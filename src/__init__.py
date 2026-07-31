@@ -1,3 +1,0 @@
-"""
-SceneGo Source Package
-"""
