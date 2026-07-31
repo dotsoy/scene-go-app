@@ -1,14 +1,21 @@
 import React from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, ImageBackground, Text } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 
 interface CameraBackgroundProps {
   isCameraActive: boolean;
+  capturedImageUri?: string | null;
+  cameraRef?: React.RefObject<any>;
   children?: React.ReactNode;
 }
 
-export const CameraBackground: React.FC<CameraBackgroundProps> = ({ isCameraActive, children }) => {
+export const CameraBackground: React.FC<CameraBackgroundProps> = ({
+  isCameraActive,
+  capturedImageUri,
+  cameraRef,
+  children,
+}) => {
   const [permission, requestPermission] = useCameraPermissions();
 
   if (isCameraActive) {
@@ -17,10 +24,21 @@ export const CameraBackground: React.FC<CameraBackgroundProps> = ({ isCameraActi
     }
     return (
       <View style={styles.container}>
-        <CameraView style={StyleSheet.absoluteFillObject} facing="back">
-          {/* 半透明遮罩层提升前景 UI 可读性 */}
+        <CameraView ref={cameraRef} style={StyleSheet.absoluteFillObject} facing="back">
           <View style={styles.cameraOverlay} />
         </CameraView>
+        <View style={styles.contentLayer}>{children}</View>
+      </View>
+    );
+  }
+
+  // 如果有捕获的截图帧，渲染冻结帧画面作为背景
+  if (capturedImageUri) {
+    return (
+      <View style={styles.container}>
+        <ImageBackground source={{ uri: capturedImageUri }} style={StyleSheet.absoluteFillObject}>
+          <View style={styles.snapshotOverlay} />
+        </ImageBackground>
         <View style={styles.contentLayer}>{children}</View>
       </View>
     );
@@ -47,7 +65,11 @@ const styles = StyleSheet.create({
   },
   cameraOverlay: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: 'rgba(9, 9, 11, 0.45)', // 45% 暗化网格，确保大字卡对比度
+    backgroundColor: 'rgba(9, 9, 11, 0.45)',
+  },
+  snapshotOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: 'rgba(9, 9, 11, 0.65)', // 截图冻结帧 65% 暗化
   },
   contentLayer: {
     flex: 1,

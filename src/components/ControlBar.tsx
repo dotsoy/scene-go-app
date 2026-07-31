@@ -6,6 +6,7 @@ interface ControlBarProps {
   isMicActive: boolean;
   isCardVisible: boolean;
   onToggleCamera: () => void;
+  onCaptureFrame: () => void;
   onToggleMic: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
@@ -17,6 +18,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   isMicActive,
   isCardVisible,
   onToggleCamera,
+  onCaptureFrame,
   onToggleMic,
   onToggleCard,
   onOpenNotes,
@@ -24,16 +26,16 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 }) => {
   return (
     <View style={styles.barContainer}>
-      {/* 摄像头开关 */}
-      <TouchableOpacity
-        style={[styles.btn, isCameraActive ? styles.btnActive : styles.btnMuted]}
-        onPress={onToggleCamera}
-        activeOpacity={0.7}
-      >
-        <Text style={[styles.btnText, isCameraActive && styles.btnTextActive]}>
-          {isCameraActive ? 'CAM ON' : 'CAM OFF'}
-        </Text>
-      </TouchableOpacity>
+      {/* 摄像头开关与实时截图按键 */}
+      {isCameraActive ? (
+        <TouchableOpacity style={[styles.btn, styles.btnActiveSnap]} onPress={onCaptureFrame} activeOpacity={0.7}>
+          <Text style={styles.btnTextSnap}>SNAP & OFF</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onToggleCamera} activeOpacity={0.7}>
+          <Text style={styles.btnText}>CAM OFF</Text>
+        </TouchableOpacity>
+      )}
 
       {/* 麦克风开关 */}
       <TouchableOpacity
@@ -62,7 +64,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         <Text style={styles.btnText}>NOTES</Text>
       </TouchableOpacity>
 
-      {/* 模拟切卡模式 */}
+      {/* 切场景 */}
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onNextScenario} activeOpacity={0.7}>
         <Text style={styles.btnText}>NEXT</Text>
       </TouchableOpacity>
@@ -85,10 +87,10 @@ const styles = StyleSheet.create({
   },
   btn: {
     paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     borderRadius: 8,
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
     minWidth: 62,
   },
   btnMuted: {
@@ -96,6 +98,9 @@ const styles = StyleSheet.create({
   },
   btnActive: {
     backgroundColor: '#ffffff',
+  },
+  btnActiveSnap: {
+    backgroundColor: '#3b82f6', // 蓝色高亮截图按钮
   },
   btnText: {
     color: '#a1a1aa',
@@ -105,5 +110,11 @@ const styles = StyleSheet.create({
   },
   btnTextActive: {
     color: '#000000',
+  },
+  btnTextSnap: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.5,
   },
 });

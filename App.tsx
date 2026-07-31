@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
@@ -7,7 +7,6 @@ import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
 
-// 场景预设数据生成器（模拟实时场景生成数据）
 const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
   AIRPORT_TAXI: (loc) => ({
     id: 'sc-1',
@@ -65,22 +64,42 @@ const MOCK_LOCATIONS = [
 
 export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
+  const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
   const [isMicActive, setIsMicActive] = useState<boolean>(true);
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
-  
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
 
+  const cameraRef = useRef<any>(null);
+
   // --------------------------------------------------------------------------
-  // TODO: Implement Multimodal AI Scene Recognition (Camera VLM + Audio + LBS)
-  // Currently falls back to deterministic/mock scenario generator based on location & sensors.
+  // TODO: Send captured snapshot frame to AI Vision Model (VLM)
+  // Convert imageUri to Base64 and post to /api/v1/detect-scenario for AI perception
   // --------------------------------------------------------------------------
-  const recognizeSceneWithAI = async (_frameData?: string): Promise<string> => {
-    // TODO: Connect to backend LLM/VLM endpoint for zero-shot camera frame & audio perception
-    return SCENARIO_KEYS[scenarioIndex];
+  const analyzeSnapshotWithAI = async (imageUri: string) => {
+    // TODO: Implement AI Vision Multimodal Analysis pipeline
+    console.log('[AI TODO] Captured frame ready for VLM Vision Analysis:', imageUri);
   };
 
-  // 根据当前场景标识实时生成 Flash Card 数据
+  // 摄像头实时截图处理：拍摄快照 -> 关闭 Camera -> 触发 AI Vision TODO 校验
+  const handleCaptureFrame = async () => {
+    if (cameraRef.current) {
+      try {
+        const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+        if (photo?.uri) {
+          setCapturedImageUri(photo.uri);
+          setIsCameraActive(false); // 截图后 Camera 设置为 OFF
+          await analyzeSnapshotWithAI(photo.uri); // 触发 AI 分析 TODO
+        }
+      } catch (err) {
+        console.warn('Camera snapshot error:', err);
+        setIsCameraActive(false);
+      }
+    } else {
+      setIsCameraActive(false);
+    }
+  };
+
   const activeScenarioKey = SCENARIO_KEYS[scenarioIndex];
   const activeLocation = MOCK_LOCATIONS[scenarioIndex];
   const currentCard = SCENARIO_GENERATORS[activeScenarioKey](activeLocation);
@@ -121,7 +140,11 @@ export default function App() {
       <ExpoStatusBar style="light" />
       <StatusBar barStyle="light-content" />
 
-      <CameraBackground isCameraActive={isCameraActive}>
+      <CameraBackground
+        isCameraActive={isCameraActive}
+        capturedImageUri={capturedImageUri}
+        cameraRef={cameraRef}
+      >
         <View style={styles.mainLayout}>
           {/* Top Header */}
           <View style={styles.topHeader}>
@@ -132,7 +155,7 @@ export default function App() {
             </View>
           </View>
 
-          {/* Center Card (Only rendered when isCardVisible is true) */}
+          {/* Center Card */}
           <View style={styles.centerCardArea}>
             {isCardVisible ? (
               <FlashCardView card={currentCard} />
@@ -148,7 +171,11 @@ export default function App() {
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
             isCardVisible={isCardVisible}
-            onToggleCamera={() => setIsCameraActive(!isCameraActive)}
+            onToggleCamera={() => {
+              if (!isCameraActive) setCapturedImageUri(null); // 重新打开 Camera 时清除旧截图
+              setIsCameraActive(!isCameraActive);
+            }}
+            onCaptureFrame={handleCaptureFrame}
             onToggleMic={() => setIsMicActive(!isMicActive)}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
