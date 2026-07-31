@@ -103,11 +103,10 @@ export default function App() {
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
-  // 切换 Camera 状态：当 Camera 开启时，自动触发 CARD OFF (隐藏大字卡，露出清晰取景框)
   const handleToggleCamera = () => {
     if (!isCameraActive) {
       setIsCameraActive(true);
-      setIsCardVisible(false); // Camera ON 时，自动执行 CARD OFF
+      setIsCardVisible(false);
     } else {
       setIsCameraActive(false);
     }
@@ -167,7 +166,7 @@ export default function App() {
           {/* Center Card */}
           <View style={styles.centerCardArea}>
             {isCardVisible ? (
-              <FlashCardView card={currentCard} />
+              <FlashCardView card={currentCard} onNextCard={handleNextScenario} />
             ) : (
               <View style={styles.hiddenCardContainer}>
                 <Text style={styles.hiddenCardText}>CARD HIDDEN</Text>
@@ -175,7 +174,7 @@ export default function App() {
             )}
           </View>
 
-          {/* Bottom Floating Control Bar */}
+          {/* Bottom Floating Control Bar (4 核心控件) */}
           <ControlBar
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
@@ -185,7 +184,6 @@ export default function App() {
             onToggleMic={() => setIsMicActive(!isMicActive)}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
-            onNextScenario={handleNextScenario}
           />
         </View>
 

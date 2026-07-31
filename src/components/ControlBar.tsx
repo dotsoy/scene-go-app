@@ -10,7 +10,6 @@ interface ControlBarProps {
   onToggleMic: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
-  onNextScenario: () => void;
 }
 
 export const ControlBar: React.FC<ControlBarProps> = ({
@@ -22,7 +21,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onToggleMic,
   onToggleCard,
   onOpenNotes,
-  onNextScenario,
 }) => {
   return (
     <View style={styles.barContainer}>
@@ -63,13 +61,6 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenNotes} activeOpacity={0.75}>
         <Text style={styles.btnText} numberOfLines={1}>NOTES</Text>
       </TouchableOpacity>
-
-      {/* 动态切卡按键：仅在 CARD ON 模式下平滑并入动态布局 */}
-      {isCardVisible && (
-        <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onNextScenario} activeOpacity={0.75}>
-          <Text style={styles.btnText} numberOfLines={1}>NEXT</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -81,21 +72,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     backgroundColor: '#121214',
     paddingVertical: 10,
-    paddingHorizontal: 10,
+    paddingHorizontal: 12,
     marginHorizontal: 16,
     marginBottom: 20,
     borderRadius: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
-    gap: 8, // 动态间距配比
+    gap: 8,
   },
   btn: {
-    flex: 1, // 动态权重自动自适应按键数量 (4个或5个按键均保持完全等宽居中)
+    flex: 1, // 4个核心控件均匀平分宽度，动态布局居中
     paddingVertical: 11,
     paddingHorizontal: 4,
     borderRadius: 10,
     alignItems: 'center',
-    justifyContent: 'center',
+    justify: 'center',
   },
   btnMuted: {
     backgroundColor: '#1c1c1e',
@@ -104,7 +95,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   btnActiveSnap: {
-    backgroundColor: '#2563eb', // 动态截图按钮高亮蓝
+    backgroundColor: '#2563eb',
   },
   btnText: {
     color: '#a1a1aa',
