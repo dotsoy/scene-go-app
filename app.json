@@ -1,0 +1,38 @@
+{
+  "expo": {
+    "name": "SceneGo",
+    "slug": "scenego",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090b"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSCameraUsageDescription": "SceneGo 需要使用摄像头捕获异国现实场景与菜单点餐。",
+        "NSMicrophoneUsageDescription": "SceneGo 需要使用麦克风进行双向语音同传与 Notes 快捷录音。",
+        "NSLocationWhenInUseUsageDescription": "SceneGo 需要使用地理位置自动匹配当前所在的异国出行场景。"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#09090b"
+      },
+      "permissions": [
+        "CAMERA",
+        "RECORD_AUDIO",
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    }
+  }
+}

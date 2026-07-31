@@ -1,0 +1,33 @@
+# Node & React Native / Expo
+node_modules/
+.expo/
+dist/
+web-build/
+*.app
+*.ipa
+*.apk
+*.aab
+
+# Python & Backend
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+env/
+.pytest_cache/
+
+# macOS
+.DS_Store
+
+# Logs & Temp
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment & Credentials
+.env
+.env.local
+.env.*.local
