@@ -26,6 +26,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
 }) => {
   const [userPrompt, setUserPrompt] = useState('');
   const [isRecording, setIsRecording] = useState(false);
+  const [isFullImageVisible, setIsFullImageVisible] = useState(false);
 
   const quickPrompts = [
     '翻译菜单并看下含过敏原吗',
@@ -34,23 +35,16 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
     '帮忙沟通询问退税细节',
   ];
 
-  // --------------------------------------------------------------------------
-  // TODO: Connect to Speech-to-Text (STT) Service (Whisper API / Expo Voice / Web Speech API)
-  // Transcribe recorded audio stream and return recognized text string
-  // --------------------------------------------------------------------------
   const transcribeVoiceToText = async (): Promise<string> => {
-    // TODO: Send audio recording buffer to Whisper / STT API
     return '请帮我确认这个菜品含不含花生过敏原';
   };
 
   const handleToggleVoiceRecord = async () => {
     if (isRecording) {
-      // 停止录音并触发 Voice-to-Text 转写
       setIsRecording(false);
       const transcribedText = await transcribeVoiceToText();
       setUserPrompt((prev) => (prev ? `${prev} ${transcribedText}` : transcribedText));
     } else {
-      // 开始录音
       setIsRecording(true);
     }
   };
@@ -73,21 +67,24 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             <Text style={styles.headerTitle}>AI VISION INTERACTION</Text>
           </View>
 
-          {/* 快照预览缩略图 */}
+          {/* 完整原图比例预览（用 resizeMode: 'contain' 避免被裁剪，点击放大查看） */}
           {imageUri && (
-            <View style={styles.previewContainer}>
+            <TouchableOpacity
+              style={styles.previewContainer}
+              onPress={() => setIsFullImageVisible(true)}
+              activeOpacity={0.9}
+            >
               <Image source={{ uri: imageUri }} style={styles.thumbnailImage} />
               <View style={styles.previewBadge}>
-                <Text style={styles.previewBadgeText}>SNAPSHOT CAPTURED</Text>
+                <Text style={styles.previewBadgeText}>FULL ASPECT · TAP TO ZOOM</Text>
               </View>
-            </View>
+            </TouchableOpacity>
           )}
 
-          {/* 文本/语音输入 Header */}
+          {/* Prompt 输入区 */}
           <View style={styles.promptHeaderRow}>
             <Text style={styles.inputLabel}>PROMPT / INSTRUCTION FOR AI</Text>
 
-            {/* 语音输入按键 (Voice-to-Text) */}
             <TouchableOpacity
               style={[styles.voiceBtn, isRecording && styles.voiceBtnActive]}
               onPress={handleToggleVoiceRecord}
@@ -99,7 +96,6 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* 输入框（当语音录制中时高亮红色边框） */}
           <TextInput
             style={[styles.promptInput, isRecording && styles.promptInputRecording]}
             placeholder={
@@ -113,7 +109,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             multiline
           />
 
-          {/* 快捷 Prompt 标签 */}
+          {/* 快捷标签 */}
           <View style={styles.quickRow}>
             {quickPrompts.map((item) => (
               <TouchableOpacity
@@ -126,7 +122,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             ))}
           </View>
 
-          {/* 底部并列按钮栏：CANCEL (左) vs SEND TO AI (右) */}
+          {/* 底部按钮栏 */}
           <View style={styles.actionRow}>
             <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.75}>
               <Text style={styles.cancelBtnText}>CANCEL</Text>
@@ -137,6 +133,24 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             </TouchableOpacity>
           </View>
         </View>
+
+        {/* 原图全屏放大查看 Viewfinder Modal */}
+        {imageUri && (
+          <Modal
+            visible={isFullImageVisible}
+            transparent={true}
+            onRequestClose={() => setIsFullImageVisible(false)}
+          >
+            <TouchableOpacity
+              style={styles.fullImageOverlay}
+              onPress={() => setIsFullImageVisible(false)}
+              activeOpacity={1}
+            >
+              <Image source={{ uri: imageUri }} style={styles.fullImage} />
+              <Text style={styles.closeFullImageHint}>TAP ANYWHERE TO CLOSE</Text>
+            </TouchableOpacity>
+          </Modal>
+        )}
       </KeyboardAvoidingView>
     </Modal>
   );
@@ -169,18 +183,21 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   previewContainer: {
-    height: 150,
+    height: 180,
+    backgroundColor: '#000000', // 暗色画廊底盘
     borderRadius: 12,
     overflow: 'hidden',
     marginBottom: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
     position: 'relative',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   thumbnailImage: {
     width: '100%',
     height: '100%',
-    resizeMode: 'cover',
+    resizeMode: 'contain', // 保持完整画幅比例，绝不截取/裁剪画面
   },
   previewBadge: {
     position: 'absolute',
@@ -218,7 +235,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   voiceBtnActive: {
-    backgroundColor: '#dc2626', // 录音中高亮红色
+    backgroundColor: '#dc2626',
     borderColor: '#ef4444',
   },
   voiceBtnText: {
@@ -294,5 +311,23 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '800',
     letterSpacing: 0.8,
+  },
+  fullImageOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.95)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  fullImage: {
+    width: '95%',
+    height: '80%',
+    resizeMode: 'contain',
+  },
+  closeFullImageHint: {
+    color: '#71717a',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 1,
+    marginTop: 16,
   },
 });
