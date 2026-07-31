@@ -66,7 +66,7 @@ const MOCK_LOCATIONS = [
 
 export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
-  const [isMicActive, setIsMicActive] = useState<boolean>(false); // 麦克风默认 OFF
+  const [isMicActive, setIsMicActive] = useState<boolean>(false);
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
 
@@ -101,6 +101,16 @@ export default function App() {
   const handleSnapshotSubmit = async (userPrompt: string, imageUri: string) => {
     setIsSnapshotModalOpen(false);
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
+  };
+
+  // 切换 Camera 状态：当 Camera 开启时，自动触发 CARD OFF (隐藏大字卡，露出清晰取景框)
+  const handleToggleCamera = () => {
+    if (!isCameraActive) {
+      setIsCameraActive(true);
+      setIsCardVisible(false); // Camera ON 时，自动执行 CARD OFF
+    } else {
+      setIsCameraActive(false);
+    }
   };
 
   const activeScenarioKey = SCENARIO_KEYS[scenarioIndex];
@@ -170,7 +180,7 @@ export default function App() {
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
             isCardVisible={isCardVisible}
-            onToggleCamera={() => setIsCameraActive(!isCameraActive)}
+            onToggleCamera={handleToggleCamera}
             onCaptureFrame={handleCaptureFrame}
             onToggleMic={() => setIsMicActive(!isMicActive)}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
