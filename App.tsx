@@ -8,59 +8,60 @@ import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 
+// 卡片预设测试数据（全部采用中文展示与测试）
 const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
   AIRPORT_TAXI: (loc) => ({
     id: 'sc-1',
-    categoryTag: 'TAXI / METER',
-    locationName: loc.toUpperCase(),
+    categoryTag: '打车 / 计价器',
+    locationName: loc,
     title: '出租车按表计费声明',
-    targetText: 'กรุณาเปิดมิเตอร์ด้วยครับ / ค่ะ',
-    phonetic: 'Gru-na open meter krub/ka',
-    english: 'Please use the meter.',
-    localTip: '机场打车请前往 1 楼叫号机，按表付费另加 50 铢附加费。',
-    languageCode: 'th-TH',
+    targetText: '请按表计费，谢谢（请打表）',
+    phonetic: 'Qing An Biao Ji Fei, Xie Xie',
+    english: '请使用计价器按标准费率打表',
+    localTip: '曼谷机场打车请前往 1 楼叫号机，按表付费另加 50 铢附加费。',
+    languageCode: 'zh-CN',
   }),
   DINING_ORDER: (loc) => ({
     id: 'sc-2',
-    categoryTag: 'DINING / ALLERGY',
-    locationName: loc.toUpperCase(),
+    categoryTag: '餐饮 / 忌口过敏',
+    locationName: loc,
     title: '餐食过敏与忌口说明',
-    targetText: 'ピーナッツアレルギーがあります。',
-    phonetic: 'Piinattsu arerugii ga arimasu',
-    english: 'I have a peanut allergy.',
-    localTip: '居酒屋默认自动提供“お通し”（开胃小菜，人头消费 300-500 日元）。',
-    languageCode: 'ja-JP',
+    targetText: '我对花生严重过敏，请勿添加',
+    phonetic: 'Wo Dui Hua Sheng Yan Zhong Guo Min',
+    english: '请确保菜品无花生及花生制品',
+    localTip: '居酒屋默认自动提供开胃小菜（お通し，人头消费 300-500 日元）。',
+    languageCode: 'zh-CN',
   }),
   TAX_REFUND: (loc) => ({
     id: 'sc-3',
-    categoryTag: 'SHOPPING / TAX',
-    locationName: loc.toUpperCase(),
+    categoryTag: '购物 / 退税',
+    locationName: loc,
     title: '购物退税单开具申请',
-    targetText: 'ขอแบบฟอร์มคืนภาษี (Tax Refund) ด้วยครับ',
-    phonetic: 'Kho baeb form kheen pha-si krub',
-    english: 'Could I have a tax refund form, please?',
+    targetText: '请帮我开具退税申请单，谢谢',
+    phonetic: 'Qing Bang Wo Kai Ju Tui Shui Dan',
+    english: '请开具官方退税凭证与表格',
     localTip: '单日消费满 2,000 铢可开具退税单，离境在机场海关盖章。',
-    languageCode: 'th-TH',
+    languageCode: 'zh-CN',
   }),
   EMERGENCY_SOS: (loc) => ({
     id: 'sc-4',
-    categoryTag: 'EMERGENCY / SOS',
-    locationName: loc.toUpperCase(),
+    categoryTag: '紧急 / 救援',
+    locationName: loc,
     title: '紧急大字求助与 GPS 坐标',
-    targetText: 'Help! GPS: 13.7563° N, 100.5018° E',
-    phonetic: 'Emergency call 1155 (Tourist Police)',
-    english: 'I need urgent assistance.',
-    localTip: '遭遇紧急危险请出示此卡，当地旅游警察专线：1155。',
-    languageCode: 'en-US',
+    targetText: '求助！请协助联系警察并定位此坐标',
+    phonetic: 'Qiu Zhu! Qing Xie Zhu Lian Xi Jing Cha',
+    english: '紧急联系电话：旅游警察专线 1155',
+    localTip: '遭遇紧急危险请出示此卡给路人，当地旅游警察专线：1155。',
+    languageCode: 'zh-CN',
   }),
 };
 
 const SCENARIO_KEYS = Object.keys(SCENARIO_GENERATORS);
 const MOCK_LOCATIONS = [
-  'BANGKOK AIRPORT (BKK)',
-  'SHINJUKU TOKYO',
-  'CENTRAL WORLD BANGKOK',
-  'UNKNOWN LOCATION',
+  '曼谷素万那普机场 (BKK)',
+  '东京新宿居酒屋',
+  '曼谷 CENTRAL WORLD 商场',
+  '未知异国位置',
 ];
 
 export default function App() {
@@ -69,34 +70,24 @@ export default function App() {
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
 
-  // 快照弹窗交互状态
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<any>(null);
 
-  // --------------------------------------------------------------------------
-  // TODO: Send captured snapshot frame + user text prompt to AI Vision VLM Endpoint
-  // Convert imageUri to Base64 and send payload to server: POST /api/v1/detect-scenario
-  // --------------------------------------------------------------------------
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
-    console.log('[AI TODO] Sending to AI Vision VLM:', {
-      imageUri,
-      userPrompt,
-    });
-    // TODO: Connect to backend FastAPI AI Endpoint with Multimodal VLM payload
+    console.log('[AI TODO] Sending to AI Vision VLM:', { imageUri, userPrompt });
   };
 
-  // 实时截图 -> Camera 置为 OFF -> 弹出交互对话框
   const handleCaptureFrame = async () => {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
         if (photo?.uri) {
-          setIsCameraActive(false); // 截图后 Camera 设置为 OFF（不缓存画面，切回黑幕渐变）
+          setIsCameraActive(false);
           setPendingSnapshotUri(photo.uri);
-          setIsSnapshotModalOpen(true); // 弹出用户交互对话框
+          setIsSnapshotModalOpen(true);
         }
       } catch (err) {
         console.warn('Camera snapshot error:', err);
@@ -107,7 +98,6 @@ export default function App() {
     }
   };
 
-  // 用户点击弹窗发送
   const handleSnapshotSubmit = async (userPrompt: string, imageUri: string) => {
     setIsSnapshotModalOpen(false);
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
@@ -120,13 +110,13 @@ export default function App() {
   const [notes, setNotes] = useState<NoteItem[]>([
     {
       id: 'n1',
-      content: 'Bangkok Hotel Wi-Fi: BKK2026',
+      content: '曼谷酒店 Wi-Fi 密码: BKK2026',
       category: 'TRIP',
       timestamp: '14:20',
     },
     {
       id: 'n2',
-      content: 'Tax refund code: TX-984210',
+      content: '退税单号记录: TX-984210',
       category: 'TAX',
       timestamp: '16:05',
     },
@@ -189,7 +179,6 @@ export default function App() {
           />
         </View>
 
-        {/* 随手记 Modal */}
         <QuickNotesModal
           visible={isNotesOpen}
           onClose={() => setIsNotesOpen(false)}
@@ -197,7 +186,6 @@ export default function App() {
           onAddNote={handleAddNote}
         />
 
-        {/* 截图 AI 交互对话框 Modal */}
         <SnapshotDialogModal
           visible={isSnapshotModalOpen}
           imageUri={pendingSnapshotUri}
