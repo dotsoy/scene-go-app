@@ -25,6 +25,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   onSubmit,
 }) => {
   const [userPrompt, setUserPrompt] = useState('');
+  const [isRecording, setIsRecording] = useState(false);
 
   const quickPrompts = [
     '翻译菜单并看下含过敏原吗',
@@ -32,6 +33,27 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
     '翻译此指示牌/单号',
     '帮忙沟通询问退税细节',
   ];
+
+  // --------------------------------------------------------------------------
+  // TODO: Connect to Speech-to-Text (STT) Service (Whisper API / Expo Voice / Web Speech API)
+  // Transcribe recorded audio stream and return recognized text string
+  // --------------------------------------------------------------------------
+  const transcribeVoiceToText = async (): Promise<string> => {
+    // TODO: Send audio recording buffer to Whisper / STT API
+    return '请帮我确认这个菜品含不含花生过敏原';
+  };
+
+  const handleToggleVoiceRecord = async () => {
+    if (isRecording) {
+      // 停止录音并触发 Voice-to-Text 转写
+      setIsRecording(false);
+      const transcribedText = await transcribeVoiceToText();
+      setUserPrompt((prev) => (prev ? `${prev} ${transcribedText}` : transcribedText));
+    } else {
+      // 开始录音
+      setIsRecording(true);
+    }
+  };
 
   const handleSend = () => {
     if (!imageUri) return;
@@ -61,12 +83,31 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             </View>
           )}
 
-          {/* 用户自定义输入框 */}
-          <Text style={styles.inputLabel}>PROMPT / INSTRUCTION FOR AI</Text>
+          {/* 文本/语音输入 Header */}
+          <View style={styles.promptHeaderRow}>
+            <Text style={styles.inputLabel}>PROMPT / INSTRUCTION FOR AI</Text>
+
+            {/* 语音输入按键 (Voice-to-Text) */}
+            <TouchableOpacity
+              style={[styles.voiceBtn, isRecording && styles.voiceBtnActive]}
+              onPress={handleToggleVoiceRecord}
+              activeOpacity={0.75}
+            >
+              <Text style={[styles.voiceBtnText, isRecording && styles.voiceBtnTextActive]}>
+                {isRecording ? 'STOP RECORDING' : 'VOICE INPUT'}
+              </Text>
+            </TouchableOpacity>
+          </View>
+
+          {/* 输入框（当语音录制中时高亮红色边框） */}
           <TextInput
-            style={styles.promptInput}
-            placeholder="如：帮看下菜单含不含花生过敏原..."
-            placeholderTextColor="#52525b"
+            style={[styles.promptInput, isRecording && styles.promptInputRecording]}
+            placeholder={
+              isRecording
+                ? 'Speak now... System is transcribing voice to text...'
+                : 'Type or click VOICE INPUT to speak...'
+            }
+            placeholderTextColor={isRecording ? '#ef4444' : '#52525b'}
             value={userPrompt}
             onChangeText={setUserPrompt}
             multiline
@@ -119,7 +160,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: 14,
   },
   headerTitle: {
     color: '#ffffff',
@@ -128,10 +169,10 @@ const styles = StyleSheet.create({
     letterSpacing: 1,
   },
   previewContainer: {
-    height: 160,
+    height: 150,
     borderRadius: 12,
     overflow: 'hidden',
-    marginBottom: 16,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.15)',
     position: 'relative',
@@ -156,12 +197,38 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.8,
   },
+  promptHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
   inputLabel: {
     color: '#71717a',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
-    marginBottom: 6,
+  },
+  voiceBtn: {
+    backgroundColor: '#27272a',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  voiceBtnActive: {
+    backgroundColor: '#dc2626', // 录音中高亮红色
+    borderColor: '#ef4444',
+  },
+  voiceBtnText: {
+    color: '#a1a1aa',
+    fontSize: 9,
+    fontWeight: '700',
+    letterSpacing: 0.5,
+  },
+  voiceBtnTextActive: {
+    color: '#ffffff',
   },
   promptInput: {
     backgroundColor: '#1c1c1e',
@@ -169,16 +236,19 @@ const styles = StyleSheet.create({
     padding: 12,
     color: '#ffffff',
     fontSize: 13,
-    minHeight: 60,
+    minHeight: 56,
     textAlignVertical: 'top',
     marginBottom: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
+  promptInputRecording: {
+    borderColor: '#ef4444',
+  },
   quickRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 20,
+    marginBottom: 18,
   },
   quickPill: {
     backgroundColor: '#27272a',
