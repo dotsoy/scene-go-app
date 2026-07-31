@@ -64,10 +64,12 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         <Text style={styles.btnText}>NOTES</Text>
       </TouchableOpacity>
 
-      {/* 切场景 */}
-      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onNextScenario} activeOpacity={0.7}>
-        <Text style={styles.btnText}>NEXT</Text>
-      </TouchableOpacity>
+      {/* 只有在 CARD ON (isCardVisible === true) 状态下才显示 NEXT 切卡按钮 */}
+      {isCardVisible && (
+        <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onNextScenario} activeOpacity={0.7}>
+          <Text style={styles.btnText}>NEXT</Text>
+        </TouchableOpacity>
+      )}
     </View>
   );
 };
@@ -91,7 +93,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justify: 'center',
-    minWidth: 62,
+    minWidth: 60,
   },
   btnMuted: {
     backgroundColor: '#1c1c1e',
@@ -100,7 +102,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   btnActiveSnap: {
-    backgroundColor: '#3b82f6', // 蓝色高亮截图按钮
+    backgroundColor: '#3b82f6',
   },
   btnText: {
     color: '#a1a1aa',
