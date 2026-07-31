@@ -49,9 +49,6 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>AI VISION INTERACTION</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>CANCEL</Text>
-            </TouchableOpacity>
           </View>
 
           {/* 快照预览缩略图 */}
@@ -88,10 +85,16 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             ))}
           </View>
 
-          {/* 发送给 AI 按钮 */}
-          <TouchableOpacity style={styles.sendBtn} onPress={handleSend} activeOpacity={0.8}>
-            <Text style={styles.sendBtnText}>SEND SNAPSHOT & PROMPT TO AI</Text>
-          </TouchableOpacity>
+          {/* 底部并列按钮栏：CANCEL (左) vs SEND TO AI (右) */}
+          <View style={styles.actionRow}>
+            <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.75}>
+              <Text style={styles.cancelBtnText}>CANCEL</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.sendBtn} onPress={handleSend} activeOpacity={0.8}>
+              <Text style={styles.sendBtnText}>SEND TO AI</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </KeyboardAvoidingView>
     </Modal>
@@ -123,16 +126,6 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '800',
     letterSpacing: 1,
-  },
-  closeBtn: {
-    paddingVertical: 4,
-    paddingHorizontal: 8,
-  },
-  closeBtnText: {
-    color: '#71717a',
-    fontSize: 11,
-    fontWeight: '700',
-    letterSpacing: 0.5,
   },
   previewContainer: {
     height: 160,
@@ -185,7 +178,7 @@ const styles = StyleSheet.create({
   quickRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    marginBottom: 16,
+    marginBottom: 20,
   },
   quickPill: {
     backgroundColor: '#27272a',
@@ -199,7 +192,28 @@ const styles = StyleSheet.create({
     color: '#d4d4d8',
     fontSize: 11,
   },
+  actionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  cancelBtn: {
+    flex: 1,
+    backgroundColor: '#27272a',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  cancelBtnText: {
+    color: '#a1a1aa',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
   sendBtn: {
+    flex: 1.5,
     backgroundColor: '#2563eb',
     borderRadius: 10,
     paddingVertical: 12,
@@ -209,6 +223,6 @@ const styles = StyleSheet.create({
     color: '#ffffff',
     fontSize: 12,
     fontWeight: '800',
-    letterSpacing: 1,
+    letterSpacing: 0.8,
   },
 });
