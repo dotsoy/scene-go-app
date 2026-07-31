@@ -4,8 +4,10 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 interface ControlBarProps {
   isCameraActive: boolean;
   isMicActive: boolean;
+  isCardVisible: boolean;
   onToggleCamera: () => void;
   onToggleMic: () => void;
+  onToggleCard: () => void;
   onOpenNotes: () => void;
   onNextScenario: () => void;
 }
@@ -13,8 +15,10 @@ interface ControlBarProps {
 export const ControlBar: React.FC<ControlBarProps> = ({
   isCameraActive,
   isMicActive,
+  isCardVisible,
   onToggleCamera,
   onToggleMic,
+  onToggleCard,
   onOpenNotes,
   onNextScenario,
 }) => {
@@ -42,12 +46,23 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         </Text>
       </TouchableOpacity>
 
+      {/* FlashCard 开关 */}
+      <TouchableOpacity
+        style={[styles.btn, isCardVisible ? styles.btnActive : styles.btnMuted]}
+        onPress={onToggleCard}
+        activeOpacity={0.7}
+      >
+        <Text style={[styles.btnText, isCardVisible && styles.btnTextActive]}>
+          {isCardVisible ? 'CARD ON' : 'CARD OFF'}
+        </Text>
+      </TouchableOpacity>
+
       {/* Notes 检索与纪录 */}
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenNotes} activeOpacity={0.7}>
         <Text style={styles.btnText}>NOTES</Text>
       </TouchableOpacity>
 
-      {/* 切卡模式 */}
+      {/* 模拟切卡模式 */}
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onNextScenario} activeOpacity={0.7}>
         <Text style={styles.btnText}>NEXT</Text>
       </TouchableOpacity>
@@ -61,8 +76,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#121214',
     paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginHorizontal: 16,
+    paddingHorizontal: 8,
+    marginHorizontal: 12,
     marginBottom: 20,
     borderRadius: 14,
     borderWidth: 1,
@@ -70,11 +85,11 @@ const styles = StyleSheet.create({
   },
   btn: {
     paddingVertical: 10,
-    paddingHorizontal: 14,
+    paddingHorizontal: 10,
     borderRadius: 8,
     alignItems: 'center',
-    justify: 'center',
-    minWidth: 70,
+    justifyContent: 'center',
+    minWidth: 62,
   },
   btnMuted: {
     backgroundColor: '#1c1c1e',
@@ -84,9 +99,9 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: '#a1a1aa',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
-    letterSpacing: 0.8,
+    letterSpacing: 0.5,
   },
   btnTextActive: {
     color: '#000000',

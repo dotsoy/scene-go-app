@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
@@ -7,58 +7,83 @@ import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
 
-const PRESET_CARDS: CardData[] = [
-  {
-    id: '1',
+// 场景预设数据生成器（模拟实时场景生成数据）
+const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
+  AIRPORT_TAXI: (loc) => ({
+    id: 'sc-1',
     categoryTag: 'TAXI / METER',
-    locationName: 'BANGKOK AIRPORT (BKK)',
+    locationName: loc.toUpperCase(),
     title: '出租车按表计费声明',
     targetText: 'กรุณาเปิดมิเตอร์ด้วยครับ / ค่ะ',
     phonetic: 'Gru-na open meter krub/ka',
     english: 'Please use the meter.',
-    localTip: '曼谷机场打车请前往 1 楼叫号机，按表付费另加 50 铢附加费。',
+    localTip: '机场打车请前往 1 楼叫号机，按表付费另加 50 铢附加费。',
     languageCode: 'th-TH',
-  },
-  {
-    id: '2',
+  }),
+  DINING_ORDER: (loc) => ({
+    id: 'sc-2',
     categoryTag: 'DINING / ALLERGY',
-    locationName: 'SHINJUKU TOKYO',
+    locationName: loc.toUpperCase(),
     title: '餐食过敏与忌口说明',
     targetText: 'ピーナッツアレルギーがあります。',
     phonetic: 'Piinattsu arerugii ga arimasu',
     english: 'I have a peanut allergy.',
     localTip: '居酒屋默认自动提供“お通し”（开胃小菜，人头消费 300-500 日元）。',
     languageCode: 'ja-JP',
-  },
-  {
-    id: '3',
+  }),
+  TAX_REFUND: (loc) => ({
+    id: 'sc-3',
     categoryTag: 'SHOPPING / TAX',
-    locationName: 'CENTRAL WORLD BANGKOK',
+    locationName: loc.toUpperCase(),
     title: '购物退税单开具申请',
     targetText: 'ขอแบบฟอร์มคืนภาษี (Tax Refund) ด้วยครับ',
     phonetic: 'Kho baeb form kheen pha-si krub',
     english: 'Could I have a tax refund form, please?',
     localTip: '单日消费满 2,000 铢可开具退税单，离境在机场海关盖章。',
     languageCode: 'th-TH',
-  },
-  {
-    id: '4',
+  }),
+  EMERGENCY_SOS: (loc) => ({
+    id: 'sc-4',
     categoryTag: 'EMERGENCY / SOS',
-    locationName: 'UNKNOWN LOCATION',
+    locationName: loc.toUpperCase(),
     title: '紧急大字求助与 GPS 坐标',
     targetText: 'Help! GPS: 13.7563° N, 100.5018° E',
     phonetic: 'Emergency call 1155 (Tourist Police)',
     english: 'I need urgent assistance.',
     localTip: '遭遇紧急危险请出示此卡，当地旅游警察专线：1155。',
     languageCode: 'en-US',
-  },
+  }),
+};
+
+const SCENARIO_KEYS = Object.keys(SCENARIO_GENERATORS);
+const MOCK_LOCATIONS = [
+  'BANGKOK AIRPORT (BKK)',
+  'SHINJUKU TOKYO',
+  'CENTRAL WORLD BANGKOK',
+  'UNKNOWN LOCATION',
 ];
 
 export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(true);
+  const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
-  const [cardIndex, setCardIndex] = useState<number>(0);
+  
+  const [scenarioIndex, setScenarioIndex] = useState<number>(0);
+
+  // --------------------------------------------------------------------------
+  // TODO: Implement Multimodal AI Scene Recognition (Camera VLM + Audio + LBS)
+  // Currently falls back to deterministic/mock scenario generator based on location & sensors.
+  // --------------------------------------------------------------------------
+  const recognizeSceneWithAI = async (_frameData?: string): Promise<string> => {
+    // TODO: Connect to backend LLM/VLM endpoint for zero-shot camera frame & audio perception
+    return SCENARIO_KEYS[scenarioIndex];
+  };
+
+  // 根据当前场景标识实时生成 Flash Card 数据
+  const activeScenarioKey = SCENARIO_KEYS[scenarioIndex];
+  const activeLocation = MOCK_LOCATIONS[scenarioIndex];
+  const currentCard = SCENARIO_GENERATORS[activeScenarioKey](activeLocation);
 
   const [notes, setNotes] = useState<NoteItem[]>([
     {
@@ -75,10 +100,8 @@ export default function App() {
     },
   ]);
 
-  const currentCard = PRESET_CARDS[cardIndex];
-
   const handleNextScenario = () => {
-    setCardIndex((prev) => (prev + 1) % PRESET_CARDS.length);
+    setScenarioIndex((prev) => (prev + 1) % SCENARIO_KEYS.length);
   };
 
   const handleAddNote = (content: string, category: string) => {
@@ -109,17 +132,25 @@ export default function App() {
             </View>
           </View>
 
-          {/* Center Card */}
+          {/* Center Card (Only rendered when isCardVisible is true) */}
           <View style={styles.centerCardArea}>
-            <FlashCardView card={currentCard} />
+            {isCardVisible ? (
+              <FlashCardView card={currentCard} />
+            ) : (
+              <View style={styles.hiddenCardContainer}>
+                <Text style={styles.hiddenCardText}>CARD HIDDEN</Text>
+              </View>
+            )}
           </View>
 
           {/* Bottom Floating Control Bar */}
           <ControlBar
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
+            isCardVisible={isCardVisible}
             onToggleCamera={() => setIsCameraActive(!isCameraActive)}
             onToggleMic={() => setIsMicActive(!isMicActive)}
+            onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
             onNextScenario={handleNextScenario}
           />
@@ -190,5 +221,15 @@ const styles = StyleSheet.create({
   centerCardArea: {
     flex: 1,
     justifyContent: 'center',
+  },
+  hiddenCardContainer: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hiddenCardText: {
+    color: '#52525b',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 1.5,
   },
 });

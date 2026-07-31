@@ -11,7 +11,6 @@ app = FastAPI(
     description="Backend service providing real-time location scenario inference and flash card templates for SceneGo Expo App."
 )
 
-# 允许 Expo 移动端与 Web 客户端跨域请求
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,11 +24,13 @@ def health_check():
     return {"status": "ok", "service": "SceneGo Scenario Engine", "version": "1.0.0"}
 
 @app.post("/api/v1/detect-scenario", response_model=ScenarioCardResponse)
-def detect_and_render_scenario(payload: LocationPayload):
+async def detect_and_render_scenario(payload: LocationPayload):
     """
     接收地理位置与 POI 围栏信息，自动推理当前场景并返回大字闪示卡。
+    
+    TODO: Multimodal AI Scene Recognition (Camera VLM + Audio + LBS Geofence)
     """
-    scenario_code = SceneDetector.detect(payload)
+    scenario_code = await SceneDetector.detect_with_ai(payload)
     location_name = payload.location_tag or f"GPS ({payload.latitude:.4f}, {payload.longitude:.4f})"
     return CardTemplateEngine.render(scenario_code, location_name)
 
