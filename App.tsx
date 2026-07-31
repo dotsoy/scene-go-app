@@ -66,6 +66,7 @@ const MOCK_LOCATIONS = [
 
 export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
+  const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
@@ -81,20 +82,28 @@ export default function App() {
   };
 
   const handleCaptureFrame = async () => {
+    if (!isCameraActive) return;
+    if (!isCameraReady) {
+      console.log('[Camera] Camera is not ready yet, waiting for hardware init...');
+      return;
+    }
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
         if (photo?.uri) {
           setIsCameraActive(false);
+          setIsCameraReady(false);
           setPendingSnapshotUri(photo.uri);
           setIsSnapshotModalOpen(true);
         }
       } catch (err) {
         console.warn('Camera snapshot error:', err);
         setIsCameraActive(false);
+        setIsCameraReady(false);
       }
     } else {
       setIsCameraActive(false);
+      setIsCameraReady(false);
     }
   };
 
@@ -105,9 +114,11 @@ export default function App() {
 
   const handleToggleCamera = () => {
     if (!isCameraActive) {
+      setIsCameraReady(false);
       setIsCameraActive(true);
       setIsCardVisible(false);
     } else {
+      setIsCameraReady(false);
       setIsCameraActive(false);
     }
   };
@@ -152,7 +163,7 @@ export default function App() {
       <ExpoStatusBar style="light" />
       <StatusBar barStyle="light-content" />
 
-      <CameraBackground isCameraActive={isCameraActive} cameraRef={cameraRef}>
+      <CameraBackground isCameraActive={isCameraActive} cameraRef={cameraRef} onCameraReady={() => setIsCameraReady(true)}>
         <View style={styles.mainLayout}>
           {/* Top Header */}
           <View style={styles.topHeader}>

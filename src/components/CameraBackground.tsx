@@ -6,12 +6,14 @@ import { CameraView, useCameraPermissions } from 'expo-camera';
 interface CameraBackgroundProps {
   isCameraActive: boolean;
   cameraRef?: React.RefObject<any>;
+  onCameraReady?: () => void;
   children?: React.ReactNode;
 }
 
 export const CameraBackground: React.FC<CameraBackgroundProps> = ({
   isCameraActive,
   cameraRef,
+  onCameraReady,
   children,
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
@@ -22,7 +24,12 @@ export const CameraBackground: React.FC<CameraBackgroundProps> = ({
     }
     return (
       <View style={styles.container}>
-        <CameraView ref={cameraRef} style={StyleSheet.absoluteFillObject} facing="back">
+        <CameraView
+          ref={cameraRef}
+          style={StyleSheet.absoluteFillObject}
+          facing="back"
+          onCameraReady={onCameraReady}
+        >
           <View style={styles.cameraOverlay} />
         </CameraView>
         <View style={styles.contentLayer}>{children}</View>
@@ -30,7 +37,6 @@ export const CameraBackground: React.FC<CameraBackgroundProps> = ({
     );
   }
 
-  // 关闭摄像头后纯粹渲染高质感深色渐变背景，不缓存/展示图片
   return (
     <View style={styles.container}>
       <LinearGradient

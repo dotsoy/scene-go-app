@@ -31,3 +31,9 @@ yarn-error.log*
 .env
 .env.local
 .env.*.local
+
+
+# iOS build artifacts
+ios/Pods/
+ios/build/
+*.xcworkspace
