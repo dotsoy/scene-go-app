@@ -1,52 +1,70 @@
-# SceneGo (境随心动) — 异国实时场景翻译与表达 App
+# SceneGo
 
-> **Anywhere you are, instantly understood.**
-> 面向出海与异国出行场景的实时翻译、零搜索大字沟通卡与上下文服务引擎。
+SceneGo is a context-aware mobile translation application built with Expo (React Native) and Python. It automatically detects real-time travel contexts (airport taxi, dining allergen warnings, tax refunds, emergency SOS) using LBS geofencing and motion sensors, rendering high-contrast flash cards for instant local communication.
 
----
+## Architecture
 
-## 📌 项目简介 (Project Overview)
+- **Frontend (`App.tsx`, `src/components/`)**: Single-page Expo (React Native) app with camera feed toggle, zero-search flash cards, TTS audio playback, and quick notes modal.
+- **Backend Engine (`server/`)**: FastAPI server (`server/main.py`) providing location scenario inference (`server/engine/scene_detector.py`) and multilingual card templates (`server/engine/card_templates.py`).
 
-SceneGo 是一款专门面向出海（异国出行）场景的智能工具 App。不同于传统的静态翻译软件，SceneGo 采用 **“零搜索 / Zero-Search”** 理念，通过硬件传感器与 LBS 围栏自动感知用户当前场景（机场打车、餐厅点餐、地铁换乘、退税计费等），动态调出大字沟通卡、双向语音同传及本地规避防坑指南。
-
----
-
-## 📁 目录结构 (Project Structure)
+## Directory Structure
 
 ```text
 scenego/
-├── README.md                   # 项目总览与启动指南
-├── requirements.txt             # Python 依赖包
-├── docs/
-│   ├── PRODUCT_STRATEGY.md      # 产品战略画布 (Product Strategy Canvas)
-│   ├── PRD.md                   # 产品需求文档 (PRD & MVP Roadmap)
-│   ├── ARCHITECTURE.md          # 核心系统架构与感知引擎设计
-│   └── EXPO_PROJECT_MANAGEMENT.md # Expo (React Native) 项目管理与 Sprint 规划
-└── src/
-    ├── __init__.py
-    └── scene_engine.py          # 核心实时场景感知与翻译渲染引擎
+├── App.tsx                     # Expo React Native App Entry Point
+├── app.json                    # Expo Configuration & Permissions
+├── package.json                # Frontend Node Dependencies
+├── server/                     # Python Backend Engine & API
+│   ├── main.py                 # FastAPI Application Server
+│   ├── requirements.txt        # Python Dependencies
+│   ├── engine/                 # Scenario Inference & Card Generator
+│   │   ├── scene_detector.py
+│   │   └── card_templates.py
+│   └── tests/                  # Unit Tests
+│       └── test_scene_engine.py
+├── src/                        # Frontend Components
+│   └── components/
+│       ├── CameraBackground.tsx
+│       ├── FlashCardView.tsx
+│       ├── ControlBar.tsx
+│       └── QuickNotesModal.tsx
+└── docs/                       # Specifications & Strategy
+    ├── PRODUCT_STRATEGY.md
+    ├── PRD.md
+    ├── ARCHITECTURE.md
+    └── EXPO_PROJECT_MANAGEMENT.md
 ```
 
----
+## Quick Start
 
-## 🚀 快速启动 (Quick Start)
+### 1. Frontend (Expo / React Native)
 
-### 1. 安装依赖
 ```bash
-cd /Users/tongqing/Personal/scenego
+# Install dependencies
+npm install
+
+# Start Expo dev server
+npx expo start
+```
+
+### 2. Backend (FastAPI / Python Engine)
+
+```bash
+cd server
 pip install -r requirements.txt
+python3 main.py
 ```
 
-### 2. 运行场景翻译引擎测试
+### 3. Run Unit Tests
+
 ```bash
-python3 src/scene_engine.py
+cd server
+python3 -m pytest tests/
 ```
 
----
+## Documentation
 
-## 📄 文档索引 (Documentation Index)
-
-- 📘 [产品战略文档 (docs/PRODUCT_STRATEGY.md)](docs/PRODUCT_STRATEGY.md)
-- 📙 [产品需求文档 (docs/PRD.md)](docs/PRD.md)
-- 📗 [系统架构说明 (docs/ARCHITECTURE.md)](docs/ARCHITECTURE.md)
-- 📕 [Expo 项目管理与落地方案 (docs/EXPO_PROJECT_MANAGEMENT.md)](docs/EXPO_PROJECT_MANAGEMENT.md)
+- [Product Strategy](docs/PRODUCT_STRATEGY.md)
+- [Product Requirements (PRD)](docs/PRD.md)
+- [System Architecture](docs/ARCHITECTURE.md)
+- [Expo Engineering & Project Management Plan](docs/EXPO_PROJECT_MANAGEMENT.md)
