@@ -66,7 +66,7 @@ const MOCK_LOCATIONS = [
 
 export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
-  const [isMicActive, setIsMicActive] = useState<boolean>(true);
+  const [isMicActive, setIsMicActive] = useState<boolean>(false); // 麦克风默认 OFF
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
 
