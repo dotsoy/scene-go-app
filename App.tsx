@@ -6,6 +6,7 @@ import { CameraBackground } from './src/components/CameraBackground';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
+import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 
 const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
   AIRPORT_TAXI: (loc) => ({
@@ -64,32 +65,38 @@ const MOCK_LOCATIONS = [
 
 export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
-  const [capturedImageUri, setCapturedImageUri] = useState<string | null>(null);
   const [isMicActive, setIsMicActive] = useState<boolean>(true);
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
-  const [scenarioIndex, setScenarioIndex] = useState<number>(0);
 
+  // 快照弹窗交互状态
+  const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
+  const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
+
+  const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<any>(null);
 
   // --------------------------------------------------------------------------
-  // TODO: Send captured snapshot frame to AI Vision Model (VLM)
-  // Convert imageUri to Base64 and post to /api/v1/detect-scenario for AI perception
+  // TODO: Send captured snapshot frame + user text prompt to AI Vision VLM Endpoint
+  // Convert imageUri to Base64 and send payload to server: POST /api/v1/detect-scenario
   // --------------------------------------------------------------------------
-  const analyzeSnapshotWithAI = async (imageUri: string) => {
-    // TODO: Implement AI Vision Multimodal Analysis pipeline
-    console.log('[AI TODO] Captured frame ready for VLM Vision Analysis:', imageUri);
+  const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
+    console.log('[AI TODO] Sending to AI Vision VLM:', {
+      imageUri,
+      userPrompt,
+    });
+    // TODO: Connect to backend FastAPI AI Endpoint with Multimodal VLM payload
   };
 
-  // 摄像头实时截图处理：拍摄快照 -> 关闭 Camera -> 触发 AI Vision TODO 校验
+  // 实时截图 -> Camera 置为 OFF -> 弹出交互对话框
   const handleCaptureFrame = async () => {
     if (cameraRef.current) {
       try {
         const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
         if (photo?.uri) {
-          setCapturedImageUri(photo.uri);
-          setIsCameraActive(false); // 截图后 Camera 设置为 OFF
-          await analyzeSnapshotWithAI(photo.uri); // 触发 AI 分析 TODO
+          setIsCameraActive(false); // 截图后 Camera 设置为 OFF（不缓存画面，切回黑幕渐变）
+          setPendingSnapshotUri(photo.uri);
+          setIsSnapshotModalOpen(true); // 弹出用户交互对话框
         }
       } catch (err) {
         console.warn('Camera snapshot error:', err);
@@ -98,6 +105,12 @@ export default function App() {
     } else {
       setIsCameraActive(false);
     }
+  };
+
+  // 用户点击弹窗发送
+  const handleSnapshotSubmit = async (userPrompt: string, imageUri: string) => {
+    setIsSnapshotModalOpen(false);
+    await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
   const activeScenarioKey = SCENARIO_KEYS[scenarioIndex];
@@ -140,11 +153,7 @@ export default function App() {
       <ExpoStatusBar style="light" />
       <StatusBar barStyle="light-content" />
 
-      <CameraBackground
-        isCameraActive={isCameraActive}
-        capturedImageUri={capturedImageUri}
-        cameraRef={cameraRef}
-      >
+      <CameraBackground isCameraActive={isCameraActive} cameraRef={cameraRef}>
         <View style={styles.mainLayout}>
           {/* Top Header */}
           <View style={styles.topHeader}>
@@ -171,10 +180,7 @@ export default function App() {
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
             isCardVisible={isCardVisible}
-            onToggleCamera={() => {
-              if (!isCameraActive) setCapturedImageUri(null); // 重新打开 Camera 时清除旧截图
-              setIsCameraActive(!isCameraActive);
-            }}
+            onToggleCamera={() => setIsCameraActive(!isCameraActive)}
             onCaptureFrame={handleCaptureFrame}
             onToggleMic={() => setIsMicActive(!isMicActive)}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
@@ -183,11 +189,20 @@ export default function App() {
           />
         </View>
 
+        {/* 随手记 Modal */}
         <QuickNotesModal
           visible={isNotesOpen}
           onClose={() => setIsNotesOpen(false)}
           notes={notes}
           onAddNote={handleAddNote}
+        />
+
+        {/* 截图 AI 交互对话框 Modal */}
+        <SnapshotDialogModal
+          visible={isSnapshotModalOpen}
+          imageUri={pendingSnapshotUri}
+          onClose={() => setIsSnapshotModalOpen(false)}
+          onSubmit={handleSnapshotSubmit}
         />
       </CameraBackground>
     </SafeAreaView>
