@@ -27,10 +27,10 @@ interface QuickNotesModalProps {
 
 export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClose, notes, onAddNote }) => {
   const [newNote, setNewNote] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('出行备忘');
+  const [selectedCategory, setSelectedCategory] = useState('TRIP');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories = ['出行备忘', '酒店账单', '退税单号', '本地防坑'];
+  const categories = ['TRIP', 'BILL', 'TAX', 'SAFETY'];
 
   const filteredNotes = notes.filter(
     (item) =>
@@ -45,48 +45,42 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClo
   };
 
   return (
-    <Modal visible={visible} animationType="slide" transparent={true} onRequestClose={onClose}>
+    <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
       >
         <View style={styles.modalContent}>
-          {/* Modal Header */}
+          {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>📝 异国随手记 Notes</Text>
+            <Text style={styles.headerTitle}>QUICK NOTES</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
+              <Text style={styles.closeBtnText}>CLOSE</Text>
             </TouchableOpacity>
           </View>
 
-          {/* 实时模糊检索框 */}
+          {/* 搜索框 */}
           <View style={styles.searchBox}>
-            <Text style={styles.searchIcon}>🔍</Text>
             <TextInput
               style={styles.searchInput}
-              placeholder="搜索随手记、单号、备忘内容..."
-              placeholderTextColor="#71717a"
+              placeholder="Search notes, bills, codes..."
+              placeholderTextColor="#52525b"
               value={searchQuery}
               onChangeText={setSearchQuery}
             />
-            {searchQuery !== '' && (
-              <TouchableOpacity onPress={() => setSearchQuery('')}>
-                <Text style={styles.clearIcon}>✕</Text>
-              </TouchableOpacity>
-            )}
           </View>
 
-          {/* 新增记录输入框 */}
+          {/* 记录区 */}
           <View style={styles.inputArea}>
             <TextInput
               style={styles.noteInput}
-              placeholder="输入临时单号、门牌号、小费备注..."
-              placeholderTextColor="#71717a"
+              placeholder="Write note or memo..."
+              placeholderTextColor="#52525b"
               value={newNote}
               onChangeText={setNewNote}
               multiline
             />
-            {/* 分类标签选择 */}
+            {/* 分类 PILS */}
             <View style={styles.tagRow}>
               {categories.map((cat) => (
                 <TouchableOpacity
@@ -102,13 +96,13 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClo
             </View>
 
             <TouchableOpacity style={styles.submitBtn} onPress={handleSave}>
-              <Text style={styles.submitBtnText}>+ 快速保存记录</Text>
+              <Text style={styles.submitBtnText}>SAVE NOTE</Text>
             </TouchableOpacity>
           </View>
 
-          {/* 记录列表 */}
+          {/* 列表 */}
           <Text style={styles.sectionTitle}>
-            历史记录 ({filteredNotes.length})
+            RECENT ({filteredNotes.length})
           </Text>
           <FlatList
             data={filteredNotes}
@@ -116,14 +110,14 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClo
             renderItem={({ item }) => (
               <View style={styles.noteCard}>
                 <View style={styles.noteHeader}>
-                  <Text style={styles.noteCategory}>[{item.category}]</Text>
+                  <Text style={styles.noteCategory}>{item.category}</Text>
                   <Text style={styles.noteTime}>{item.timestamp}</Text>
                 </View>
                 <Text style={styles.noteText}>{item.content}</Text>
               </View>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>暂无符合要求的记录</Text>
+              <Text style={styles.emptyText}>No matching notes found</Text>
             }
             contentContainerStyle={styles.listContent}
           />
@@ -136,17 +130,17 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClo
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    backgroundColor: 'rgba(0, 0, 0, 0.85)',
     justifyContent: 'flex-end',
   },
   modalContent: {
-    backgroundColor: '#18181b',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    backgroundColor: '#121214',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
     maxHeight: '85%',
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   header: {
     flexDirection: 'row',
@@ -156,50 +150,45 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     color: '#ffffff',
-    fontSize: 18,
+    fontSize: 14,
     fontWeight: '800',
+    letterSpacing: 1,
   },
   closeBtn: {
-    padding: 6,
+    paddingVertical: 4,
+    paddingHorizontal: 8,
   },
   closeBtnText: {
-    color: '#a1a1aa',
-    fontSize: 20,
-    fontWeight: '600',
+    color: '#71717a',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.5,
   },
   searchBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#27272a',
-    borderRadius: 12,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 8,
     paddingHorizontal: 12,
-    marginBottom: 16,
-  },
-  searchIcon: {
-    fontSize: 16,
-    marginRight: 8,
+    marginBottom: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   searchInput: {
-    flex: 1,
-    height: 44,
+    height: 40,
     color: '#ffffff',
-    fontSize: 14,
-  },
-  clearIcon: {
-    color: '#a1a1aa',
-    fontSize: 16,
-    padding: 4,
+    fontSize: 13,
   },
   inputArea: {
-    backgroundColor: '#27272a',
-    borderRadius: 14,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 12,
     padding: 14,
     marginBottom: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.05)',
   },
   noteInput: {
     color: '#ffffff',
-    fontSize: 14,
-    minHeight: 50,
+    fontSize: 13,
+    minHeight: 44,
     textAlignVertical: 'top',
     marginBottom: 12,
   },
@@ -208,48 +197,54 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   tag: {
-    backgroundColor: '#3f3f46',
+    backgroundColor: '#27272a',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 12,
+    borderRadius: 6,
     marginRight: 6,
   },
   activeTag: {
-    backgroundColor: '#7c3aed',
+    backgroundColor: '#ffffff',
   },
   tagText: {
-    color: '#d4d4d8',
-    fontSize: 12,
-  },
-  activeTagText: {
-    color: '#ffffff',
+    color: '#a1a1aa',
+    fontSize: 10,
     fontWeight: '700',
   },
+  activeTagText: {
+    color: '#000000',
+  },
   submitBtn: {
-    backgroundColor: '#2563eb',
-    borderRadius: 10,
+    backgroundColor: '#27272a',
+    borderRadius: 8,
     paddingVertical: 10,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   submitBtnText: {
     color: '#ffffff',
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '700',
+    letterSpacing: 0.8,
   },
   sectionTitle: {
-    color: '#a1a1aa',
-    fontSize: 13,
+    color: '#52525b',
+    fontSize: 11,
     fontWeight: '700',
+    letterSpacing: 1,
     marginBottom: 10,
   },
   listContent: {
     paddingBottom: 20,
   },
   noteCard: {
-    backgroundColor: '#27272a',
-    borderRadius: 12,
+    backgroundColor: '#1c1c1e',
+    borderRadius: 8,
     padding: 12,
     marginBottom: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.04)',
   },
   noteHeader: {
     flexDirection: 'row',
@@ -257,22 +252,24 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   noteCategory: {
-    color: '#a78bfa',
-    fontSize: 12,
+    color: '#e4e4e7',
+    fontSize: 10,
     fontWeight: '700',
+    letterSpacing: 0.5,
   },
   noteTime: {
-    color: '#71717a',
-    fontSize: 11,
+    color: '#52525b',
+    fontSize: 10,
   },
   noteText: {
-    color: '#f4f4f5',
-    fontSize: 14,
-    lineHeight: 20,
+    color: '#d4d4d8',
+    fontSize: 13,
+    lineHeight: 18,
   },
   emptyText: {
-    color: '#71717a',
+    color: '#52525b',
     textAlign: 'center',
     marginVertical: 20,
+    fontSize: 12,
   },
 });

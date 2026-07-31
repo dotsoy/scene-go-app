@@ -4,7 +4,7 @@ import * as Speech from 'expo-speech';
 
 export interface CardData {
   id: string;
-  scenarioTag: string;
+  categoryTag: string;
   locationName: string;
   title: string;
   targetText: string;
@@ -12,7 +12,7 @@ export interface CardData {
   english: string;
   localTip: string;
   languageCode: string;
-  badgeColor: string;
+  badgeColor?: string;
 }
 
 interface FlashCardViewProps {
@@ -24,43 +24,43 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({ card }) => {
     Speech.speak(card.targetText, {
       language: card.languageCode,
       pitch: 1.0,
-      rate: 0.9,
+      rate: 0.85,
     });
   };
 
   return (
     <View style={styles.cardContainer}>
-      {/* 顶部场景与位置 Badge */}
-      <View style={styles.badgeRow}>
-        <View style={[styles.badge, { backgroundColor: card.badgeColor }]}>
-          <Text style={styles.badgeText}>{card.scenarioTag}</Text>
+      {/* 极简 Top Bar */}
+      <View style={styles.topRow}>
+        <View style={styles.categoryPill}>
+          <Text style={styles.categoryText}>{card.categoryTag.toUpperCase()}</Text>
         </View>
-        <Text style={styles.locationText}>📍 {card.locationName}</Text>
+        <Text style={styles.locationText}>{card.locationName.toUpperCase()}</Text>
       </View>
 
-      {/* 闪示卡卡片主体 */}
+      {/* 极简主卡片 */}
       <View style={styles.cardBody}>
         <Text style={styles.cardTitle}>{card.title}</Text>
 
-        {/* 超高对比度大字闪示区域 */}
-        <View style={styles.textHighlightBox}>
+        {/* 高对比大字核心展示区 */}
+        <View style={styles.displayArea}>
           <Text style={styles.targetText}>{card.targetText}</Text>
         </View>
 
-        {/* 读音与英语辅助说明 */}
-        <Text style={styles.phoneticText}>🗣️ {card.phonetic}</Text>
-        <Text style={styles.englishText}>🇬🇧 {card.english}</Text>
+        {/* 读音与英文 */}
+        <Text style={styles.phoneticText}>{card.phonetic}</Text>
+        <Text style={styles.englishText}>{card.english}</Text>
 
-        {/* 语音朗读按钮 */}
-        <TouchableOpacity style={styles.audioButton} onPress={handlePlayAudio} activeOpacity={0.8}>
-          <Text style={styles.audioButtonText}>🔊 点击播放本地发音</Text>
+        {/* 发音按钮 */}
+        <TouchableOpacity style={styles.audioPill} onPress={handlePlayAudio} activeOpacity={0.75}>
+          <Text style={styles.audioPillText}>PLAY AUDIO</Text>
         </TouchableOpacity>
       </View>
 
-      {/* 本地规避与小费浮窗 (Local Protocol) */}
+      {/* 极简指南提示卡 */}
       <View style={styles.tipBox}>
-        <Text style={styles.tipTitle}>💡 本地出行指南 (Local Protocol)</Text>
-        <Text style={styles.tipText}>{card.localTip}</Text>
+        <Text style={styles.tipHeader}>LOCAL PROTOCOL</Text>
+        <Text style={styles.tipBody}>{card.localTip}</Text>
       </View>
     </View>
   );
@@ -69,103 +69,105 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({ card }) => {
 const styles = StyleSheet.create({
   cardContainer: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingVertical: 10,
     flex: 1,
-    justify: 'center',
+    justifyContent: 'center',
   },
-  badgeRow: {
+  topRow: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'space-between',
     marginBottom: 16,
   },
-  badge: {
-    paddingHorizontal: 12,
+  categoryPill: {
+    backgroundColor: '#27272a',
+    paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 16,
-    marginRight: 8,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  badgeText: {
-    color: '#ffffff',
-    fontSize: 12,
+  categoryText: {
+    color: '#e4e4e7',
+    fontSize: 11,
     fontWeight: '700',
+    letterSpacing: 1,
   },
   locationText: {
-    color: '#a1a1aa',
-    fontSize: 14,
-    fontWeight: '500',
+    color: '#71717a',
+    fontSize: 11,
+    fontWeight: '600',
+    letterSpacing: 0.5,
   },
   cardBody: {
-    backgroundColor: 'rgba(24, 24, 27, 0.85)',
-    borderRadius: 20,
+    backgroundColor: '#121214',
+    borderRadius: 16,
     padding: 24,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.4,
-    shadowRadius: 16,
-    elevation: 8,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   cardTitle: {
-    color: '#facc15', // 醒目金黄
-    fontSize: 18,
-    fontWeight: '700',
+    color: '#f4f4f5',
+    fontSize: 16,
+    fontWeight: '600',
     marginBottom: 16,
   },
-  textHighlightBox: {
+  displayArea: {
     backgroundColor: '#000000',
-    borderRadius: 14,
-    padding: 20,
+    borderRadius: 12,
+    padding: 22,
     marginBottom: 16,
-    borderWidth: 2,
-    borderColor: '#facc15',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   targetText: {
     color: '#ffffff',
     fontSize: 34,
-    fontWeight: '900',
+    fontWeight: '800',
     lineHeight: 46,
-    textAlign: 'left',
+    letterSpacing: 0.5,
   },
   phoneticText: {
-    color: '#38bdf8',
-    fontSize: 16,
-    fontWeight: '600',
-    marginBottom: 6,
+    color: '#a1a1aa',
+    fontSize: 15,
+    fontWeight: '500',
+    marginBottom: 4,
   },
   englishText: {
-    color: '#a1a1aa',
-    fontSize: 14,
+    color: '#52525b',
+    fontSize: 13,
     marginBottom: 20,
   },
-  audioButton: {
-    backgroundColor: '#2563eb',
-    borderRadius: 12,
-    paddingVertical: 14,
+  audioPill: {
+    backgroundColor: '#ffffff',
+    borderRadius: 8,
+    paddingVertical: 12,
     alignItems: 'center',
   },
-  audioButtonText: {
-    color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
+  audioPillText: {
+    color: '#000000',
+    fontSize: 13,
+    fontWeight: '800',
+    letterSpacing: 1,
   },
   tipBox: {
     marginTop: 16,
-    backgroundColor: 'rgba(39, 39, 42, 0.9)',
-    borderRadius: 14,
+    backgroundColor: '#121214',
+    borderRadius: 12,
     padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#10b981',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  tipTitle: {
-    color: '#10b981',
-    fontSize: 13,
+  tipHeader: {
+    color: '#71717a',
+    fontSize: 11,
     fontWeight: '700',
-    marginBottom: 4,
+    letterSpacing: 1,
+    marginBottom: 6,
   },
-  tipText: {
-    color: '#e4e4e7',
+  tipBody: {
+    color: '#d4d4d8',
     fontSize: 13,
-    lineHeight: 18,
+    lineHeight: 19,
   },
 });

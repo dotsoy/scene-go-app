@@ -20,36 +20,36 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 }) => {
   return (
     <View style={styles.barContainer}>
-      {/* 摄像头开关按键 */}
+      {/* 摄像头开关 */}
       <TouchableOpacity
-        style={[styles.actionBtn, isCameraActive ? styles.activeCameraBtn : styles.inactiveBtn]}
+        style={[styles.btn, isCameraActive ? styles.btnActive : styles.btnMuted]}
         onPress={onToggleCamera}
         activeOpacity={0.7}
       >
-        <Text style={styles.btnIcon}>{isCameraActive ? '📷' : '📷'}</Text>
-        <Text style={styles.btnLabel}>{isCameraActive ? '实景开' : '实景关'}</Text>
+        <Text style={[styles.btnText, isCameraActive && styles.btnTextActive]}>
+          {isCameraActive ? 'CAM ON' : 'CAM OFF'}
+        </Text>
       </TouchableOpacity>
 
-      {/* 麦克风开关按键 */}
+      {/* 麦克风开关 */}
       <TouchableOpacity
-        style={[styles.actionBtn, isMicActive ? styles.activeMicBtn : styles.inactiveBtn]}
+        style={[styles.btn, isMicActive ? styles.btnActive : styles.btnMuted]}
         onPress={onToggleMic}
         activeOpacity={0.7}
       >
-        <Text style={styles.btnIcon}>{isMicActive ? '🎙️' : '🔇'}</Text>
-        <Text style={styles.btnLabel}>{isMicActive ? '同传开' : '同传静音'}</Text>
+        <Text style={[styles.btnText, isMicActive && styles.btnTextActive]}>
+          {isMicActive ? 'MIC ON' : 'MIC OFF'}
+        </Text>
       </TouchableOpacity>
 
-      {/* Notes 快捷记录与检索按键 */}
-      <TouchableOpacity style={[styles.actionBtn, styles.notesBtn]} onPress={onOpenNotes} activeOpacity={0.7}>
-        <Text style={styles.btnIcon}>📝</Text>
-        <Text style={styles.btnLabel}>Notes 记录</Text>
+      {/* Notes 检索与纪录 */}
+      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenNotes} activeOpacity={0.7}>
+        <Text style={styles.btnText}>NOTES</Text>
       </TouchableOpacity>
 
-      {/* 模拟切卡快捷入口 */}
-      <TouchableOpacity style={[styles.actionBtn, styles.switchBtn]} onPress={onNextScenario} activeOpacity={0.7}>
-        <Text style={styles.btnIcon}>🔄</Text>
-        <Text style={styles.btnLabel}>切场景</Text>
+      {/* 切卡模式 */}
+      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onNextScenario} activeOpacity={0.7}>
+        <Text style={styles.btnText}>NEXT</Text>
       </TouchableOpacity>
     </View>
   );
@@ -58,52 +58,37 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 const styles = StyleSheet.create({
   barContainer: {
     flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    backgroundColor: 'rgba(18, 18, 20, 0.95)',
-    paddingVertical: 14,
+    justifyContent: 'space-between',
+    backgroundColor: '#121214',
+    paddingVertical: 10,
     paddingHorizontal: 12,
     marginHorizontal: 16,
-    marginBottom: 24,
-    borderRadius: 24,
+    marginBottom: 20,
+    borderRadius: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 6 },
-    shadowOpacity: 0.5,
-    shadowRadius: 12,
-    elevation: 10,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  actionBtn: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: 8,
+  btn: {
+    paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 16,
-    minWidth: 72,
+    borderRadius: 8,
+    alignItems: 'center',
+    justify: 'center',
+    minWidth: 70,
   },
-  inactiveBtn: {
-    backgroundColor: 'rgba(39, 39, 42, 0.8)',
+  btnMuted: {
+    backgroundColor: '#1c1c1e',
   },
-  activeCameraBtn: {
-    backgroundColor: '#059669', // 翡翠绿
+  btnActive: {
+    backgroundColor: '#ffffff',
   },
-  activeMicBtn: {
-    backgroundColor: '#dc2626', // 亮红
-  },
-  notesBtn: {
-    backgroundColor: '#7c3aed', // 优雅紫
-  },
-  switchBtn: {
-    backgroundColor: 'rgba(63, 63, 70, 0.9)',
-  },
-  btnIcon: {
-    fontSize: 20,
-    marginBottom: 4,
-  },
-  btnLabel: {
-    color: '#ffffff',
+  btnText: {
+    color: '#a1a1aa',
     fontSize: 11,
     fontWeight: '700',
+    letterSpacing: 0.8,
+  },
+  btnTextActive: {
+    color: '#000000',
   },
 });
