@@ -17,7 +17,8 @@
         "NSCameraUsageDescription": "SceneGo 需要使用摄像头捕获异国现实场景与菜单点餐。",
         "NSMicrophoneUsageDescription": "SceneGo 需要使用麦克风进行双向语音同传与 Notes 快捷录音。",
         "NSLocationWhenInUseUsageDescription": "SceneGo 需要使用地理位置自动匹配当前所在的异国出行场景。"
-      }
+      },
+      "bundleIdentifier": "com.ninetieth.scenego"
     },
     "android": {
       "adaptiveIcon": {
