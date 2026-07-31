@@ -17,12 +17,19 @@ export interface CardData {
 
 interface FlashCardViewProps {
   card: CardData;
+  currentIndex: number;
+  totalCards: number;
   onNextCard: () => void;
 }
 
-export const FlashCardView: React.FC<FlashCardViewProps> = ({ card, onNextCard }) => {
+export const FlashCardView: React.FC<FlashCardViewProps> = ({
+  card,
+  currentIndex,
+  totalCards,
+  onNextCard,
+}) => {
   const handlePlayAudio = (e: GestureResponderEvent) => {
-    e.stopPropagation(); // 阻止冒泡，避免播放发音时触发切卡
+    e.stopPropagation();
     Speech.speak(card.targetText, {
       language: card.languageCode,
       pitch: 1.0,
@@ -30,9 +37,11 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({ card, onNextCard }
     });
   };
 
+  const formattedProgress = `${(currentIndex + 1).toString().padStart(2, '0')} / ${totalCards.toString().padStart(2, '0')}`;
+
   return (
     <View style={styles.cardContainer}>
-      {/* 极简 Top Bar（包含内置 NEXT 按钮与分类 Pill） */}
+      {/* Top Header: 分类名称 + 进度位置指示 */}
       <View style={styles.topRow}>
         <View style={styles.leftPillGroup}>
           <View style={styles.categoryPill}>
@@ -41,17 +50,17 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({ card, onNextCard }
           <Text style={styles.locationText}>{card.locationName.toUpperCase()}</Text>
         </View>
 
-        {/* 移入 Card 内部的极简 NEXT 按钮 */}
-        <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.7}>
-          <Text style={styles.nextCardPillText}>NEXT ➔</Text>
-        </TouchableOpacity>
+        {/* 顶部进度批次展示 (01 / 04) */}
+        <View style={styles.progressPill}>
+          <Text style={styles.progressText}>{formattedProgress}</Text>
+        </View>
       </View>
 
-      {/* 点击卡片任意主体区域，快速切换下一张 Card */}
+      {/* 点击卡片任意主体区域可快速切卡 */}
       <TouchableOpacity
         style={styles.cardBody}
         onPress={onNextCard}
-        activeOpacity={0.88}
+        activeOpacity={0.9}
       >
         <Text style={styles.cardTitle}>{card.title}</Text>
 
@@ -64,13 +73,19 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({ card, onNextCard }
         <Text style={styles.phoneticText}>{card.phonetic}</Text>
         <Text style={styles.englishText}>{card.english}</Text>
 
-        {/* 发音按钮 */}
-        <TouchableOpacity style={styles.audioPill} onPress={handlePlayAudio} activeOpacity={0.75}>
-          <Text style={styles.audioPillText}>PLAY AUDIO</Text>
-        </TouchableOpacity>
+        {/* 底部双操作按钮栏：PLAY AUDIO (左) 与 放大显眼的 NEXT CARD 按钮 (右) */}
+        <View style={styles.actionRow}>
+          <TouchableOpacity style={styles.audioPill} onPress={handlePlayAudio} activeOpacity={0.75}>
+            <Text style={styles.audioPillText}>PLAY AUDIO</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
+            <Text style={styles.nextCardPillText}>NEXT CARD ➔</Text>
+          </TouchableOpacity>
+        </View>
       </TouchableOpacity>
 
-      {/* 极简指南提示卡 */}
+      {/* 本地指南提示卡 */}
       <View style={styles.tipBox}>
         <Text style={styles.tipHeader}>LOCAL PROTOCOL</Text>
         <Text style={styles.tipBody}>{card.localTip}</Text>
@@ -96,6 +111,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    flex: 1,
   },
   categoryPill: {
     backgroundColor: '#27272a',
@@ -113,72 +129,95 @@ const styles = StyleSheet.create({
   },
   locationText: {
     color: '#71717a',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '600',
     letterSpacing: 0.5,
+    flexShrink: 1,
   },
-  nextCardPill: {
-    backgroundColor: '#ffffff',
+  progressPill: {
+    backgroundColor: '#18181b',
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
   },
-  nextCardPillText: {
-    color: '#000000',
-    fontSize: 10,
+  progressText: {
+    color: '#facc15', // 黄色高亮进度数字
+    fontSize: 11,
     fontWeight: '800',
     letterSpacing: 0.8,
   },
   cardBody: {
     backgroundColor: '#121214',
     borderRadius: 16,
-    padding: 22,
+    padding: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   cardTitle: {
     color: '#f4f4f5',
-    fontSize: 16,
+    fontSize: 15,
     fontWeight: '600',
-    marginBottom: 14,
+    marginBottom: 12,
   },
   displayArea: {
     backgroundColor: '#000000',
     borderRadius: 12,
-    padding: 20,
+    padding: 18,
     marginBottom: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   targetText: {
     color: '#ffffff',
-    fontSize: 32,
+    fontSize: 30,
     fontWeight: '800',
-    lineHeight: 44,
+    lineHeight: 42,
     letterSpacing: 0.5,
   },
   phoneticText: {
     color: '#a1a1aa',
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '500',
     marginBottom: 4,
   },
   englishText: {
     color: '#52525b',
-    fontSize: 13,
-    marginBottom: 18,
+    fontSize: 12,
+    marginBottom: 16,
+  },
+  actionRow: {
+    flexDirection: 'row',
+    gap: 10,
   },
   audioPill: {
-    backgroundColor: '#ffffff',
-    borderRadius: 8,
-    paddingVertical: 11,
+    flex: 1,
+    backgroundColor: '#27272a',
+    borderRadius: 10,
+    paddingVertical: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   audioPillText: {
+    color: '#ffffff',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.8,
+  },
+  nextCardPill: {
+    flex: 1.2,
+    backgroundColor: '#ffffff',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  nextCardPillText: {
     color: '#000000',
     fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 1,
+    fontWeight: '900',
+    letterSpacing: 0.8,
   },
   tipBox: {
     marginTop: 14,

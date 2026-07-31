@@ -166,7 +166,12 @@ export default function App() {
           {/* Center Card */}
           <View style={styles.centerCardArea}>
             {isCardVisible ? (
-              <FlashCardView card={currentCard} onNextCard={handleNextScenario} />
+              <FlashCardView
+                card={currentCard}
+                currentIndex={scenarioIndex}
+                totalCards={SCENARIO_KEYS.length}
+                onNextCard={handleNextScenario}
+              />
             ) : (
               <View style={styles.hiddenCardContainer}>
                 <Text style={styles.hiddenCardText}>CARD HIDDEN</Text>
@@ -174,7 +179,7 @@ export default function App() {
             )}
           </View>
 
-          {/* Bottom Floating Control Bar (4 核心控件) */}
+          {/* Bottom Floating Control Bar */}
           <ControlBar
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
