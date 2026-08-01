@@ -1,17 +1,19 @@
 import { OcrPlugin, MatcherPlugin, OcrResult, ScenarioResult } from './types';
 import { AppleVisionOcrPlugin } from './ocr/AppleVisionOcrPlugin';
+import { AppleVisionScenePlugin } from './scene/AppleVisionScenePlugin';
 import { LocalDictMatcherPlugin } from './matchers/LocalDictMatcherPlugin';
 
 class PluginManager {
   private ocrPlugins: Map<string, OcrPlugin> = new Map();
   private matcherPlugins: Map<string, MatcherPlugin> = new Map();
 
-  private activeOcrId: string = 'apple-vision';
+  private activeOcrId: string = 'apple-vision-scene';
   private activeMatcherId: string = 'local-dict';
 
   constructor() {
     // 默认注册离线原生插件
     this.registerOcr(new AppleVisionOcrPlugin());
+    this.registerOcr(new AppleVisionScenePlugin());
     this.registerMatcher(new LocalDictMatcherPlugin());
   }
 
