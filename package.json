@@ -9,11 +9,10 @@
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",
-    "@react-native-voice/voice": "^3.2.4",
     "expo": "~51.0.0",
     "expo-camera": "~15.0.13",
     "expo-dev-client": "~4.0.29",
-    "expo-file-system": "^57.0.1",
+    "expo-file-system": "~17.0.1",
     "expo-keep-awake": "~13.0.2",
     "expo-linear-gradient": "~13.0.2",
     "expo-speech": "~12.0.2",

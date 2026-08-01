@@ -1,33 +1,33 @@
 import { OcrPlugin, MatcherPlugin, OcrResult, ScenarioResult } from './types';
 import { AppleVisionOcrPlugin } from './ocr/AppleVisionOcrPlugin';
 import { AppleVisionScenePlugin } from './scene/AppleVisionScenePlugin';
+import { CloudVlmOcrPlugin, parseVlmScenarioResult } from './ocr/CloudVlmOcrPlugin';
 import { LocalDictMatcherPlugin } from './matchers/LocalDictMatcherPlugin';
 
 class PluginManager {
   private ocrPlugins: Map<string, OcrPlugin> = new Map();
   private matcherPlugins: Map<string, MatcherPlugin> = new Map();
 
-  private activeOcrId: string = 'apple-vision-scene';
+  private activeOcrId: string = 'cloud-vlm';
   private activeMatcherId: string = 'local-dict';
 
+  private cloudVlmPlugin = new CloudVlmOcrPlugin();
+
   constructor() {
-    // 默认注册离线原生插件
     this.registerOcr(new AppleVisionOcrPlugin());
     this.registerOcr(new AppleVisionScenePlugin());
+    this.registerOcr(this.cloudVlmPlugin);
     this.registerMatcher(new LocalDictMatcherPlugin());
   }
 
-  // 注册 OCR 插件
   registerOcr(plugin: OcrPlugin) {
     this.ocrPlugins.set(plugin.id, plugin);
   }
 
-  // 注册 Matcher 插件
   registerMatcher(plugin: MatcherPlugin) {
     this.matcherPlugins.set(plugin.id, plugin);
   }
 
-  // 切换活动 OCR 插件
   setActiveOcr(id: string) {
     if (this.ocrPlugins.has(id)) {
       this.activeOcrId = id;
@@ -36,7 +36,6 @@ class PluginManager {
     }
   }
 
-  // 切换活动 Matcher 插件
   setActiveMatcher(id: string) {
     if (this.matcherPlugins.has(id)) {
       this.activeMatcherId = id;
@@ -45,7 +44,10 @@ class PluginManager {
     }
   }
 
-  // 获取插件列表
+  getActiveOcrId(): string {
+    return this.activeOcrId;
+  }
+
   getOcrPlugins(): OcrPlugin[] {
     return Array.from(this.ocrPlugins.values());
   }
@@ -54,18 +56,43 @@ class PluginManager {
     return Array.from(this.matcherPlugins.values());
   }
 
-  // 执行管线处理：拍摄 ➔ OCR ➔ 语义/卡片匹配
-  async processImageSnapshot(imageUri: string, location?: string): Promise<{ ocr: OcrResult; scenario: ScenarioResult }> {
-    const ocrPlugin = this.ocrPlugins.get(this.activeOcrId) || this.ocrPlugins.get('apple-vision')!;
-    const matcherPlugin = this.matcherPlugins.get(this.activeMatcherId) || this.matcherPlugins.get('local-dict')!;
+  /** 获取云端 VLM 插件实例（用于多轮追问） */
+  getCloudVlmPlugin(): CloudVlmOcrPlugin {
+    return this.cloudVlmPlugin;
+  }
+
+  /**
+   * 核心管线：拍摄 → 识别 → 语义匹配
+   *
+   * 当使用云端 VLM 时，VLM 直接输出结构化 ScenarioResult（无需 Matcher 二次处理）
+   * 当使用本地引擎时，走 OCR → Matcher 两阶段管线
+   */
+  async processImageSnapshot(
+    imageUri: string,
+    location?: string,
+  ): Promise<{ ocr: OcrResult; scenario: ScenarioResult }> {
+    const ocrPlugin =
+      this.ocrPlugins.get(this.activeOcrId) ||
+      this.ocrPlugins.get('apple-vision-scene')!;
 
     const ocrResult = await ocrPlugin.recognizeText(imageUri);
+
+    // 云端 VLM 模式：直接从返回文本解析 ScenarioResult
+    if (this.activeOcrId === 'cloud-vlm' && ocrResult.rawText) {
+      const parsed = parseVlmScenarioResult(ocrResult.rawText);
+      if (parsed) {
+        return { ocr: ocrResult, scenario: parsed };
+      }
+      // 解析失败，降级到本地 Matcher
+    }
+
+    // 本地模式：OCR 文本 → 本地词库匹配
+    const matcherPlugin =
+      this.matcherPlugins.get(this.activeMatcherId) ||
+      this.matcherPlugins.get('local-dict')!;
     const scenarioResult = await matcherPlugin.match(ocrResult.rawText, location);
 
-    return {
-      ocr: ocrResult,
-      scenario: scenarioResult,
-    };
+    return { ocr: ocrResult, scenario: scenarioResult };
   }
 }
 

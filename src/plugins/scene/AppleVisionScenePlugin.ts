@@ -15,12 +15,15 @@ export class AppleVisionScenePlugin implements OcrPlugin {
 
   async recognizeText(imageUri: string): Promise<OcrResult> {
     try {
-      if (SceneGoVisionClassifier && SceneGoVisionClassifier.classifyScene) {
-        const scenes: SceneObservation[] = await SceneGoVisionClassifier.classifyScene(imageUri);
+      if (SceneGoVisionClassifier?.classifyScene) {
+        const scenes: SceneObservation[] =
+          await SceneGoVisionClassifier.classifyScene(imageUri);
         const topSceneNames = scenes.map((s) => s.identifier).join('\n');
         return {
           rawText: topSceneNames,
-          lines: scenes.map((s) => `${s.identifier} (${Math.round(s.confidence * 100)}%)`),
+          lines: scenes.map(
+            (s) => `${s.identifier} (${Math.round(s.confidence * 100)}%)`,
+          ),
           confidence: scenes[0]?.confidence || 0,
         };
       }
@@ -28,10 +31,11 @@ export class AppleVisionScenePlugin implements OcrPlugin {
       console.warn('[AppleVisionScenePlugin] 场景识别出错:', err);
     }
 
+    // 原生模块不可用（模拟器 / 旧设备），返回空结果而非假数据
     return {
-      rawText: 'restaurant, food, dining_room',
-      lines: ['restaurant (85%)', 'food (75%)'],
-      confidence: 0.85,
+      rawText: '',
+      lines: ['[本地场景识别不可用，建议切换为云端模式]'],
+      confidence: 0,
     };
   }
 }

@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar } from 'react-native';
+import React, { useState, useRef } from 'react';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
-import Voice, { SpeechResultsEvent } from '@react-native-voice/voice';
 import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
+import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 
 // 卡片预设测试数据（全部采用中文展示与测试）
 const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
@@ -67,46 +67,50 @@ const MOCK_LOCATIONS = [
 ];
 
 export default function App() {
-
-
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
-  const [liveTranscript, setLiveTranscript] = useState<string>('');
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
 
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
   const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
+  const [isProcessing, setIsProcessing] = useState<boolean>(false);
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
-  const cameraRef = useRef<any>(null);
-  // 绑定 iOS 苹果原生真实麦克风语音听写监听器
-  useEffect(() => {
-    Voice.onSpeechResults = (e: SpeechResultsEvent) => {
-      if (e.value && e.value.length > 0) {
-        setLiveTranscript(e.value[0]);
-      }
-    };
+  const cameraRef = useRef<unknown>(null);
 
-    Voice.onSpeechPartialResults = (e: SpeechResultsEvent) => {
-      if (e.value && e.value.length > 0) {
-        setLiveTranscript(e.value[0]);
-      }
-    };
-
-    Voice.onSpeechError = (e) => {
-      console.warn('[Voice ASR Error]:', e);
-    };
-
-    return () => {
-      Voice.destroy().then(Voice.removeAllListeners);
-    };
-  }, []);
-
+  /** 云端 VLM 多轮追问：用户基于快照照片提出具体问题 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
-    console.log('[AI TODO] Sending to AI Vision VLM:', { imageUri, userPrompt });
+    setIsProcessing(true);
+    try {
+      const cloudVlm = pluginManager.getCloudVlmPlugin();
+      const reply = await cloudVlm.askFollowUp(imageUri, userPrompt);
+
+      setActiveScenarioResult((prev) =>
+        prev
+          ? {
+              ...prev,
+              translatedText: reply,
+              tips: [],
+              recommendedPhrases: [],
+            }
+          : {
+              title: '追问回答',
+              category: 'FOLLOW_UP',
+              originalText: userPrompt,
+              translatedText: reply,
+              tips: [],
+              recommendedPhrases: [],
+            },
+      );
+    } catch (err) {
+      console.warn('[AI Follow-up Error]:', err);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   const handleCaptureFrame = async () => {
@@ -115,18 +119,20 @@ export default function App() {
       console.log('[Camera] Camera is not ready yet, waiting for hardware init...');
       return;
     }
-    if (cameraRef.current) {
+    const cam = cameraRef.current as { takePictureAsync?: (opts: { quality: number }) => Promise<{ uri: string }> } | null;
+    if (cam?.takePictureAsync) {
       try {
-        const photo = await cameraRef.current.takePictureAsync({ quality: 0.8 });
+        setIsProcessing(true);
+        const photo = await cam.takePictureAsync({ quality: 0.8 });
         if (photo?.uri) {
           setIsCameraActive(false);
           setIsCameraReady(false);
 
-          // 触发插件管线: Apple Vision OCR 识别 + 本地词库/场景匹配
+          // 触发插件管线: 场景识别 + 语义匹配
           console.log('[Plugins] 启动插件管线，处理图像快照...');
           const result = await pluginManager.processImageSnapshot(photo.uri);
-          console.log('[Plugin OCR 结果]:', result.ocr.rawText);
-          console.log('[Plugin 场景匹配结果]:', result.scenario);
+          console.log('[Plugin OCR 结果]:', result.ocr.rawText.slice(0, 100));
+          console.log('[Plugin 场景匹配结果]:', result.scenario.title);
 
           setActiveScenarioResult(result.scenario);
           setPendingSnapshotUri(photo.uri);
@@ -136,6 +142,8 @@ export default function App() {
         console.warn('Camera snapshot error:', err);
         setIsCameraActive(false);
         setIsCameraReady(false);
+      } finally {
+        setIsProcessing(false);
       }
     } else {
       setIsCameraActive(false);
@@ -144,31 +152,11 @@ export default function App() {
   };
 
   const handleSnapshotSubmit = async (userPrompt: string, imageUri: string) => {
-    setIsSnapshotModalOpen(false);
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
-  const handleToggleMic = async () => {
-    if (!isMicActive) {
-      setIsMicActive(true);
-      setLiveTranscript('正在听取您的说话声...');
-      try {
-        await Voice.start('zh-CN');
-      } catch (err) {
-        console.warn('Voice start error:', err);
-      }
-    } else {
-      setIsMicActive(false);
-      try {
-        await Voice.stop();
-      } catch (err) {
-        console.warn('Voice stop error:', err);
-      }
-      if (liveTranscript && !liveTranscript.includes('正在听取')) {
-        handleAddNote(liveTranscript, 'VOICE');
-      }
-      setLiveTranscript('');
-    }
+  const handleToggleMic = () => {
+    setIsMicActive(!isMicActive);
   };
 
   const handleToggleCamera = () => {
@@ -233,15 +221,14 @@ export default function App() {
             </View>
           </View>
 
-          {/* Live Speech Transcript Banner */}
-          {isMicActive && (
-            <View style={styles.liveTranscriptCard}>
-              <View style={styles.liveHeaderRow}>
-                <Text style={styles.liveBadge}>🎙️ 实时语音转录中</Text>
-                <Text style={styles.liveRecordingPulse}>● REC</Text>
-              </View>
-              <Text style={styles.liveTranscriptText}>
-                {liveTranscript || '请说话，系统正在进行端侧实时语音听写...'}
+          {/* Processing Indicator */}
+          {isProcessing && (
+            <View style={styles.processingCard}>
+              <ActivityIndicator size="small" color="#4fc3f7" />
+              <Text style={styles.processingText}>
+                {pluginManager.getActiveOcrId() === 'cloud-vlm'
+                  ? '☁️ 云端视觉大模型分析中...'
+                  : '📱 本地场景识别中...'}
               </Text>
             </View>
           )}
@@ -272,6 +259,7 @@ export default function App() {
             onToggleMic={handleToggleMic}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
+            onOpenSettings={() => setIsSettingsOpen(true)}
           />
         </View>
 
@@ -289,6 +277,11 @@ export default function App() {
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
         />
+
+        <PluginSelectorModal
+          visible={isSettingsOpen}
+          onClose={() => setIsSettingsOpen(false)}
+        />
       </CameraBackground>
     </SafeAreaView>
   );
@@ -303,36 +296,22 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'space-between',
   },
-  liveTranscriptCard: {
-    backgroundColor: 'rgba(24, 24, 27, 0.92)',
+  processingCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: 'rgba(24, 24, 27, 0.95)',
     marginHorizontal: 16,
     marginTop: 8,
     padding: 12,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(37, 99, 235, 0.4)',
+    borderColor: 'rgba(79, 195, 247, 0.4)',
+    gap: 10,
   },
-  liveHeaderRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 6,
-  },
-  liveBadge: {
-    color: '#38bdf8',
-    fontSize: 11,
-    fontWeight: '700',
-  },
-  liveRecordingPulse: {
-    color: '#ef4444',
-    fontSize: 10,
-    fontWeight: '800',
-  },
-  liveTranscriptText: {
-    color: '#f4f4f5',
+  processingText: {
+    color: '#4fc3f7',
     fontSize: 13,
-    lineHeight: 18,
-    fontWeight: '500',
+    fontWeight: '600',
   },
   topHeader: {
     flexDirection: 'row',

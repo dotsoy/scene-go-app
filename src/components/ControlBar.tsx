@@ -10,6 +10,7 @@ interface ControlBarProps {
   onToggleMic: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
+  onOpenSettings: () => void;
 }
 
 export const ControlBar: React.FC<ControlBarProps> = ({
@@ -21,6 +22,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onToggleMic,
   onToggleCard,
   onOpenNotes,
+  onOpenSettings,
 }) => {
   return (
     <View style={styles.barContainer}>
@@ -61,55 +63,59 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenNotes} activeOpacity={0.75}>
         <Text style={styles.btnText} numberOfLines={1}>NOTES</Text>
       </TouchableOpacity>
+
+      {/* 设置 / 引擎切换 */}
+      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenSettings} activeOpacity={0.75}>
+        <Text style={styles.btnText} numberOfLines={1}>⚙️</Text>
+      </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
   barContainer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     flexDirection: 'row',
-    justifyContent: 'center',
+    justifyContent: 'space-evenly',
     alignItems: 'center',
-    backgroundColor: '#121214',
     paddingVertical: 10,
-    paddingHorizontal: 12,
-    marginHorizontal: 16,
-    marginBottom: 20,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-    gap: 8,
+    paddingHorizontal: 6,
+    backgroundColor: 'rgba(10,10,30,0.85)',
+    borderTopWidth: 0.5,
+    borderTopColor: 'rgba(255,255,255,0.08)',
   },
   btn: {
-    flex: 1, // 4个核心控件均匀平分宽度，动态布局居中
-    paddingVertical: 11,
-    paddingHorizontal: 4,
-    borderRadius: 10,
+    paddingVertical: 8,
+    paddingHorizontal: 10,
+    borderRadius: 8,
+    minWidth: 52,
     alignItems: 'center',
-    justifyContent: 'center',
   },
   btnMuted: {
-    backgroundColor: '#1c1c1e',
+    backgroundColor: 'rgba(255,255,255,0.06)',
   },
   btnActive: {
-    backgroundColor: '#ffffff',
+    backgroundColor: 'rgba(76,175,80,0.25)',
   },
   btnActiveSnap: {
-    backgroundColor: '#2563eb',
+    backgroundColor: 'rgba(244,67,54,0.35)',
   },
   btnText: {
-    color: '#a1a1aa',
-    fontSize: 10,
+    color: '#777',
+    fontSize: 11,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
   btnTextActive: {
-    color: '#000000',
+    color: '#81C784',
   },
   btnTextSnap: {
-    color: '#ffffff',
-    fontSize: 10,
-    fontWeight: '800',
+    color: '#ef5350',
+    fontSize: 11,
+    fontWeight: '700',
     letterSpacing: 0.5,
   },
 });

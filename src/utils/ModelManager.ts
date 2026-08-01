@@ -1,4 +1,4 @@
-import { File, Paths } from 'expo-file-system';
+import * as FileSystem from 'expo-file-system';
 import { pluginManager, QwenLocalPlugin, WhisperSpeechPlugin } from '../plugins';
 
 export interface ModelStatus {
@@ -9,97 +9,128 @@ export interface ModelStatus {
   isDownloading: boolean;
 }
 
-const QWEN_MODEL_URL = 'https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf';
-const WHISPER_MODEL_URL = 'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin';
+const QWEN_MODEL_URL =
+  'https://huggingface.co/Qwen/Qwen2.5-0.5B-Instruct-GGUF/resolve/main/qwen2.5-0.5b-instruct-q4_k_m.gguf';
+const WHISPER_MODEL_URL =
+  'https://huggingface.co/ggerganov/whisper.cpp/resolve/main/ggml-tiny.bin';
 
 const QWEN_FILE_NAME = 'qwen2.5-0.5b-instruct-q4_k_m.gguf';
 const WHISPER_FILE_NAME = 'ggml-tiny.bin';
 
 class ModelManager {
-  private docDir = Paths.document.uri || Paths.cache.uri || '';
+  private docDir = FileSystem.documentDirectory || FileSystem.cacheDirectory || '';
 
   public getQwenPath(): string {
-    return `${this.docDir}/${QWEN_FILE_NAME}`;
+    return `${this.docDir}${QWEN_FILE_NAME}`;
   }
 
   public getWhisperPath(): string {
-    return `${this.docDir}/${WHISPER_FILE_NAME}`;
+    return `${this.docDir}${WHISPER_FILE_NAME}`;
   }
 
   // 检查端侧模型安装状态
   async checkModelStatus(): Promise<ModelStatus> {
-    const qwenFile = new File(this.getQwenPath());
-    const whisperFile = new File(this.getWhisperPath());
+    const qwenPath = this.getQwenPath();
+    const whisperPath = this.getWhisperPath();
+
+    const qwenInfo = await FileSystem.getInfoAsync(qwenPath);
+    const whisperInfo = await FileSystem.getInfoAsync(whisperPath);
 
     return {
-      qwenInstalled: qwenFile.exists,
-      qwenProgress: qwenFile.exists ? 100 : 0,
-      whisperInstalled: whisperFile.exists,
-      whisperProgress: whisperFile.exists ? 100 : 0,
+      qwenInstalled: qwenInfo.exists,
+      qwenProgress: qwenInfo.exists ? 100 : 0,
+      whisperInstalled: whisperInfo.exists,
+      whisperProgress: whisperInfo.exists ? 100 : 0,
       isDownloading: false,
     };
   }
 
   // 初始化并加载已有模型到插件管理器
   async initializeExistingModels(): Promise<boolean> {
-    let qwenReady = false;
-    let whisperReady = false;
+    const status = await this.checkModelStatus();
+    let anyLoaded = false;
 
-    const qwenPath = this.getQwenPath();
-    const qwenFile = new File(qwenPath);
-    if (qwenFile.exists) {
-      const qwenPlugin = new QwenLocalPlugin();
-      qwenReady = await qwenPlugin.initModel(qwenPath);
-      if (qwenReady) {
+    if (status.qwenInstalled) {
+      try {
+        const qwenPlugin = new QwenLocalPlugin(this.getQwenPath());
         pluginManager.registerMatcher(qwenPlugin);
-        pluginManager.setActiveMatcher('qwen-0.5b');
+        pluginManager.setActiveMatcher(qwenPlugin.id);
+        anyLoaded = true;
+      } catch (err) {
+        console.warn('[ModelManager] Qwen load failed:', err);
       }
     }
 
-    const whisperPath = this.getWhisperPath();
-    const whisperFile = new File(whisperPath);
-    if (whisperFile.exists) {
-      const whisperPlugin = new WhisperSpeechPlugin();
-      whisperReady = await whisperPlugin.initModel(whisperPath);
+    if (status.whisperInstalled) {
+      try {
+        const whisperPlugin = new WhisperSpeechPlugin();
+        await whisperPlugin.initModel(this.getWhisperPath());
+        console.log('[ModelManager] Whisper registered:', whisperPlugin.id);
+        anyLoaded = true;
+      } catch (err) {
+        console.warn('[ModelManager] Whisper load failed:', err);
+      }
     }
 
-    return qwenReady || whisperReady;
+    return anyLoaded;
   }
 
   // 下载 Qwen 本地大模型
-  async downloadQwenModel(onProgress?: (progress: number) => void): Promise<boolean> {
+  async downloadQwenModel(
+    onProgress?: (progress: number) => void,
+  ): Promise<boolean> {
+    const targetPath = this.getQwenPath();
+    const downloadResumable = FileSystem.createDownloadResumable(
+      QWEN_MODEL_URL,
+      targetPath,
+      {},
+      (downloadProgress) => {
+        const progress =
+          (downloadProgress.totalBytesWritten /
+            downloadProgress.totalBytesExpectedToWrite) *
+          100;
+        if (onProgress) onProgress(Math.round(progress));
+      },
+    );
+
     try {
-      const targetFile = new File(this.getQwenPath());
-      const downloadedFile = await File.downloadFileAsync(QWEN_MODEL_URL, targetFile);
-      if (downloadedFile && downloadedFile.exists) {
-        console.log('[ModelManager] Qwen2.5 模型下载完成:', downloadedFile.uri);
-        const qwenPlugin = new QwenLocalPlugin();
-        const ok = await qwenPlugin.initModel(downloadedFile.uri);
-        if (ok) {
-          pluginManager.registerMatcher(qwenPlugin);
-          pluginManager.setActiveMatcher('qwen-0.5b');
-        }
+      const result = await downloadResumable.downloadAsync();
+      if (result?.uri) {
+        await this.initializeExistingModels();
         return true;
       }
-    } catch (err) {
-      console.warn('[ModelManager] Qwen 模型下载失败:', err);
+    } catch (e) {
+      console.warn('[ModelManager] Qwen download failed:', e);
     }
     return false;
   }
 
   // 下载 Whisper 本地语音模型
-  async downloadWhisperModel(onProgress?: (progress: number) => void): Promise<boolean> {
+  async downloadWhisperModel(
+    onProgress?: (progress: number) => void,
+  ): Promise<boolean> {
+    const targetPath = this.getWhisperPath();
+    const downloadResumable = FileSystem.createDownloadResumable(
+      WHISPER_MODEL_URL,
+      targetPath,
+      {},
+      (downloadProgress) => {
+        const progress =
+          (downloadProgress.totalBytesWritten /
+            downloadProgress.totalBytesExpectedToWrite) *
+          100;
+        if (onProgress) onProgress(Math.round(progress));
+      },
+    );
+
     try {
-      const targetFile = new File(this.getWhisperPath());
-      const downloadedFile = await File.downloadFileAsync(WHISPER_MODEL_URL, targetFile);
-      if (downloadedFile && downloadedFile.exists) {
-        console.log('[ModelManager] Whisper 模型下载完成:', downloadedFile.uri);
-        const whisperPlugin = new WhisperSpeechPlugin();
-        await whisperPlugin.initModel(downloadedFile.uri);
+      const result = await downloadResumable.downloadAsync();
+      if (result?.uri) {
+        await this.initializeExistingModels();
         return true;
       }
-    } catch (err) {
-      console.warn('[ModelManager] Whisper 模型下载失败:', err);
+    } catch (e) {
+      console.warn('[ModelManager] Whisper download failed:', e);
     }
     return false;
   }
