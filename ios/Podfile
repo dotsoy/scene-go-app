@@ -67,6 +67,16 @@ target 'SceneGo' do
         end
       end
     end
+
+    # Patch Sentry Cocoa Pod std::vector<const T> libc++ C++20 compatibility issue for Xcode 16/17
+    sentry_header = File.join(__dir__, 'Pods/Sentry/Sources/Sentry/include/SentryThreadMetadataCache.hpp')
+    if File.exist?(sentry_header)
+      File.chmod(0644, sentry_header)
+      content = File.read(sentry_header)
+      if content.include?('std::vector<const ThreadHandleMetadataPair>')
+        File.write(sentry_header, content.sub('std::vector<const ThreadHandleMetadataPair>', 'std::vector<ThreadHandleMetadataPair>'))
+      end
+    end
   end
 
   post_integrate do |installer|

@@ -11,6 +11,15 @@ import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
+import * as Sentry from '@sentry/react-native';
+
+Sentry.init({
+  dsn: 'https://71913c9b41554c4dd80d559db168205a@o4511835504574464.ingest.us.sentry.io/4511835559428096',
+  sendDefaultPii: true,
+  enableAutoSessionTracking: true,
+  tracesSampleRate: 1.0,
+  debug: __DEV__,
+});
 
 // 卡片预设测试数据（全部采用中文展示与测试）
 const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
@@ -68,7 +77,7 @@ const MOCK_LOCATIONS = [
   '未知异国位置',
 ];
 
-export default function App() {
+export default Sentry.wrap(function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
@@ -331,7 +340,7 @@ export default function App() {
       </CameraBackground>
     </SafeAreaView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   safeArea: {

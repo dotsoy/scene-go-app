@@ -37,3 +37,7 @@ yarn-error.log*
 ios/Pods/
 ios/build/
 *.xcworkspace
+
+.env.local
+sentry.properties
+ios/sentry.properties

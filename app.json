@@ -43,6 +43,16 @@
       "eas": {
         "projectId": "c4128741-453b-488a-9664-dff62a07845f"
       }
-    }
+    },
+    "plugins": [
+      [
+        "@sentry/react-native/expo",
+        {
+          "url": "https://sentry.io/",
+          "project": "scenego",
+          "organization": "personal-4ty"
+        }
+      ]
+    ]
   }
 }

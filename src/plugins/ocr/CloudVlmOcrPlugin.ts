@@ -1,6 +1,7 @@
 import { OcrPlugin, OcrResult, ScenarioResult } from '../types';
 import { getOpenRouterApiKey } from '../../utils/SecureConfig';
 import { apiLogger } from '../../utils/ApiLogger';
+import * as FileSystem from 'expo-file-system';
 
 const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异国旅行，会通过手机摄像头拍摄眼前的场景（菜单、路牌、车站、商店、景点、告示牌等）。
 你的任务是分析这张照片，给出对旅行者最有价值的即时解读。
@@ -20,7 +21,6 @@ const MODEL_ID = 'openrouter/free';
 /** 安全转换图片为 Base64 字符串（具备 FileSystem 原生模块 + Fetch Blob 双层降级） */
 async function convertImageToBase64(imageUri: string): Promise<string> {
   try {
-    const FileSystem = require('expo-file-system');
     if (FileSystem?.readAsStringAsync) {
       return await FileSystem.readAsStringAsync(imageUri, {
         encoding: FileSystem.EncodingType?.Base64 || 'base64',
