@@ -29,7 +29,9 @@
         "CAMERA",
         "RECORD_AUDIO",
         "ACCESS_FINE_LOCATION",
-        "ACCESS_COARSE_LOCATION"
+        "ACCESS_COARSE_LOCATION",
+        "android.permission.CAMERA",
+        "android.permission.RECORD_AUDIO"
       ]
     },
     "web": {
@@ -44,6 +46,11 @@
           "microphonePermission": "SceneGo 需要使用麦克风进行双向语音同传与 Notes 快捷录音。"
         }
       ]
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "c4128741-453b-488a-9664-dff62a07845f"
+      }
+    }
   }
 }
