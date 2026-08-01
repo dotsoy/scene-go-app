@@ -1,7 +1,8 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
+import Voice, { SpeechResultsEvent } from '@react-native-voice/voice';
 import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
@@ -66,9 +67,12 @@ const MOCK_LOCATIONS = [
 ];
 
 export default function App() {
+
+
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
+  const [liveTranscript, setLiveTranscript] = useState<string>('');
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
 
@@ -78,6 +82,28 @@ export default function App() {
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<any>(null);
+  // 绑定 iOS 苹果原生真实麦克风语音听写监听器
+  useEffect(() => {
+    Voice.onSpeechResults = (e: SpeechResultsEvent) => {
+      if (e.value && e.value.length > 0) {
+        setLiveTranscript(e.value[0]);
+      }
+    };
+
+    Voice.onSpeechPartialResults = (e: SpeechResultsEvent) => {
+      if (e.value && e.value.length > 0) {
+        setLiveTranscript(e.value[0]);
+      }
+    };
+
+    Voice.onSpeechError = (e) => {
+      console.warn('[Voice ASR Error]:', e);
+    };
+
+    return () => {
+      Voice.destroy().then(Voice.removeAllListeners);
+    };
+  }, []);
 
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
     console.log('[AI TODO] Sending to AI Vision VLM:', { imageUri, userPrompt });
@@ -120,6 +146,29 @@ export default function App() {
   const handleSnapshotSubmit = async (userPrompt: string, imageUri: string) => {
     setIsSnapshotModalOpen(false);
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
+  };
+
+  const handleToggleMic = async () => {
+    if (!isMicActive) {
+      setIsMicActive(true);
+      setLiveTranscript('正在听取您的说话声...');
+      try {
+        await Voice.start('zh-CN');
+      } catch (err) {
+        console.warn('Voice start error:', err);
+      }
+    } else {
+      setIsMicActive(false);
+      try {
+        await Voice.stop();
+      } catch (err) {
+        console.warn('Voice stop error:', err);
+      }
+      if (liveTranscript && !liveTranscript.includes('正在听取')) {
+        handleAddNote(liveTranscript, 'VOICE');
+      }
+      setLiveTranscript('');
+    }
   };
 
   const handleToggleCamera = () => {
@@ -184,6 +233,19 @@ export default function App() {
             </View>
           </View>
 
+          {/* Live Speech Transcript Banner */}
+          {isMicActive && (
+            <View style={styles.liveTranscriptCard}>
+              <View style={styles.liveHeaderRow}>
+                <Text style={styles.liveBadge}>🎙️ 实时语音转录中</Text>
+                <Text style={styles.liveRecordingPulse}>● REC</Text>
+              </View>
+              <Text style={styles.liveTranscriptText}>
+                {liveTranscript || '请说话，系统正在进行端侧实时语音听写...'}
+              </Text>
+            </View>
+          )}
+
           {/* Center Card */}
           <View style={styles.centerCardArea}>
             {isCardVisible ? (
@@ -207,7 +269,7 @@ export default function App() {
             isCardVisible={isCardVisible}
             onToggleCamera={handleToggleCamera}
             onCaptureFrame={handleCaptureFrame}
-            onToggleMic={() => setIsMicActive(!isMicActive)}
+            onToggleMic={handleToggleMic}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
           />
@@ -240,6 +302,37 @@ const styles = StyleSheet.create({
   mainLayout: {
     flex: 1,
     justifyContent: 'space-between',
+  },
+  liveTranscriptCard: {
+    backgroundColor: 'rgba(24, 24, 27, 0.92)',
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.4)',
+  },
+  liveHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  liveBadge: {
+    color: '#38bdf8',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  liveRecordingPulse: {
+    color: '#ef4444',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  liveTranscriptText: {
+    color: '#f4f4f5',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
   },
   topHeader: {
     flexDirection: 'row',
