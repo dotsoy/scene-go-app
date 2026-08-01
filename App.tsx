@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
+import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
@@ -73,6 +74,7 @@ export default function App() {
 
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
+  const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<any>(null);
@@ -93,6 +95,14 @@ export default function App() {
         if (photo?.uri) {
           setIsCameraActive(false);
           setIsCameraReady(false);
+
+          // 触发插件管线: Apple Vision OCR 识别 + 本地词库/场景匹配
+          console.log('[Plugins] 启动插件管线，处理图像快照...');
+          const result = await pluginManager.processImageSnapshot(photo.uri);
+          console.log('[Plugin OCR 结果]:', result.ocr.rawText);
+          console.log('[Plugin 场景匹配结果]:', result.scenario);
+
+          setActiveScenarioResult(result.scenario);
           setPendingSnapshotUri(photo.uri);
           setIsSnapshotModalOpen(true);
         }
@@ -213,6 +223,7 @@ export default function App() {
         <SnapshotDialogModal
           visible={isSnapshotModalOpen}
           imageUri={pendingSnapshotUri}
+          scenarioResult={activeScenarioResult}
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
         />

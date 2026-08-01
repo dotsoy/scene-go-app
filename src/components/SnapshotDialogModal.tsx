@@ -9,11 +9,15 @@ import {
   TouchableOpacity,
   KeyboardAvoidingView,
   Platform,
+  ScrollView,
 } from 'react-native';
+import * as Speech from 'expo-speech';
+import { ScenarioResult } from '../plugins/types';
 
 interface SnapshotDialogModalProps {
   visible: boolean;
   imageUri: string | null;
+  scenarioResult?: ScenarioResult | null;
   onClose: () => void;
   onSubmit: (prompt: string, imageUri: string) => void;
 }
@@ -21,32 +25,22 @@ interface SnapshotDialogModalProps {
 export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   visible,
   imageUri,
+  scenarioResult,
   onClose,
   onSubmit,
 }) => {
   const [userPrompt, setUserPrompt] = useState('');
-  const [isRecording, setIsRecording] = useState(false);
   const [isFullImageVisible, setIsFullImageVisible] = useState(false);
+  const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
 
-  const quickPrompts = [
-    '翻译菜单并看下含过敏原吗',
-    '确认出租车按表计费说明',
-    '翻译此指示牌/单号',
-    '帮忙沟通询问退税细节',
-  ];
-
-  const transcribeVoiceToText = async (): Promise<string> => {
-    return '请帮我确认这个菜品含不含花生过敏原';
-  };
-
-  const handleToggleVoiceRecord = async () => {
-    if (isRecording) {
-      setIsRecording(false);
-      const transcribedText = await transcribeVoiceToText();
-      setUserPrompt((prev) => (prev ? `${prev} ${transcribedText}` : transcribedText));
-    } else {
-      setIsRecording(true);
-    }
+  const handleSpeak = (textToSpeak: string) => {
+    if (!textToSpeak) return;
+    setIsPlayingSpeech(true);
+    Speech.speak(textToSpeak, {
+      language: 'zh-CN',
+      onDone: () => setIsPlayingSpeech(false),
+      onError: () => setIsPlayingSpeech(false),
+    });
   };
 
   const handleSend = () => {
@@ -59,114 +53,123 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
     <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.overlay}
+        style={styles.modalOverlay}
       >
-        <View style={styles.dialogContent}>
+        <View style={styles.dialogCard}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.headerTitle}>AI VISION INTERACTION</Text>
-          </View>
-
-          {/* 完整原图比例预览（用 resizeMode: 'contain' 避免被裁剪，点击放大查看） */}
-          {imageUri && (
-            <TouchableOpacity
-              style={styles.previewContainer}
-              onPress={() => setIsFullImageVisible(true)}
-              activeOpacity={0.9}
-            >
-              <Image source={{ uri: imageUri }} style={styles.thumbnailImage} />
-              <View style={styles.previewBadge}>
-                <Text style={styles.previewBadgeText}>FULL ASPECT · TAP TO ZOOM</Text>
+            <View style={styles.titleRow}>
+              <View style={styles.categoryBadge}>
+                <Text style={styles.categoryBadgeText}>
+                  {scenarioResult?.category || 'AI SCENE'}
+                </Text>
               </View>
-            </TouchableOpacity>
-          )}
-
-          {/* Prompt 输入区 */}
-          <View style={styles.promptHeaderRow}>
-            <Text style={styles.inputLabel}>PROMPT / INSTRUCTION FOR AI</Text>
-
-            <TouchableOpacity
-              style={[styles.voiceBtn, isRecording && styles.voiceBtnActive]}
-              onPress={handleToggleVoiceRecord}
-              activeOpacity={0.75}
-            >
-              <Text style={[styles.voiceBtnText, isRecording && styles.voiceBtnTextActive]}>
-                {isRecording ? 'STOP RECORDING' : 'VOICE INPUT'}
+              <Text style={styles.headerTitle}>
+                {scenarioResult?.title || '快照与场景解读'}
               </Text>
+            </View>
+            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </View>
 
-          <TextInput
-            style={[styles.promptInput, isRecording && styles.promptInputRecording]}
-            placeholder={
-              isRecording
-                ? 'Speak now... System is transcribing voice to text...'
-                : 'Type or click VOICE INPUT to speak...'
-            }
-            placeholderTextColor={isRecording ? '#ef4444' : '#52525b'}
-            value={userPrompt}
-            onChangeText={setUserPrompt}
-            multiline
-          />
-
-          {/* 快捷标签 */}
-          <View style={styles.quickRow}>
-            {quickPrompts.map((item) => (
+          <ScrollView style={styles.scrollBody} showsVerticalScrollIndicator={false}>
+            {/* Image Preview */}
+            {imageUri && (
               <TouchableOpacity
-                key={item}
-                style={styles.quickPill}
-                onPress={() => setUserPrompt(item)}
+                activeOpacity={0.9}
+                onPress={() => setIsFullImageVisible(!isFullImageVisible)}
+                style={styles.imageContainer}
               >
-                <Text style={styles.quickPillText}>{item}</Text>
+                <Image
+                  source={{ uri: imageUri }}
+                  style={[styles.thumbnail, isFullImageVisible && styles.fullImage]}
+                  resizeMode={isFullImageVisible ? 'contain' : 'cover'}
+                />
+                <Text style={styles.imageHint}>
+                  {isFullImageVisible ? '点击缩小' : '点击查看大图'}
+                </Text>
               </TouchableOpacity>
-            ))}
-          </View>
+            )}
 
-          {/* 底部按钮栏 */}
-          <View style={styles.actionRow}>
-            <TouchableOpacity style={styles.cancelBtn} onPress={onClose} activeOpacity={0.75}>
-              <Text style={styles.cancelBtnText}>CANCEL</Text>
-            </TouchableOpacity>
+            {/* OCR Raw Text & Interpretation */}
+            <View style={styles.infoBox}>
+              <Text style={styles.sectionLabel}>识别到的文本与解读：</Text>
+              <Text style={styles.translatedText}>
+                {scenarioResult?.translatedText || '已为您分析快照信息。'}
+              </Text>
 
-            <TouchableOpacity style={styles.sendBtn} onPress={handleSend} activeOpacity={0.8}>
-              <Text style={styles.sendBtnText}>SEND TO AI</Text>
+              {scenarioResult?.originalText ? (
+                <Text style={styles.originalText}>
+                  原文: "{scenarioResult.originalText.replace(/\n/g, ' ')}"
+                </Text>
+              ) : null}
+            </View>
+
+            {/* Safety Tips */}
+            {scenarioResult?.tips && scenarioResult.tips.length > 0 && (
+              <View style={styles.tipsContainer}>
+                <Text style={styles.sectionLabel}>出行避坑与注意事项：</Text>
+                {scenarioResult.tips.map((tip, idx) => (
+                  <View key={idx} style={styles.tipRow}>
+                    <Text style={styles.tipDot}>•</Text>
+                    <Text style={styles.tipText}>{tip}</Text>
+                  </View>
+                ))}
+              </View>
+            )}
+
+            {/* Recommended Phrases */}
+            {scenarioResult?.recommendedPhrases && scenarioResult.recommendedPhrases.length > 0 && (
+              <View style={styles.phrasesContainer}>
+                <Text style={styles.sectionLabel}>常用交流短语（点击朗读）：</Text>
+                <View style={styles.phraseChipRow}>
+                  {scenarioResult.recommendedPhrases.map((phrase, idx) => (
+                    <TouchableOpacity
+                      key={idx}
+                      style={styles.phraseChip}
+                      onPress={() => handleSpeak(phrase)}
+                    >
+                      <Text style={styles.phraseText}>🔊 {phrase}</Text>
+                    </TouchableOpacity>
+                  ))}
+                </View>
+              </View>
+            )}
+          </ScrollView>
+
+          {/* Footer Input */}
+          <View style={styles.footerInputRow}>
+            <TextInput
+              style={styles.textInput}
+              placeholder="向 AI 追问细节 (如: 价格包含服务费吗?)"
+              placeholderTextColor="#71717a"
+              value={userPrompt}
+              onChangeText={setUserPrompt}
+            />
+
+            <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
+              <Text style={styles.sendBtnText}>发送</Text>
             </TouchableOpacity>
           </View>
         </View>
-
-        {/* 原图全屏放大查看 Viewfinder Modal */}
-        {imageUri && (
-          <Modal
-            visible={isFullImageVisible}
-            transparent={true}
-            onRequestClose={() => setIsFullImageVisible(false)}
-          >
-            <TouchableOpacity
-              style={styles.fullImageOverlay}
-              onPress={() => setIsFullImageVisible(false)}
-              activeOpacity={1}
-            >
-              <Image source={{ uri: imageUri }} style={styles.fullImage} />
-              <Text style={styles.closeFullImageHint}>TAP ANYWHERE TO CLOSE</Text>
-            </TouchableOpacity>
-          </Modal>
-        )}
       </KeyboardAvoidingView>
     </Modal>
   );
 };
 
 const styles = StyleSheet.create({
-  overlay: {
+  modalOverlay: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.85)',
-    justifyContent: 'center',
-    paddingHorizontal: 20,
+    backgroundColor: 'rgba(0, 0, 0, 0.75)',
+    justifyContent: 'flex-end',
   },
-  dialogContent: {
-    backgroundColor: '#121214',
-    borderRadius: 16,
-    padding: 20,
+  dialogCard: {
+    backgroundColor: '#18181b',
+    borderTopLeftRadius: 20,
+    borderTopRightRadius: 20,
+    maxHeight: '85%',
+    padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
@@ -174,160 +177,151 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 14,
+    marginBottom: 12,
   },
-  headerTitle: {
-    color: '#ffffff',
-    fontSize: 13,
-    fontWeight: '800',
-    letterSpacing: 1,
-  },
-  previewContainer: {
-    height: 180,
-    backgroundColor: '#000000', // 暗色画廊底盘
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
-    position: 'relative',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  thumbnailImage: {
-    width: '100%',
-    height: '100%',
-    resizeMode: 'contain', // 保持完整画幅比例，绝不截取/裁剪画面
-  },
-  previewBadge: {
-    position: 'absolute',
-    bottom: 8,
-    left: 8,
-    backgroundColor: 'rgba(0, 0, 0, 0.75)',
-    paddingHorizontal: 8,
-    paddingVertical: 3,
-    borderRadius: 4,
-  },
-  previewBadgeText: {
-    color: '#a1a1aa',
-    fontSize: 9,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  promptHeaderRow: {
+  titleRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 6,
+    gap: 8,
   },
-  inputLabel: {
-    color: '#71717a',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.8,
-  },
-  voiceBtn: {
-    backgroundColor: '#27272a',
+  categoryBadge: {
+    backgroundColor: '#2563eb',
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  voiceBtnActive: {
-    backgroundColor: '#dc2626',
-    borderColor: '#ef4444',
+  categoryBadgeText: {
+    color: '#ffffff',
+    fontSize: 10,
+    fontWeight: '800',
   },
-  voiceBtnText: {
-    color: '#a1a1aa',
-    fontSize: 9,
+  headerTitle: {
+    color: '#ffffff',
+    fontSize: 16,
     fontWeight: '700',
-    letterSpacing: 0.5,
   },
-  voiceBtnTextActive: {
-    color: '#ffffff',
+  closeBtn: {
+    padding: 6,
   },
-  promptInput: {
-    backgroundColor: '#1c1c1e',
-    borderRadius: 10,
+  closeBtnText: {
+    color: '#a1a1aa',
+    fontSize: 18,
+  },
+  scrollBody: {
+    marginBottom: 12,
+  },
+  imageContainer: {
+    alignItems: 'center',
+    marginBottom: 12,
+    borderRadius: 12,
+    overflow: 'hidden',
+    backgroundColor: '#09090b',
+  },
+  thumbnail: {
+    width: '100%',
+    height: 140,
+  },
+  fullImage: {
+    height: 280,
+  },
+  imageHint: {
+    color: '#71717a',
+    fontSize: 10,
+    marginTop: 4,
+    marginBottom: 4,
+  },
+  infoBox: {
+    backgroundColor: '#09090b',
     padding: 12,
-    color: '#ffffff',
-    fontSize: 13,
-    minHeight: 56,
-    textAlignVertical: 'top',
+    borderRadius: 12,
     marginBottom: 12,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.05)',
   },
-  promptInputRecording: {
-    borderColor: '#ef4444',
-  },
-  quickRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    marginBottom: 18,
-  },
-  quickPill: {
-    backgroundColor: '#27272a',
-    paddingHorizontal: 10,
-    paddingVertical: 5,
-    borderRadius: 6,
-    marginRight: 6,
-    marginBottom: 6,
-  },
-  quickPillText: {
-    color: '#d4d4d8',
-    fontSize: 11,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
-  },
-  cancelBtn: {
-    flex: 1,
-    backgroundColor: '#27272a',
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  cancelBtnText: {
+  sectionLabel: {
     color: '#a1a1aa',
     fontSize: 12,
-    fontWeight: '700',
-    letterSpacing: 0.8,
+    fontWeight: '600',
+    marginBottom: 6,
+  },
+  translatedText: {
+    color: '#f4f4f5',
+    fontSize: 14,
+    lineHeight: 20,
+    fontWeight: '500',
+  },
+  originalText: {
+    color: '#71717a',
+    fontSize: 12,
+    marginTop: 6,
+    fontStyle: 'italic',
+  },
+  tipsContainer: {
+    backgroundColor: '#27272a',
+    padding: 12,
+    borderRadius: 12,
+    marginBottom: 12,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginTop: 4,
+  },
+  tipDot: {
+    color: '#38bdf8',
+    marginRight: 6,
+    fontSize: 14,
+  },
+  tipText: {
+    color: '#e4e4e7',
+    fontSize: 12,
+    flex: 1,
+  },
+  phrasesContainer: {
+    marginBottom: 12,
+  },
+  phraseChipRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  phraseChip: {
+    backgroundColor: '#3f3f46',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 18,
+  },
+  phraseText: {
+    color: '#38bdf8',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  footerInputRow: {
+    flexDirection: 'row',
+    gap: 8,
+    alignItems: 'center',
+  },
+  textInput: {
+    flex: 1,
+    backgroundColor: '#09090b',
+    color: '#ffffff',
+    borderRadius: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    fontSize: 13,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   sendBtn: {
-    flex: 1.5,
     backgroundColor: '#2563eb',
+    paddingHorizontal: 16,
+    paddingVertical: 11,
     borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
   },
   sendBtnText: {
     color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '800',
-    letterSpacing: 0.8,
-  },
-  fullImageOverlay: {
-    flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.95)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  fullImage: {
-    width: '95%',
-    height: '80%',
-    resizeMode: 'contain',
-  },
-  closeFullImageHint: {
-    color: '#71717a',
-    fontSize: 11,
     fontWeight: '700',
-    letterSpacing: 1,
-    marginTop: 16,
+    fontSize: 13,
   },
 });

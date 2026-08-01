@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 4,
     borderRadius: 10,
     alignItems: 'center',
-    justify: 'center',
+    justifyContent: 'center',
   },
   btnMuted: {
     backgroundColor: '#1c1c1e',
