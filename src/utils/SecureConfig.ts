@@ -1,4 +1,4 @@
-export const DEFAULT_OPENROUTER_API_KEY = '[openai_token_redacted]';
+export const DEFAULT_OPENROUTER_API_KEY = process.env.EXPO_PUBLIC_OPENROUTER_API_KEY || '';
 
 let currentApiKey = DEFAULT_OPENROUTER_API_KEY;
 

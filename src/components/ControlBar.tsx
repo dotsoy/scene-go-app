@@ -11,6 +11,7 @@ interface ControlBarProps {
   onToggleCard: () => void;
   onOpenNotes: () => void;
   onOpenSettings: () => void;
+  onOpenLogs: () => void;
 }
 
 export const ControlBar: React.FC<ControlBarProps> = ({
@@ -23,6 +24,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onToggleCard,
   onOpenNotes,
   onOpenSettings,
+  onOpenLogs,
 }) => {
   return (
     <View style={styles.barContainer}>
@@ -64,6 +66,11 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         <Text style={styles.btnText} numberOfLines={1}>NOTES</Text>
       </TouchableOpacity>
 
+      {/* API 实时日志监控 */}
+      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenLogs} activeOpacity={0.75}>
+        <Text style={styles.btnText} numberOfLines={1}>📡 LOG</Text>
+      </TouchableOpacity>
+
       {/* 设置 / 引擎切换 */}
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenSettings} activeOpacity={0.75}>
         <Text style={styles.btnText} numberOfLines={1}>⚙️</Text>
@@ -82,16 +89,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-evenly',
     alignItems: 'center',
     paddingVertical: 10,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
     backgroundColor: 'rgba(10,10,30,0.85)',
     borderTopWidth: 0.5,
     borderTopColor: 'rgba(255,255,255,0.08)',
   },
   btn: {
     paddingVertical: 8,
-    paddingHorizontal: 10,
+    paddingHorizontal: 6,
     borderRadius: 8,
-    minWidth: 52,
+    minWidth: 46,
     alignItems: 'center',
   },
   btnMuted: {
@@ -105,7 +112,7 @@ const styles = StyleSheet.create({
   },
   btnText: {
     color: '#777',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
   },
@@ -114,7 +121,7 @@ const styles = StyleSheet.create({
   },
   btnTextSnap: {
     color: '#ef5350',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
   },

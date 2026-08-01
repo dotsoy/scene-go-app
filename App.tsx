@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
@@ -9,6 +9,8 @@ import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
+import { ApiLogModal } from './src/components/ApiLogModal';
+import { NativeSpeech } from './src/utils/NativeSpeech';
 
 // 卡片预设测试数据（全部采用中文展示与测试）
 const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
@@ -70,9 +72,11 @@ export default function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
+  const [liveTranscript, setLiveTranscript] = useState<string>('');
   const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
+  const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
 
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
@@ -81,6 +85,18 @@ export default function App() {
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<unknown>(null);
+
+  // 绑定原生 iOS SFSpeechRecognizer 听写监听
+  useEffect(() => {
+    const sub = NativeSpeech.onSpeechResult((e) => {
+      if (e.transcript) {
+        setLiveTranscript(e.transcript);
+      }
+    });
+    return () => {
+      sub.remove();
+    };
+  }, []);
 
   /** 云端 VLM 多轮追问：用户基于快照照片提出具体问题 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
@@ -155,8 +171,19 @@ export default function App() {
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
-  const handleToggleMic = () => {
-    setIsMicActive(!isMicActive);
+  const handleToggleMic = async () => {
+    if (!isMicActive) {
+      setIsMicActive(true);
+      setLiveTranscript('正在开启原生听写，请说话...');
+      await NativeSpeech.start('zh-CN');
+    } else {
+      setIsMicActive(false);
+      await NativeSpeech.stop();
+      if (liveTranscript && !liveTranscript.includes('正在开启')) {
+        handleAddNote(liveTranscript, 'VOICE');
+      }
+      setLiveTranscript('');
+    }
   };
 
   const handleToggleCamera = () => {
@@ -233,6 +260,19 @@ export default function App() {
             </View>
           )}
 
+          {/* Live Speech Transcript Banner */}
+          {isMicActive && (
+            <View style={styles.liveTranscriptCard}>
+              <View style={styles.liveHeaderRow}>
+                <Text style={styles.liveBadge}>🎙️ 实时语音转录中</Text>
+                <Text style={styles.liveRecordingPulse}>● REC</Text>
+              </View>
+              <Text style={styles.liveTranscriptText}>
+                {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
+              </Text>
+            </View>
+          )}
+
           {/* Center Card */}
           <View style={styles.centerCardArea}>
             {isCardVisible ? (
@@ -260,6 +300,7 @@ export default function App() {
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
+            onOpenLogs={() => setIsLogsOpen(true)}
           />
         </View>
 
@@ -281,6 +322,11 @@ export default function App() {
         <PluginSelectorModal
           visible={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+        />
+
+        <ApiLogModal
+          visible={isLogsOpen}
+          onClose={() => setIsLogsOpen(false)}
         />
       </CameraBackground>
     </SafeAreaView>
@@ -312,6 +358,37 @@ const styles = StyleSheet.create({
     color: '#4fc3f7',
     fontSize: 13,
     fontWeight: '600',
+  },
+  liveTranscriptCard: {
+    backgroundColor: 'rgba(24, 24, 27, 0.92)',
+    marginHorizontal: 16,
+    marginTop: 8,
+    padding: 12,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(37, 99, 235, 0.4)',
+  },
+  liveHeaderRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 6,
+  },
+  liveBadge: {
+    color: '#38bdf8',
+    fontSize: 11,
+    fontWeight: '700',
+  },
+  liveRecordingPulse: {
+    color: '#ef4444',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+  liveTranscriptText: {
+    color: '#f4f4f5',
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: '500',
   },
   topHeader: {
     flexDirection: 'row',

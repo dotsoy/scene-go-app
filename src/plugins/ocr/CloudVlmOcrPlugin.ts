@@ -1,8 +1,6 @@
 import { OcrPlugin, OcrResult, ScenarioResult } from '../types';
 import { getOpenRouterApiKey } from '../../utils/SecureConfig';
-
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL_ID = 'openrouter/free';
+import { apiLogger } from '../../utils/ApiLogger';
 
 const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异国旅行，会通过手机摄像头拍摄眼前的场景（菜单、路牌、车站、商店、景点、告示牌等）。
 你的任务是分析这张照片，给出对旅行者最有价值的即时解读。
@@ -15,6 +13,9 @@ const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异
   "tips": ["出行避坑提示1", "避坑提示2", "避坑提示3"],
   "recommendedPhrases": ["当地语言实用短语1 (中文翻译)", "短语2 (中文翻译)"]
 }`;
+
+const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
+const MODEL_ID = 'openrouter/free';
 
 /** 安全转换图片为 Base64 字符串（具备 FileSystem 原生模块 + Fetch Blob 双层降级） */
 async function convertImageToBase64(imageUri: string): Promise<string> {
@@ -46,32 +47,89 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
 
 export class CloudVlmOcrPlugin implements OcrPlugin {
   id = 'cloud-vlm';
-  name = '云端视觉大模型 (OpenRouter Free)';
-  description = '通过 OpenRouter 免费视觉模型深度解析摄像头场景';
+  name = '云端视觉大模型 (OpenRouter Free Router)';
+  description = '使用 OpenRouter 官方 openrouter/free 自由路由免费模型深度解析场景';
 
   async recognizeText(imageUri: string): Promise<OcrResult> {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) {
       return {
         rawText: '',
-        lines: ['[未配置 OpenRouter API Key，请在设置中填入]'],
+        lines: ['[未配置 API Key，请在 ⚙️ 设置中填入]'],
         confidence: 0,
       };
     }
 
+    const url = OPENROUTER_API_URL;
+    const model = MODEL_ID;
+    const startTime = Date.now();
+
     try {
       const base64 = await convertImageToBase64(imageUri);
 
-      const response = await fetch(OPENROUTER_API_URL, {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://scenego.app',
-          'X-Title': 'SceneGo',
+      const reqHeaders: Record<string, string> = {
+        Authorization: `Bearer ${apiKey.slice(0, 12)}•••••••• (OpenRouter Key)`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://scenego.app',
+        'X-OpenRouter-Title': 'SceneGo',
+      };
+
+      const reqBodyObject = {
+        model,
+        messages: [
+          { role: 'system', content: SCENE_SYSTEM_PROMPT },
+          {
+            role: 'user',
+            content: [
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:image/jpeg;base64,${base64.slice(0, 30)}...[Length: ${base64.length} chars]`,
+                },
+              },
+              {
+                type: 'text',
+                text: '请分析这张照片中的场景，给出出行解读。',
+              },
+            ],
+          },
+        ],
+        max_tokens: 1024,
+      };
+
+      const fullRequestLog = JSON.stringify(
+        {
+          url,
+          method: 'POST',
+          headers: reqHeaders,
+          body: reqBodyObject,
         },
+        null,
+        2,
+      );
+
+      console.log('=============== [CloudVlm 全量请求参数] ===============');
+      console.log(fullRequestLog);
+      console.log('=====================================================');
+
+      const logId = apiLogger.logRequest({
+        url,
+        model,
+        requestBody: fullRequestLog,
+      });
+
+      const actualHeaders: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://scenego.app',
+        'X-OpenRouter-Title': 'SceneGo',
+      };
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: actualHeaders,
         body: JSON.stringify({
-          model: MODEL_ID,
+          model,
           messages: [
             { role: 'system', content: SCENE_SYSTEM_PROMPT },
             {
@@ -92,24 +150,41 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         }),
       });
 
+      const durationMs = Date.now() - startTime;
+      const respText = await response.text();
+
+      apiLogger.logResponse(logId, response.status, durationMs, respText);
+
+      console.log(`=============== [CloudVlm 响应 (${response.status})] ===============`);
+      console.log(respText);
+      console.log('=====================================================');
+
       if (!response.ok) {
-        const errText = await response.text();
-        console.warn('[CloudVlm] API Error:', response.status, errText);
+        console.warn('[CloudVlm API Error]:', response.status, respText);
+        if (response.status === 401) {
+          return {
+            rawText: respText,
+            lines: [`[API Key 鉴权失败 (${response.status})，请在 ⚙️ 设置中确认你的 Key 是否有效]`] ,
+            confidence: 0,
+          };
+        }
         return {
-          rawText: '',
+          rawText: respText,
           lines: [`[云端识别失败: HTTP ${response.status}]`],
           confidence: 0,
         };
       }
 
-      const data = await response.json();
-      const content = data?.choices?.[0]?.message?.content || '';
+      const data = JSON.parse(respText);
+      const content = data?.choices?.[0]?.message?.content || respText;
       return { rawText: content, lines: [content], confidence: 1.0 };
-    } catch (err) {
-      console.warn('[CloudVlm] Network error:', err instanceof Error ? err.message : String(err));
+    } catch (err: unknown) {
+      const durationMs = Date.now() - startTime;
+      const errMsg = err instanceof Error ? err.message : String(err);
+      console.warn('[CloudVlm Fetch Network Error]:', errMsg);
       return {
         rawText: '',
-        lines: ['[网络异常，已自动降级到本地识别]'],
+        lines: [`[网络异常: ${errMsg}]`],
         confidence: 0,
       };
     }
@@ -118,21 +193,33 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
   /** 多轮追问：用户基于当前照片提出具体问题 */
   async askFollowUp(imageUri: string, question: string): Promise<string> {
     const apiKey = await getOpenRouterApiKey();
-    if (!apiKey) return '请先配置 OpenRouter API Key';
+    if (!apiKey) return '请先配置 API Key';
+
+    const url = OPENROUTER_API_URL;
+    const model = MODEL_ID;
+    const startTime = Date.now();
 
     try {
       const base64 = await convertImageToBase64(imageUri);
 
-      const response = await fetch(OPENROUTER_API_URL, {
+      const actualHeaders: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://scenego.app',
+        'X-OpenRouter-Title': 'SceneGo',
+      };
+
+      const logId = apiLogger.logRequest({
+        url,
+        model,
+        requestBody: `[Follow-Up Question]: ${question}`,
+      });
+
+      const response = await fetch(url, {
         method: 'POST',
-        headers: {
-          Authorization: `Bearer ${apiKey}`,
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://scenego.app',
-          'X-Title': 'SceneGo',
-        },
+        headers: actualHeaders,
         body: JSON.stringify({
-          model: MODEL_ID,
+          model,
           messages: [
             {
               role: 'system',
@@ -154,38 +241,54 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         }),
       });
 
-      if (!response.ok) return `云端响应错误 (${response.status})`;
+      const durationMs = Date.now() - startTime;
+      const respText = await response.text();
 
-      const data = await response.json();
-      return data?.choices?.[0]?.message?.content || '未获取到回答';
-    } catch (err) {
-      return `网络错误: ${err instanceof Error ? err.message : '请检查网络连接'}`;
+      apiLogger.logResponse(logId, response.status, durationMs, respText);
+
+      if (!response.ok) return `响应错误 (${response.status}): ${respText}`;
+
+      const data = JSON.parse(respText);
+      return data?.choices?.[0]?.message?.content || respText;
+    } catch (err: unknown) {
+      const errMsg = err instanceof Error ? err.message : '请检查网络连接';
+      return `网络错误: ${errMsg}`;
     }
   }
 }
 
 /** 尝试从云端 VLM 原始返回文本中解析出 ScenarioResult JSON */
 export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
+  if (!rawText || rawText.trim().length === 0) return null;
+
   try {
     let jsonStr = rawText;
     const match = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (match) jsonStr = match[1];
 
     const obj = JSON.parse(jsonStr.trim());
-    if (obj.title && obj.category) {
+    if (obj.title || obj.translatedText) {
       return {
-        title: obj.title,
-        category: obj.category,
+        title: obj.title || '云端 VLM 场景解读',
+        category: obj.category || 'CLOUD_VLM',
         originalText: rawText,
-        translatedText: obj.translatedText || '',
-        tips: Array.isArray(obj.tips) ? obj.tips : [],
+        translatedText: obj.translatedText || rawText,
+        tips: Array.isArray(obj.tips) ? obj.tips : ['来自云端大模型解析'],
         recommendedPhrases: Array.isArray(obj.recommendedPhrases)
           ? obj.recommendedPhrases
           : [],
       };
     }
   } catch {
-    // JSON 解析失败，返回 null 走降级
+    // 非严格 JSON 文本，包裹为完整解读返回
   }
-  return null;
+
+  return {
+    title: '云端 VLM 视觉场景解读',
+    category: 'CLOUD_VLM',
+    originalText: rawText,
+    translatedText: rawText,
+    tips: ['来自云端视觉大模型实时分析'],
+    recommendedPhrases: ['Excuse me, could you explain this? (请问能解释一下这个吗？)'],
+  };
 }

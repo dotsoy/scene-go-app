@@ -1,6 +1,4 @@
 import { OcrPlugin, MatcherPlugin, OcrResult, ScenarioResult } from './types';
-import { AppleVisionOcrPlugin } from './ocr/AppleVisionOcrPlugin';
-import { AppleVisionScenePlugin } from './scene/AppleVisionScenePlugin';
 import { CloudVlmOcrPlugin, parseVlmScenarioResult } from './ocr/CloudVlmOcrPlugin';
 import { LocalDictMatcherPlugin } from './matchers/LocalDictMatcherPlugin';
 
@@ -14,8 +12,6 @@ class PluginManager {
   private cloudVlmPlugin = new CloudVlmOcrPlugin();
 
   constructor() {
-    this.registerOcr(new AppleVisionOcrPlugin());
-    this.registerOcr(new AppleVisionScenePlugin());
     this.registerOcr(this.cloudVlmPlugin);
     this.registerMatcher(new LocalDictMatcherPlugin());
   }
@@ -73,7 +69,7 @@ class PluginManager {
   ): Promise<{ ocr: OcrResult; scenario: ScenarioResult }> {
     const ocrPlugin =
       this.ocrPlugins.get(this.activeOcrId) ||
-      this.ocrPlugins.get('apple-vision-scene')!;
+      this.cloudVlmPlugin;
 
     const ocrResult = await ocrPlugin.recognizeText(imageUri);
 

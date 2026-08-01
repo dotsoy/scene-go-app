@@ -32,17 +32,13 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
     if (visible) {
       setActiveOcrId(pluginManager.getActiveOcrId());
       getOpenRouterApiKey().then((key) => {
-        setHasApiKey(!!key);
+        setHasApiKey(!!key && key.trim().length > 0);
         if (key) setApiKeyInput(key.slice(0, 8) + '••••••••');
       });
     }
   }, [visible]);
 
   const handleSelectOcr = (id: string) => {
-    if (id === 'cloud-vlm' && !hasApiKey) {
-      Alert.alert('需要 API Key', '请先在下方填入 OpenRouter API Key');
-      return;
-    }
     pluginManager.setActiveOcr(id);
     setActiveOcrId(id);
   };
@@ -50,22 +46,18 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
   const handleSaveApiKey = async () => {
     const trimmed = apiKeyInput.trim();
     if (!trimmed || trimmed.includes('••••')) {
-      Alert.alert('请输入完整的 API Key');
+      Alert.alert('提示', '请输入完整的 API Key');
       return;
     }
     await setOpenRouterApiKey(trimmed);
     setHasApiKey(true);
-    Alert.alert('已保存', 'OpenRouter API Key 已安全存储');
+    Alert.alert('已保存', 'OpenRouter API Key 已保存');
   };
 
   const handleClearApiKey = async () => {
     await clearOpenRouterApiKey();
     setHasApiKey(false);
     setApiKeyInput('');
-    if (activeOcrId === 'cloud-vlm') {
-      pluginManager.setActiveOcr('apple-vision-scene');
-      setActiveOcrId('apple-vision-scene');
-    }
   };
 
   const ocrPlugins = pluginManager.getOcrPlugins();
@@ -110,10 +102,12 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
 
           {/* API Key 配置 */}
           <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-            OpenRouter API Key
+            OpenRouter API Key (用于 openrouter/free 官方智能免费路由)
           </Text>
           <Text style={styles.apiKeyHint}>
-            免费注册 openrouter.ai 获取 Key，无需绑卡
+            {hasApiKey
+              ? '已配置 OpenRouter Key，填入新 Key 可重新保存。'
+              : '免费注册 openrouter.ai 获取 Key 即可使用 openrouter/free 视觉模型。'}
           </Text>
           <View style={styles.apiKeyRow}>
             <TextInput
@@ -144,7 +138,7 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
               当前模式：{activeOcrId === 'cloud-vlm' ? '☁️ 云端深度识别' : '📱 本地离线识别'}
             </Text>
             <Text style={styles.statusText}>
-              API Key：{hasApiKey ? '✅ 已配置' : '❌ 未配置'}
+              API Key 状态：{hasApiKey ? '✅ 已配置' : '❌ 未配置'}
             </Text>
           </View>
         </View>
