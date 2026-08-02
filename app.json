@@ -13,6 +13,7 @@
     },
     "ios": {
       "supportsTablet": true,
+      "developmentTeam": "N8L286CL2R",
       "infoPlist": {
         "NSCameraUsageDescription": "SceneGo 需要使用摄像头捕获异国现实场景与菜单点餐。",
         "NSMicrophoneUsageDescription": "SceneGo 需要使用麦克风进行双向语音同传与 Notes 快捷录音。",
@@ -54,7 +55,8 @@
         }
       ],
       "expo-secure-store",
-      "./plugins/withSentryAlwaysOutOfDate"
+      "./plugins/withSentryAlwaysOutOfDate",
+      "./plugins/withAutoCodeSigning"
     ]
   }
 }
