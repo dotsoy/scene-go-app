@@ -39,8 +39,8 @@ export const FONT = {
 
 /** 布局常量（spec §2.3 / §4） */
 export const LAYOUT = {
-  mainBarHeight: 72,
-  cameraBarHeight: 100,
+  mainBarHeight: 64,
+  cameraBarHeight: 64,
   screenPaddingH: 20,
   cardRadius: 12,
 } as const;

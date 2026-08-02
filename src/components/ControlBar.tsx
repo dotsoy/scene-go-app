@@ -98,10 +98,11 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 
 const styles = StyleSheet.create({
   bar: {
-    height: 64,
-    backgroundColor: COLORS.bgBar,
+    height: LAYOUT.mainBarHeight,
+    // 与主题底色一致（近黑），避免蓝调色带与背景割裂
+    backgroundColor: 'rgba(9,9,11,0.9)',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.12)',
+    borderTopColor: 'rgba(255,255,255,0.1)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
@@ -109,7 +110,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   barCamera: {
-    height: LAYOUT.mainBarHeight,
+    height: LAYOUT.cameraBarHeight,
   },
   cameraSide: {
     flexDirection: 'row',

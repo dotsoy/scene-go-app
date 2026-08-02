@@ -98,7 +98,7 @@ const styles = StyleSheet.create({
   },
   btnLarge: {
     flex: 1,
-    height: 44,
+    height: 38, // 相机态不改按钮高度，仅宽度主导
     borderRadius: 10,
     paddingHorizontal: 14,
   },
