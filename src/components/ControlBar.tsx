@@ -10,9 +10,8 @@ interface ControlBarProps {
   onToggleMic: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
-  onOpenSettings: () => void;
-  onOpenLogs: () => void;
-  onOpenHistory: () => void;
+  /** 打开工具箱抽屉（收纳 LOG/对话记录/设置） */
+  onOpenTools: () => void;
 }
 
 export const ControlBar: React.FC<ControlBarProps> = ({
@@ -24,9 +23,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onToggleMic,
   onToggleCard,
   onOpenNotes,
-  onOpenSettings,
-  onOpenLogs,
-  onOpenHistory,
+  onOpenTools,
 }) => {
   return (
     <View style={styles.barContainer}>
@@ -68,19 +65,9 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         <Text style={styles.btnText} numberOfLines={1}>NOTES</Text>
       </TouchableOpacity>
 
-      {/* API 实时日志监控 */}
-      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenLogs} activeOpacity={0.75}>
-        <Text style={styles.btnText} numberOfLines={1}>📡 LOG</Text>
-      </TouchableOpacity>
-
-      {/* 历史对话记录 */}
-      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenHistory} activeOpacity={0.75}>
-        <Text style={styles.btnText} numberOfLines={1}>💬</Text>
-      </TouchableOpacity>
-
-      {/* 设置 / 引擎切换 */}
-      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenSettings} activeOpacity={0.75}>
-        <Text style={styles.btnText} numberOfLines={1}>⚙️</Text>
+      {/* 工具箱入口 */}
+      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenTools} activeOpacity={0.75}>
+        <Text style={styles.btnText} numberOfLines={1}>🧰</Text>
       </TouchableOpacity>
     </View>
   );

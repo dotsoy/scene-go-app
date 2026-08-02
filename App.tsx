@@ -11,6 +11,7 @@ import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
 import { SessionHistoryModal } from './src/components/SessionHistoryModal';
+import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
@@ -91,6 +92,7 @@ export default Sentry.wrap(function App() {
   const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
   const [sessions, setSessions] = useState<SavedSession[]>([]);
+  const [isToolsOpen, setIsToolsOpen] = useState<boolean>(false);
 
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
@@ -197,6 +199,13 @@ export default Sentry.wrap(function App() {
       pendingSnapshotRef.current = false;
       setIsSnapshotModalOpen(true);
     }
+  };
+
+  const handleToolSelect = (kind: ToolKind) => {
+    setIsToolsOpen(false);
+    if (kind === 'logs') setIsLogsOpen(true);
+    else if (kind === 'history') handleOpenHistory();
+    else setIsSettingsOpen(true);
   };
 
   /** 打开会话记录列表 */
@@ -409,9 +418,7 @@ export default Sentry.wrap(function App() {
             onToggleMic={handleToggleMic}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
-            onOpenSettings={() => setIsSettingsOpen(true)}
-            onOpenLogs={() => setIsLogsOpen(true)}
-            onOpenHistory={handleOpenHistory}
+            onOpenTools={() => setIsToolsOpen(true)}
           />
         </View>
 
@@ -434,6 +441,12 @@ export default Sentry.wrap(function App() {
         <PluginSelectorModal
           visible={isSettingsOpen}
           onClose={() => setIsSettingsOpen(false)}
+        />
+
+        <UtilityDrawerModal
+          visible={isToolsOpen}
+          onClose={() => setIsToolsOpen(false)}
+          onSelect={handleToolSelect}
         />
 
         <SessionHistoryModal
