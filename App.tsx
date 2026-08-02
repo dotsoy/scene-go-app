@@ -26,6 +26,7 @@ import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
 import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
+import { COLORS, FONT } from './src/theme/tokens';
 
 Sentry.init({
   dsn: 'https://71913c9b41554c4dd80d559db168205a@o4511835504574464.ingest.us.sentry.io/4511835559428096',
@@ -759,20 +760,20 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   brandTitle: {
+    fontFamily: FONT.monoBold,
     color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '900',
+    fontSize: 18,
     letterSpacing: 2,
   },
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#121214',
+    backgroundColor: COLORS.bgCard,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.borderSubtle,
   },
   statusDot: {
     width: 6,
@@ -784,26 +785,25 @@ const styles = StyleSheet.create({
     backgroundColor: '#10b981',
   },
   dotGray: {
-    backgroundColor: '#52525b',
+    backgroundColor: COLORS.textMuted,
   },
   statusText: {
-    color: '#a1a1aa',
+    fontFamily: FONT.mono,
+    color: COLORS.textSecondary,
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 0.8,
   },
   locationBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    alignSelf: 'center',
-    backgroundColor: 'rgba(24, 24, 27, 0.9)',
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: COLORS.bgCard,
+    borderColor: COLORS.borderSubtle,
     borderWidth: 1,
-    borderRadius: 14,
+    borderRadius: 10,
+    height: 39,
     paddingHorizontal: 12,
-    paddingVertical: 5,
+    marginHorizontal: 20,
     marginTop: 8,
-    maxWidth: '92%',
   },
   locationDot: {
     width: 6,
@@ -812,14 +812,15 @@ const styles = StyleSheet.create({
     marginRight: 7,
   },
   locationText: {
-    color: '#d4d4d8',
-    fontSize: 12,
-    fontWeight: '600',
+    fontFamily: FONT.semibold,
+    color: COLORS.textPrimary,
+    fontSize: 13,
+    flex: 1,
   },
   locationChange: {
-    color: '#71717a',
-    fontSize: 11,
-    fontWeight: '600',
+    fontFamily: FONT.regular,
+    color: COLORS.textTertiary,
+    fontSize: 12,
     marginLeft: 8,
   },
   dotAmber: {

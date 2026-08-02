@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
 import * as Speech from 'expo-speech';
+import { COLORS, FONT } from '../theme/tokens';
 
 export interface CardData {
   id: string;
@@ -86,8 +87,8 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           </TouchableOpacity>
 
           {detailLabel && onShowDetail ? (
-            <TouchableOpacity style={styles.nextCardPill} onPress={onShowDetail} activeOpacity={0.8}>
-              <Text style={styles.nextCardPillText}>{detailLabel}</Text>
+            <TouchableOpacity style={styles.detailPill} onPress={onShowDetail} activeOpacity={0.8}>
+              <Text style={styles.detailPillText}>{detailLabel}</Text>
             </TouchableOpacity>
           ) : (
             <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
@@ -126,51 +127,51 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   categoryPill: {
-    backgroundColor: '#27272a',
+    backgroundColor: COLORS.bgCardLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: COLORS.borderSubtle,
   },
   categoryText: {
+    fontFamily: FONT.bold,
     color: '#e4e4e7',
     fontSize: 11,
-    fontWeight: '700',
     letterSpacing: 1,
   },
   locationText: {
-    color: '#71717a',
+    fontFamily: FONT.semibold,
+    color: COLORS.textTertiary,
     fontSize: 10,
-    fontWeight: '600',
     letterSpacing: 0.5,
     flexShrink: 1,
   },
   progressPill: {
-    backgroundColor: '#18181b',
+    backgroundColor: COLORS.bgCardLight,
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: COLORS.borderLight,
   },
   progressText: {
-    color: '#facc15', // 黄色高亮进度数字
+    fontFamily: FONT.monoBold,
+    color: COLORS.accentYellow,
     fontSize: 11,
-    fontWeight: '800',
     letterSpacing: 0.8,
   },
   cardBody: {
-    backgroundColor: '#121214',
+    backgroundColor: COLORS.bgCard,
     borderRadius: 16,
     padding: 20,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.borderSubtle,
   },
   cardTitle: {
-    color: '#f4f4f5',
+    fontFamily: FONT.semibold,
+    color: COLORS.textPrimary,
     fontSize: 15,
-    fontWeight: '600',
     marginBottom: 12,
   },
   displayArea: {
@@ -182,20 +183,21 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   targetText: {
+    fontFamily: FONT.extrabold,
     color: '#ffffff',
-    fontSize: 30,
-    fontWeight: '800',
-    lineHeight: 42,
+    fontSize: 22,
+    lineHeight: 31,
     letterSpacing: 0.5,
   },
   phoneticText: {
-    color: '#a1a1aa',
+    fontFamily: FONT.regular,
+    color: COLORS.textSecondary,
     fontSize: 13,
-    fontWeight: '500',
     marginBottom: 4,
   },
   englishText: {
-    color: '#52525b',
+    fontFamily: FONT.regular,
+    color: COLORS.textMuted,
     fontSize: 12,
     marginBottom: 16,
   },
@@ -205,44 +207,59 @@ const styles = StyleSheet.create({
   },
   audioPill: {
     flex: 1,
-    backgroundColor: '#27272a',
+    backgroundColor: COLORS.bgCardLight,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.borderSubtle,
   },
   audioPillText: {
-    color: '#ffffff',
-    fontSize: 11,
-    fontWeight: '800',
+    fontFamily: FONT.bold,
+    color: COLORS.textSecondary,
+    fontSize: 12,
     letterSpacing: 0.8,
   },
   nextCardPill: {
     flex: 1.2,
-    backgroundColor: '#ffffff',
+    backgroundColor: COLORS.bgCardLight,
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+  },
+  nextCardPillText: {
+    fontFamily: FONT.bold,
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    letterSpacing: 0.8,
+  },
+  detailPill: {
+    flex: 1.2,
+    backgroundColor: COLORS.accentBlue,
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
   },
-  nextCardPillText: {
-    color: '#000000',
+  detailPillText: {
+    fontFamily: FONT.bold,
+    color: '#0a0a1e',
     fontSize: 12,
-    fontWeight: '900',
     letterSpacing: 0.8,
   },
   tipBox: {
     marginTop: 14,
-    backgroundColor: '#121214',
+    backgroundColor: COLORS.bgCard,
     borderRadius: 12,
     padding: 14,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderColor: COLORS.borderSubtle,
   },
   tipHeader: {
-    color: '#71717a',
+    fontFamily: FONT.mono,
+    color: COLORS.textTertiary,
     fontSize: 10,
-    fontWeight: '700',
     letterSpacing: 1,
     marginBottom: 4,
   },
