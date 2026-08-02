@@ -580,9 +580,13 @@ export default Sentry.wrap(function App() {
                 currentIndex={cardIndex}
                 totalCards={cards.length}
                 onNextCard={handleNextScenario}
-                detailLabel={currentCard.id.startsWith('safety-') ? '安全信息' : undefined}
-                onShowDetail={
-                  currentCard.id.startsWith('safety-') ? () => setIsSafetyDetailOpen(true) : undefined
+                tipActionLabel={
+                  currentCard.id.startsWith('safety-') ? '安全信息' : undefined
+                }
+                onTipAction={
+                  currentCard.id.startsWith('safety-')
+                    ? () => setIsSafetyDetailOpen(true)
+                    : undefined
                 }
               />
             ) : (

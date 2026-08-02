@@ -22,9 +22,9 @@ interface FlashCardViewProps {
   currentIndex: number;
   totalCards: number;
   onNextCard: () => void;
-  /** 安全卡等需要"点击展开详情"的卡片：存在时卡体点击/按钮改为打开详情 */
-  detailLabel?: string;
-  onShowDetail?: () => void;
+  /** LOCAL PROTOCOL 框内可选操作入口（如安全卡的「安全信息」） */
+  tipActionLabel?: string;
+  onTipAction?: () => void;
 }
 
 export const FlashCardView: React.FC<FlashCardViewProps> = ({
@@ -32,8 +32,8 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
   currentIndex,
   totalCards,
   onNextCard,
-  detailLabel,
-  onShowDetail,
+  tipActionLabel,
+  onTipAction,
 }) => {
   const handlePlayAudio = (e: GestureResponderEvent) => {
     e.stopPropagation();
@@ -63,10 +63,10 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
         </View>
       </View>
 
-      {/* 点击卡片任意主体区域可快速切卡；安全卡改为打开详情 */}
+      {/* 点击卡片任意主体区域可快速切卡 */}
       <TouchableOpacity
         style={styles.cardBody}
-        onPress={onShowDetail ?? onNextCard}
+        onPress={onNextCard}
         activeOpacity={0.9}
       >
         <Text style={styles.cardTitle}>{card.title}</Text>
@@ -86,22 +86,21 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
             <Text style={styles.audioPillText}>PLAY AUDIO</Text>
           </TouchableOpacity>
 
-          {detailLabel && onShowDetail ? (
-            <TouchableOpacity style={styles.detailPill} onPress={onShowDetail} activeOpacity={0.8}>
-              <Text style={styles.detailPillText}>{detailLabel}</Text>
-            </TouchableOpacity>
-          ) : (
-            <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
-              <Text style={styles.nextCardPillText}>{'NEXT CARD ->'}</Text>
-            </TouchableOpacity>
-          )}
+          <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
+            <Text style={styles.nextCardPillText}>{'NEXT CARD ->'}</Text>
+          </TouchableOpacity>
         </View>
       </TouchableOpacity>
 
-      {/* 本地指南提示卡 */}
+      {/* 本地指南提示卡：安全卡附带「安全信息」入口 */}
       <View style={styles.tipBox}>
         <Text style={styles.tipHeader}>LOCAL PROTOCOL</Text>
         <Text style={styles.tipBody}>{card.localTip}</Text>
+        {tipActionLabel && onTipAction && (
+          <TouchableOpacity style={styles.tipActionRow} onPress={onTipAction} activeOpacity={0.7}>
+            <Text style={styles.tipActionText}>{tipActionLabel} ›</Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
@@ -235,19 +234,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     letterSpacing: 0.8,
   },
-  detailPill: {
-    flex: 1.2,
-    backgroundColor: COLORS.accentBlue,
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-  },
-  detailPillText: {
-    fontFamily: FONT.bold,
-    color: '#0a0a1e',
-    fontSize: 12,
-    letterSpacing: 0.8,
-  },
   tipBox: {
     marginTop: 14,
     backgroundColor: COLORS.bgCard,
@@ -262,6 +248,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     letterSpacing: 1,
     marginBottom: 4,
+  },
+  tipActionRow: {
+    marginTop: 10,
+    paddingTop: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: COLORS.borderSubtle,
+  },
+  tipActionText: {
+    fontFamily: FONT.bold,
+    color: COLORS.accentBlue,
+    fontSize: 12,
+    letterSpacing: 0.5,
   },
   tipBody: {
     fontFamily: FONT.regular,
