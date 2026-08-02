@@ -1,4 +1,5 @@
-import { EventEmitter, requireOptionalNativeModule } from 'expo-modules-core';
+import { NativeModules, NativeEventEmitter } from 'react-native';
+import { requireOptionalNativeModule } from 'expo-modules-core';
 
 interface SpeechNativeModule {
   startListening(locale: string): Promise<boolean>;
@@ -6,8 +7,12 @@ interface SpeechNativeModule {
 }
 
 const speechModule = requireOptionalNativeModule<SpeechNativeModule>('SceneGoSpeechRecognizer');
-// EventEmitter 构造要求 NativeModule 类型（带私有字段，无法结构匹配），这里 cast any
-const speechEmitter = speechModule ? new EventEmitter(speechModule as any) : null;
+
+// 旧架构 (Paper) 下事件经 RCT 事件桥 (EXReactNativeEventEmitter) 送达 JS；
+// Swift 侧 sendEvent 走 JSI 路径在旧架构不可用，事件名保持与原生一致
+const rnEventEmitter = NativeModules.EXReactNativeEventEmitter
+  ? new NativeEventEmitter(NativeModules.EXReactNativeEventEmitter)
+  : null;
 
 export interface SpeechResultEvent {
   transcript: string;
@@ -20,15 +25,15 @@ export interface SpeechErrorEvent {
 
 export const NativeSpeech = {
   onSpeechResult(callback: (e: SpeechResultEvent) => void) {
-    if (speechEmitter) {
-      return speechEmitter.addListener('onSpeechResult', callback);
+    if (rnEventEmitter) {
+      return rnEventEmitter.addListener('onSpeechResult', callback);
     }
     return { remove: () => {} };
   },
 
   onSpeechError(callback: (e: SpeechErrorEvent) => void) {
-    if (speechEmitter) {
-      return speechEmitter.addListener('onSpeechError', callback);
+    if (rnEventEmitter) {
+      return rnEventEmitter.addListener('onSpeechError', callback);
     }
     return { remove: () => {} };
   },

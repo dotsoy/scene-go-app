@@ -10,6 +10,18 @@ public class SceneGoSpeechRecognizer: Module {
   // 授权回调期间收到 stop 时置位，授权完成后放弃启动（消除快速连点导致的双任务竞争）
   private var stopRequested = false
 
+  /// 发送事件：旧架构 (Paper) 下必须经 RCT 事件桥 (EXReactNativeEventEmitter) 才能到达 JS
+  /// （LegacyEventEmitterCompat 的 JSI 路径在旧架构 runtime 不可用，事件会被静默丢弃）
+  private func emitEvent(_ name: String, _ body: [String: Any]) {
+    if let serviceProtocol = NSProtocolFromString("EXEventEmitterService"),
+       let legacyEmitter = (appContext?.legacyModule(implementing: serviceProtocol) as NSObject?) {
+      legacyEmitter.perform(NSSelectorFromString("sendEventWithName:body:"), with: name, with: body as NSDictionary)
+    } else {
+      // 新架构 fallback：JSI 事件
+      sendEvent(name, body)
+    }
+  }
+
   public func definition() -> ModuleDefinition {
     Name("SceneGoSpeechRecognizer")
 
@@ -106,7 +118,7 @@ public class SceneGoSpeechRecognizer: Module {
 
       if let result {
         let transcript = result.bestTranscription.formattedString
-        self.sendEvent("onSpeechResult", [
+        self.emitEvent("onSpeechResult", [
           "transcript": transcript,
           "isFinal": result.isFinal,
         ])
@@ -117,7 +129,7 @@ public class SceneGoSpeechRecognizer: Module {
         let nsError = error as NSError
         if nsError.code != NSUserCancelledError {
           NSLog("[Speech] recognition error: %@", error.localizedDescription)
-          self.sendEvent("onSpeechError", ["message": error.localizedDescription])
+          self.emitEvent("onSpeechError", ["message": error.localizedDescription])
         }
       }
 
