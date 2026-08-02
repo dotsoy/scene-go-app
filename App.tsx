@@ -13,7 +13,6 @@ import { ApiLogModal } from './src/components/ApiLogModal';
 import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
-import { locationTrigger } from './src/utils/LocationTrigger';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
@@ -77,16 +76,13 @@ const SCENARIO_GENERATORS: Record<string, (location: string) => CardData> = {
 
 const SCENARIO_KEYS = Object.keys(SCENARIO_GENERATORS);
 
-/** 无定位命中时各场景卡的默认位置名（替代原先的 MOCK_LOCATIONS 索引映射） */
+/** 各场景卡的默认位置名 */
 const DEFAULT_LOCATION_NAMES: Record<string, string> = {
   AIRPORT_TAXI: '机场区域',
   DINING_ORDER: '餐厅',
   TAX_REFUND: '购物区',
   EMERGENCY_SOS: '当前位置',
 };
-
-/** 手动切卡后的自动触发冷静期（毫秒），避免刚手动选完又被定位覆盖 */
-const MANUAL_OVERRIDE_MS = 60 * 1000;
 
 export default Sentry.wrap(function App() {
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
@@ -115,12 +111,6 @@ export default Sentry.wrap(function App() {
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<unknown>(null);
-  // 定位自动触发状态：命中围栏后的区域名 / 是否自动模式 / 权限是否被拒
-  const [autoZoneName, setAutoZoneName] = useState<string | null>(null);
-  const [autoDetected, setAutoDetected] = useState<boolean>(false);
-  const [locationPermissionDenied, setLocationPermissionDenied] = useState<boolean>(false);
-  // 手动切卡时间戳：用于自动触发的冷静期
-  const lastManualSwitchAtRef = useRef<number>(0);
   // REC 指示呼吸动画
   const pulseAnim = useRef(new Animated.Value(1)).current;
 
@@ -361,36 +351,10 @@ export default Sentry.wrap(function App() {
   };
 
   const activeScenarioKey = SCENARIO_KEYS[scenarioIndex];
-  const activeLocation =
-    autoDetected && autoZoneName
-      ? autoZoneName
-      : DEFAULT_LOCATION_NAMES[activeScenarioKey] ?? '未知异国位置';
+  const activeLocation = DEFAULT_LOCATION_NAMES[activeScenarioKey] ?? '未知异国位置';
   const currentCard = SCENARIO_GENERATORS[activeScenarioKey](activeLocation);
 
   const [notes, setNotes] = useState<NoteItem[]>([]);
-
-  // 场景自动触发：进入机场等地理围栏自动切卡；权限被拒则保持手动模式
-  useEffect(() => {
-    let cancelled = false;
-    locationTrigger
-      .start((report) => {
-        if (cancelled) return;
-        // 手动切卡冷静期内不覆盖用户选择
-        if (Date.now() - lastManualSwitchAtRef.current < MANUAL_OVERRIDE_MS) return;
-        const idx = SCENARIO_KEYS.indexOf(report.zone.scenarioKey);
-        if (idx < 0) return;
-        setScenarioIndex(idx);
-        setAutoZoneName(report.zone.name);
-        setAutoDetected(true);
-      })
-      .then((ok) => {
-        if (!ok && !cancelled) setLocationPermissionDenied(true);
-      });
-    return () => {
-      cancelled = true;
-      locationTrigger.stop();
-    };
-  }, []);
 
   // 启动时加载持久化笔记
   useEffect(() => {
@@ -398,8 +362,6 @@ export default Sentry.wrap(function App() {
   }, []);
 
   const handleNextScenario = () => {
-    lastManualSwitchAtRef.current = Date.now();
-    setAutoDetected(false);
     setScenarioIndex((prev) => (prev + 1) % SCENARIO_KEYS.length);
   };
 
@@ -479,34 +441,6 @@ export default Sentry.wrap(function App() {
               </Text>
             </View>
           )}
-
-          {/* 场景触发状态指示：自动识别结果 / 手动模式 / 定位未授权 */}
-          <View style={styles.sceneStatusRow}>
-            <View
-              style={[
-                styles.sceneStatusPill,
-                locationPermissionDenied && styles.sceneStatusPillWarn,
-              ]}
-            >
-              <View
-                style={[
-                  styles.sceneStatusDot,
-                  locationPermissionDenied
-                    ? styles.dotGray
-                    : autoDetected
-                      ? styles.dotGreen
-                      : styles.dotAmber,
-                ]}
-              />
-              <Text style={styles.sceneStatusText} numberOfLines={1}>
-                {locationPermissionDenied
-                  ? '未授权定位 · 手动模式'
-                  : autoDetected && autoZoneName
-                    ? `已自动识别 · ${autoZoneName}`
-                    : '手动场景模式'}
-              </Text>
-            </View>
-          </View>
 
           {/* Center Card */}
           <View style={styles.centerCardArea}>
@@ -689,44 +623,11 @@ const styles = StyleSheet.create({
   dotGray: {
     backgroundColor: '#52525b',
   },
-  dotAmber: {
-    backgroundColor: '#f59e0b',
-  },
   statusText: {
     color: '#a1a1aa',
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
-  },
-  sceneStatusRow: {
-    alignItems: 'center',
-    marginTop: 8,
-  },
-  sceneStatusPill: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: 'rgba(16, 185, 129, 0.1)',
-    borderColor: 'rgba(16, 185, 129, 0.35)',
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 5,
-    maxWidth: '92%',
-  },
-  sceneStatusPillWarn: {
-    backgroundColor: 'rgba(245, 158, 11, 0.1)',
-    borderColor: 'rgba(245, 158, 11, 0.35)',
-  },
-  sceneStatusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 7,
-  },
-  sceneStatusText: {
-    color: '#d4d4d8',
-    fontSize: 12,
-    fontWeight: '600',
   },
   centerCardArea: {
     flex: 1,

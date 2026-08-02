@@ -16,7 +16,6 @@
         "expo-file-system": "~17.0.1",
         "expo-keep-awake": "~13.0.2",
         "expo-linear-gradient": "~13.0.2",
-        "expo-location": "~17.0.1",
         "expo-secure-store": "~13.0.2",
         "expo-speech": "~12.0.2",
         "expo-status-bar": "~1.12.1",
@@ -839,8 +838,6 @@
     "expo-keep-awake": ["expo-keep-awake@13.0.2", "", { "peerDependencies": { "expo": "*" } }, "sha512-kKiwkVg/bY0AJ5q1Pxnm/GvpeB6hbNJhcFsoOWDh2NlpibhCLaHL826KHUM+WsnJRbVRxJ+K9vbPRHEMvFpVyw=="],
 
     "expo-linear-gradient": ["expo-linear-gradient@13.0.2", "", { "peerDependencies": { "expo": "*" } }, "sha512-EDcILUjRKu4P1rtWcwciN6CSyGtH7Bq4ll3oTRV7h3h8oSzSilH1g6z7kTAMlacPBKvMnkkWOGzW6KtgMKEiTg=="],
-
-    "expo-location": ["expo-location@17.0.1", "", { "peerDependencies": { "expo": "*" } }, "sha512-m+OzotzlAXO3ZZ1uqW5GC25nXW868zN+ROyBA1V4VF6jGay1ZEs4URPglCVUDzZby2F5wt24cMzqDKw2IX6nRw=="],
 
     "expo-manifests": ["expo-manifests@0.14.3", "", { "dependencies": { "@expo/config": "~9.0.0", "expo-json-utils": "~0.13.0" }, "peerDependencies": { "expo": "*" } }, "sha512-L3b5/qocBPiQjbW0cpOHfnqdKZbTJS7sA3mgeDJT+mWga/xYsdpma1EfNmsuvrOzjLGjStr1k1fceM9Bl49aqQ=="],
 
