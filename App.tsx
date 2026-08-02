@@ -541,8 +541,12 @@ export default Sentry.wrap(function App() {
             </View>
           )}
 
-          {/* Live Speech Transcript Banner：isMicActive 或存在文案时显示，错误回滚不引发横幅闪灭 */}
-          {(isMicActive || liveTranscript) && (
+          {/* Live Speech Transcript Banner：录音中常显；关闭后仅真实异常（失败/异常/错误）保留 */}
+          {isMicActive ||
+          (liveTranscript &&
+            (liveTranscript.includes('异常') ||
+              liveTranscript.includes('失败') ||
+              liveTranscript.includes('错误'))) ? (
             <View style={styles.liveTranscriptCard}>
               <View style={styles.liveHeaderRow}>
                 <Text style={styles.liveBadge}>
@@ -554,7 +558,7 @@ export default Sentry.wrap(function App() {
                       REC
                     </Animated.Text>
                   )}
-                  {/* MIC 关闭后的残留提示可手动关闭 */}
+                  {/* 异常提示可手动关闭 */}
                   {!isMicActive && (
                     <TouchableOpacity
                       onPress={() => setLiveTranscript('')}
@@ -569,7 +573,7 @@ export default Sentry.wrap(function App() {
                 {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
               </Text>
             </View>
-          )}
+          ) : null}
 
           {/* Center Card */}
           <View style={styles.centerCardArea}>
