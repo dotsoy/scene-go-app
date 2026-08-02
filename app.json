@@ -52,7 +52,8 @@
           "project": "scenego",
           "organization": "personal-4ty"
         }
-      ]
+      ],
+      "expo-secure-store"
     ]
   }
 }
