@@ -25,9 +25,10 @@ interface ControlBarProps {
 }
 
 /**
- * 底部控制栏（spec §4 01/02）：
- * - 主界面：72pt，5 按钮 space-between
- * - 相机态：100pt，SNAP 大按钮 + MIC/CARD，隐藏 NOTES/MORE
+ * 底部控制栏（精修版）：相机态不改变按钮形态——
+ * 始终 5 个同形按钮，仅状态变化：
+ * - CAM：关闭时点按开启；开启后高亮，双击=拍照分析+关相机，单击=仅关闭
+ * - MIC：双击=停止+生成卡，单击=仅停止
  */
 export const ControlBar: React.FC<ControlBarProps> = ({
   isCameraActive,
@@ -43,42 +44,20 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onOpenNotes,
   onOpenTools,
 }) => {
-  // SNAP：双击 = 拍照+云端分析+关闭相机；单击 = 仅关闭相机
-  const handleSnapPress = useDoubleTap(onCancelCamera, onCaptureFrame);
+  // CAM：双击 = 拍照+云端分析+关闭相机；单击 = 仅关闭相机
+  const handleCamPress = useDoubleTap(onCancelCamera, onCaptureFrame);
   // MIC：双击 = 停止+生成卡；单击 = 仅停止
   const handleMicPress = useDoubleTap(onMicSingleTap, onMicDoubleTap);
   const micPress = isMicActive ? handleMicPress : onStartMic;
 
-  // 相机态：SNAP 大按钮 + 右侧 MIC/CARD，取景时隐藏 NOTES/MORE
-  if (isCameraActive) {
-    return (
-      <View style={[styles.bar, styles.barCamera]}>
-        <ControlBarBtn
-          large
-          danger
-          label="SNAP"
-          hint="双击分析 · 单击关闭"
-          onPress={handleSnapPress}
-        />
-        <View style={styles.cameraSide}>
-          <ControlBarBtn
-            label={isMicActive ? 'MIC ON' : 'MIC OFF'}
-            active={isMicActive}
-            onPress={micPress}
-          />
-          <ControlBarBtn
-            label={isCardVisible ? 'CARD ON' : 'CARD OFF'}
-            active={isCardVisible}
-            onPress={onToggleCard}
-          />
-        </View>
-      </View>
-    );
-  }
-
   return (
     <View style={styles.bar}>
-      <ControlBarBtn label="CAM OFF" onPress={onToggleCamera} />
+      <ControlBarBtn
+        label={isCameraActive ? 'CAM ON' : 'CAM OFF'}
+        active={isCameraActive}
+        hint={isCameraActive ? '双击分析 · 单击关闭' : undefined}
+        onPress={isCameraActive ? handleCamPress : onToggleCamera}
+      />
       <ControlBarBtn
         label={isMicActive ? 'MIC ON' : 'MIC OFF'}
         active={isMicActive}
@@ -108,12 +87,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 14,
     paddingBottom: 4,
-  },
-  barCamera: {
-    height: LAYOUT.cameraBarHeight,
-  },
-  cameraSide: {
-    flexDirection: 'row',
-    gap: 10,
   },
 });

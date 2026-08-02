@@ -44,7 +44,7 @@ export const CameraBackground: React.FC<CameraBackgroundProps> = ({
           {/* 取景引导：居中提示 + 取景框（spec §4 02） */}
           <View style={styles.guideLayer} pointerEvents="none">
             <Text style={styles.guideCenterHint}>
-              {'[ 相机取景画面 ]\n对准菜单 / 标牌 / 售票机\n双击 SNAP 拍照分析'}
+              {'[ 相机取景画面 ]\n对准菜单 / 标牌 / 售票机\n双击 CAM 按钮拍照分析'}
             </Text>
             <View style={styles.guideFrame}>
               <Text style={styles.guideFrameText}>对齐画面中的文字区域</Text>

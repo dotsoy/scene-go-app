@@ -8,72 +8,45 @@ interface ControlBarBtnProps {
   hint?: string;
   /** 激活态（绿，带光晕） */
   active?: boolean;
-  /** 危险/录制态（红，SNAP） */
-  danger?: boolean;
-  /** SNAP 大按钮（相机态） */
-  large?: boolean;
   onPress: () => void;
 }
 
 /**
  * 底部控制栏统一按钮（精致版）：
  * - Pressable 按压态：scale 0.96 + 降透明度，释放回弹
- * - 统一 1px 边框、12 圆角、字距层级
- * - 激活态绿色光晕（shadow），危险态红色光晕
+ * - 统一 1px 边框、10 圆角、字距层级
+ * - 激活态绿色光晕（§7.4 次按钮规范：半透明白底 + 细描边）
  */
 export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
   label,
   hint,
   active,
-  danger,
-  large,
   onPress,
 }) => {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.btn,
-        large && styles.btnLarge,
-        hint && !large && styles.btnWide,
+        hint && styles.btnWide,
         pressed && styles.btnPressed,
-        // 状态底色与描边
-        danger
-          ? styles.btnDanger
-          : active
-            ? styles.btnActive
-            : styles.btnIdle,
-        // 仅激活态保留光晕（SNAP 动作按钮不发光，避免过重）
-        active && !danger && styles.glowActive,
+        active ? styles.btnActive : styles.btnIdle,
+        active && styles.glowActive,
       ]}
       onPress={onPress}
-      android_ripple={undefined}
     >
       {({ pressed }) => (
         <>
           <View style={[styles.labelRow, pressed && styles.labelRowPressed]}>
-            {active && (
-              <View style={[styles.stateDot, danger ? styles.dotDanger : styles.dotActive]} />
-            )}
+            {active && <View style={styles.stateDot} />}
             <Text
-              style={[
-                styles.label,
-                large && styles.labelLarge,
-                danger
-                  ? styles.labelDanger
-                  : active
-                    ? styles.labelActive
-                    : styles.labelIdle,
-              ]}
+              style={[styles.label, active ? styles.labelActive : styles.labelIdle]}
               numberOfLines={1}
             >
               {label}
             </Text>
           </View>
           {hint ? (
-            <Text
-              style={[styles.hint, large && styles.hintLarge]}
-              numberOfLines={1}
-            >
+            <Text style={styles.hint} numberOfLines={1}>
               {hint}
             </Text>
           ) : null}
@@ -96,17 +69,11 @@ const styles = StyleSheet.create({
   btnWide: {
     minWidth: 90,
   },
-  btnLarge: {
-    flex: 1,
-    height: 38, // 相机态不改按钮高度，仅宽度主导
-    borderRadius: 10,
-    paddingHorizontal: 14,
-  },
   btnPressed: {
     transform: [{ scale: 0.96 }],
     opacity: 0.85,
   },
-  // 状态底色（§7.4 次按钮规范：半透明白 + 细描边；激活态品牌绿；危险态同为次按钮样式）
+  // 状态底色（§7.4：次按钮半透明白 + 细描边；激活态品牌绿）
   btnIdle: {
     backgroundColor: 'rgba(255,255,255,0.07)',
     borderColor: 'rgba(255,255,255,0.14)',
@@ -115,11 +82,6 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(76,175,80,0.18)',
     borderColor: 'rgba(129,199,132,0.4)',
   },
-  btnDanger: {
-    backgroundColor: 'rgba(244,67,54,0.18)',
-    borderColor: 'rgba(239,83,80,0.4)',
-  },
-  // 光晕
   glowActive: {
     shadowColor: COLORS.accentGreen,
     shadowOpacity: 0.28,
@@ -139,21 +101,12 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     marginRight: 5,
-  },
-  dotActive: {
     backgroundColor: COLORS.accentGreen,
-  },
-  dotDanger: {
-    backgroundColor: COLORS.accentRed,
   },
   label: {
     fontFamily: FONT.bold,
     fontSize: 9,
     letterSpacing: 0.7,
-  },
-  labelLarge: {
-    fontSize: 15,
-    letterSpacing: 2,
   },
   labelIdle: {
     color: 'rgba(255,255,255,0.7)',
@@ -161,18 +114,11 @@ const styles = StyleSheet.create({
   labelActive: {
     color: COLORS.accentGreen,
   },
-  labelDanger: {
-    color: COLORS.accentRed,
-  },
   hint: {
     fontFamily: FONT.regular,
     color: '#6b7280',
     fontSize: 7.5,
     marginTop: 1,
     letterSpacing: 0.3,
-  },
-  hintLarge: {
-    fontSize: 8.5,
-    marginTop: 2,
   },
 });
