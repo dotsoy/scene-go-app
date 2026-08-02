@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
 import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
@@ -109,6 +109,24 @@ export default Sentry.wrap(function App() {
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<unknown>(null);
+  // REC 指示呼吸动画
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    if (isMicActive) {
+      const loop = Animated.loop(
+        Animated.sequence([
+          Animated.timing(pulseAnim, { toValue: 0.3, duration: 600, useNativeDriver: true }),
+          Animated.timing(pulseAnim, { toValue: 1, duration: 600, useNativeDriver: true }),
+        ])
+      );
+      loop.start();
+      return () => {
+        loop.stop();
+        pulseAnim.setValue(1);
+      };
+    }
+  }, [isMicActive, pulseAnim]);
   // 最新转录文本的 ref 副本：避免 async 回调读取到过期的闭包 state
   const liveTranscriptRef = useRef<string>('');
   // 麦克风期望状态 ref：同步 isMicActive，防止授权异步窗口内重复触发
@@ -395,7 +413,9 @@ export default Sentry.wrap(function App() {
             <View style={styles.liveTranscriptCard}>
               <View style={styles.liveHeaderRow}>
                 <Text style={styles.liveBadge}>实时语音转录中</Text>
-                <Text style={styles.liveRecordingPulse}>REC</Text>
+                <Animated.Text style={[styles.liveRecordingPulse, { opacity: pulseAnim }]}>
+                  REC
+                </Animated.Text>
               </View>
               <Text style={styles.liveTranscriptText}>
                 {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
