@@ -45,6 +45,55 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
   });
 }
 
+/** 构造场景识别请求体（日志与真实请求共用同一对象，避免两处重复维护） */
+function buildSceneRequestBody(base64: string) {
+  return {
+    model: MODEL_ID,
+    messages: [
+      { role: 'system', content: SCENE_SYSTEM_PROMPT },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: { url: `data:image/jpeg;base64,${base64}` },
+          },
+          {
+            type: 'text',
+            text: '请分析这张照片中的场景，给出出行解读。',
+          },
+        ],
+      },
+    ],
+    max_tokens: 1024,
+  };
+}
+
+/** 构造多轮追问请求体（同上，单一来源） */
+function buildFollowUpRequestBody(base64: string, question: string) {
+  return {
+    model: MODEL_ID,
+    messages: [
+      {
+        role: 'system',
+        content:
+          '你是 SceneGo 出行助手。用户正在异国旅行中，基于拍摄的照片向你追问具体细节。请用中文简洁回答。',
+      },
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'image_url',
+            image_url: { url: `data:image/jpeg;base64,${base64}` },
+          },
+          { type: 'text', text: question },
+        ],
+      },
+    ],
+    max_tokens: 512,
+  };
+}
+
 export class CloudVlmOcrPlugin implements OcrPlugin {
   id = 'cloud-vlm';
   name = '云端视觉大模型 (OpenRouter Free Router)';
@@ -74,28 +123,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         'X-OpenRouter-Title': 'SceneGo',
       };
 
-      const reqBodyObject = {
-        model,
-        messages: [
-          { role: 'system', content: SCENE_SYSTEM_PROMPT },
-          {
-            role: 'user',
-            content: [
-              {
-                type: 'image_url',
-                image_url: {
-                  url: `data:image/jpeg;base64,${base64.slice(0, 30)}...[Length: ${base64.length} chars]`,
-                },
-              },
-              {
-                type: 'text',
-                text: '请分析这张照片中的场景，给出出行解读。',
-              },
-            ],
-          },
-        ],
-        max_tokens: 1024,
-      };
+      const reqBodyObject = buildSceneRequestBody(base64);
 
       const fullRequestLog = JSON.stringify(
         {
@@ -128,26 +156,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       const response = await fetch(url, {
         method: 'POST',
         headers: actualHeaders,
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: 'system', content: SCENE_SYSTEM_PROMPT },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'image_url',
-                  image_url: { url: `data:image/jpeg;base64,${base64}` },
-                },
-                {
-                  type: 'text',
-                  text: '请分析这张照片中的场景，给出出行解读。',
-                },
-              ],
-            },
-          ],
-          max_tokens: 1024,
-        }),
+        body: JSON.stringify(reqBodyObject),
       });
 
       const durationMs = Date.now() - startTime;
@@ -218,27 +227,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       const response = await fetch(url, {
         method: 'POST',
         headers: actualHeaders,
-        body: JSON.stringify({
-          model,
-          messages: [
-            {
-              role: 'system',
-              content:
-                '你是 SceneGo 出行助手。用户正在异国旅行中，基于拍摄的照片向你追问具体细节。请用中文简洁回答。',
-            },
-            {
-              role: 'user',
-              content: [
-                {
-                  type: 'image_url',
-                  image_url: { url: `data:image/jpeg;base64,${base64}` },
-                },
-                { type: 'text', text: question },
-              ],
-            },
-          ],
-          max_tokens: 512,
-        }),
+        body: JSON.stringify(buildFollowUpRequestBody(base64, question)),
       });
 
       const durationMs = Date.now() - startTime;
