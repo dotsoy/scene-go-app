@@ -10,22 +10,23 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-
-export interface NoteItem {
-  id: string;
-  content: string;
-  category: string;
-  timestamp: string;
-}
+import { NoteItem } from '../utils/NoteStore';
 
 interface QuickNotesModalProps {
   visible: boolean;
   onClose: () => void;
   notes: NoteItem[];
   onAddNote: (content: string, category: string) => void;
+  onDeleteNote: (id: string) => void;
 }
 
-export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClose, notes, onAddNote }) => {
+export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
+  visible,
+  onClose,
+  notes,
+  onAddNote,
+  onDeleteNote,
+}) => {
   const [newNote, setNewNote] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('TRIP');
   const [searchQuery, setSearchQuery] = useState('');
@@ -111,13 +112,25 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({ visible, onClo
               <View style={styles.noteCard}>
                 <View style={styles.noteHeader}>
                   <Text style={styles.noteCategory}>{item.category}</Text>
-                  <Text style={styles.noteTime}>{item.timestamp}</Text>
+                  <View style={styles.noteHeaderRight}>
+                    <Text style={styles.noteTime}>{item.timestamp}</Text>
+                    <TouchableOpacity
+                      onPress={() => onDeleteNote(item.id)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text style={styles.deleteText}>删除</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
                 <Text style={styles.noteText}>{item.content}</Text>
               </View>
             )}
             ListEmptyComponent={
-              <Text style={styles.emptyText}>No matching notes found</Text>
+              <Text style={styles.emptyText}>
+                {notes.length === 0
+                  ? '暂无笔记，输入文字或使用语音听写后自动归档'
+                  : '无匹配记录'}
+              </Text>
             }
             contentContainerStyle={styles.listContent}
           />
@@ -249,7 +262,18 @@ const styles = StyleSheet.create({
   noteHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     marginBottom: 4,
+  },
+  noteHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  deleteText: {
+    color: '#f87171',
+    fontSize: 11,
+    fontWeight: '600',
   },
   noteCategory: {
     color: '#e4e4e7',

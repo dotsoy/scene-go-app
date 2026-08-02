@@ -6,7 +6,7 @@ import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
-import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
+import { QuickNotesModal } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
@@ -15,6 +15,7 @@ import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModa
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
+import { noteStore, NoteItem } from './src/utils/NoteStore';
 import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
@@ -320,20 +321,12 @@ export default Sentry.wrap(function App() {
   const activeLocation = MOCK_LOCATIONS[scenarioIndex];
   const currentCard = SCENARIO_GENERATORS[activeScenarioKey](activeLocation);
 
-  const [notes, setNotes] = useState<NoteItem[]>([
-    {
-      id: 'n1',
-      content: '曼谷酒店 Wi-Fi 密码: BKK2026',
-      category: 'TRIP',
-      timestamp: '14:20',
-    },
-    {
-      id: 'n2',
-      content: '退税单号记录: TX-984210',
-      category: 'TAX',
-      timestamp: '16:05',
-    },
-  ]);
+  const [notes, setNotes] = useState<NoteItem[]>([]);
+
+  // 启动时加载持久化笔记
+  useEffect(() => {
+    noteStore.getAll().then(setNotes);
+  }, []);
 
   const handleNextScenario = () => {
     setScenarioIndex((prev) => (prev + 1) % SCENARIO_KEYS.length);
@@ -348,7 +341,13 @@ export default Sentry.wrap(function App() {
       category,
       timestamp: timeStr,
     };
-    setNotes([newEntry, ...notes]);
+    setNotes((prev) => [newEntry, ...prev]);
+    noteStore.save(newEntry);
+  };
+
+  const handleDeleteNote = (id: string) => {
+    setNotes((prev) => prev.filter((n) => n.id !== id));
+    noteStore.remove(id);
   };
 
   return (
@@ -427,6 +426,7 @@ export default Sentry.wrap(function App() {
           onClose={() => setIsNotesOpen(false)}
           notes={notes}
           onAddNote={handleAddNote}
+          onDeleteNote={handleDeleteNote}
         />
 
         <SnapshotDialogModal
