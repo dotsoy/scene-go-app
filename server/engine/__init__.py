@@ -1,3 +1,0 @@
-"""
-SceneGo Server Engine Package
-"""
