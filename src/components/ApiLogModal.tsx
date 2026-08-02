@@ -15,11 +15,18 @@ interface ApiLogModalProps {
   onClose: () => void;
 }
 
+function truncateText(text?: string, maxLength: number = 2500): string {
+  if (!text) return '无';
+  if (text.length <= maxLength) return text;
+  return text.slice(0, maxLength) + `\n... [数据过长已自动截断 (${text.length} 字符)]`;
+}
+
 export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose }) => {
-  const [logs, setLogs] = useState<ApiLogEntry[]>(apiLogger.getLogs());
+  const [logs, setLogs] = useState<ApiLogEntry[]>([]);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
   useEffect(() => {
+    if (!visible) return;
     setLogs([...apiLogger.getLogs()]);
     const unsub = apiLogger.subscribe(() => {
       setLogs([...apiLogger.getLogs()]);
@@ -29,8 +36,14 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose }) =>
     };
   }, [visible]);
 
+  if (!visible) return null;
+
+  const handleClose = () => {
+    setSelectedLogId(null);
+    onClose();
+  };
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
           {/* Header */}
@@ -40,7 +53,7 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose }) =>
               <TouchableOpacity onPress={() => apiLogger.clear()} style={styles.clearBtn}>
                 <Text style={styles.clearBtnText}>清空</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity onPress={handleClose} style={styles.closeBtn}>
                 <Text style={styles.closeBtnText}>✕</Text>
               </TouchableOpacity>
             </View>
@@ -99,14 +112,14 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose }) =>
                     <View style={styles.detailBox}>
                       <Text style={styles.detailLabel}>📤 请求 Body:</Text>
                       <Text style={styles.detailCode}>
-                        {log.requestBody || '无'}
+                        {truncateText(log.requestBody)}
                       </Text>
 
                       <Text style={[styles.detailLabel, { marginTop: 10 }]}>
                         📥 响应 Body:
                       </Text>
                       <Text style={styles.detailCode}>
-                        {log.responseBody || '等待响应...'}
+                        {truncateText(log.responseBody, 4000)}
                       </Text>
                     </View>
                   )}
