@@ -81,7 +81,7 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           </TouchableOpacity>
 
           <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
-            <Text style={styles.nextCardPillText}>NEXT CARD ➔</Text>
+            <Text style={styles.nextCardPillText}>{'NEXT CARD ->'}</Text>
           </TouchableOpacity>
         </View>
       </TouchableOpacity>

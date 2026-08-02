@@ -10,10 +10,10 @@ interface UtilityDrawerModalProps {
   onDismiss?: () => void;
 }
 
-const TOOLS: Array<{ kind: ToolKind; icon: string; title: string; desc: string }> = [
-  { kind: 'logs', icon: '📡', title: 'API 日志', desc: '查看云端大模型请求与响应、网络耗时' },
-  { kind: 'history', icon: '💬', title: '对话记录', desc: '恢复历史快照的多轮追问会话' },
-  { kind: 'settings', icon: '⚙️', title: '识别引擎设置', desc: '切换识别引擎、配置 API Key' },
+const TOOLS: Array<{ kind: ToolKind; title: string; desc: string }> = [
+  { kind: 'logs', title: 'API 日志', desc: '查看接口请求与响应日志、网络耗时' },
+  { kind: 'history', title: '对话记录', desc: '恢复历史快照的多轮追问会话' },
+  { kind: 'settings', title: '识别引擎设置', desc: '切换识别引擎、配置 API Key' },
 ];
 
 export const UtilityDrawerModal: React.FC<UtilityDrawerModalProps> = ({
@@ -34,7 +34,7 @@ export const UtilityDrawerModal: React.FC<UtilityDrawerModalProps> = ({
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>🧰 工具箱</Text>
+            <Text style={styles.title}>工具箱</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
@@ -48,7 +48,6 @@ export const UtilityDrawerModal: React.FC<UtilityDrawerModalProps> = ({
               onPress={() => onSelect(tool.kind)}
               activeOpacity={0.75}
             >
-              <Text style={styles.toolIcon}>{tool.icon}</Text>
               <View style={styles.toolInfo}>
                 <Text style={styles.toolTitle}>{tool.title}</Text>
                 <Text style={styles.toolDesc}>{tool.desc}</Text>

@@ -115,12 +115,12 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
 
           {/* API Key 配置 */}
           <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
-            OpenRouter API Key (用于 openrouter/free 官方智能免费路由)
+            OpenRouter API Key
           </Text>
           <Text style={styles.apiKeyHint}>
             {hasApiKey
-              ? '已配置 OpenRouter Key，填入新 Key 可重新保存。'
-              : '免费注册 openrouter.ai 获取 Key 即可使用 openrouter/free 视觉模型。'}
+              ? '已配置 OpenRouter Key，填入新 Key 可更新。'
+              : '免费注册 openrouter.ai 获取 Key 即可开启云端服务。'}
           </Text>
           <View style={styles.apiKeyRow}>
             <TextInput
@@ -148,10 +148,10 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
           {/* 状态指示 */}
           <View style={styles.statusRow}>
             <Text style={styles.statusText}>
-              当前模式：{activeOcrId === 'cloud-vlm' ? '☁️ 云端深度识别' : '📱 本地离线识别'}
+              当前模式：{activeOcrId === 'cloud-vlm' ? '云端识别' : '本地识别'}
             </Text>
             <Text style={styles.statusText}>
-              API Key 状态：{hasApiKey ? '✅ 已配置' : '❌ 未配置'}
+              API Key 状态：{hasApiKey ? '已配置' : '未配置'}
             </Text>
           </View>
         </View>

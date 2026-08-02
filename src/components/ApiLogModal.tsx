@@ -54,7 +54,7 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose, onDi
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>📡 API 请求/响应 日志监控</Text>
+            <Text style={styles.title}>API 请求/响应 日志监控</Text>
             <View style={styles.headerActions}>
               <TouchableOpacity onPress={() => apiLogger.clear()} style={styles.clearBtn}>
                 <Text style={styles.clearBtnText}>清空</Text>
@@ -71,7 +71,7 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose, onDi
               <View style={styles.emptyContainer}>
                 <Text style={styles.emptyText}>尚无 API 请求纪录</Text>
                 <Text style={styles.emptySubText}>
-                  拍摄快照或追问后，云端大模型 API 发送与接收的数据将在此即时显示。
+                  拍摄快照或追问细节后，接口发送与接收的数据将在此即时显示。
                 </Text>
               </View>
             ) : (
@@ -101,7 +101,7 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose, onDi
                     >
                       <Text style={styles.statusText}>
                         {log.type === 'REQUEST'
-                          ? '⏳ 发送中...'
+                          ? '发送中...'
                           : log.status
                           ? `${log.status} (${log.durationMs}ms)`
                           : '错误'}
@@ -116,13 +116,13 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose, onDi
                   {/* Expanded Detail */}
                   {selectedLogId === log.id && (
                     <View style={styles.detailBox}>
-                      <Text style={styles.detailLabel}>📤 请求 Body:</Text>
+                      <Text style={styles.detailLabel}>请求 Body:</Text>
                       <Text style={styles.detailCode}>
                         {truncateText(log.requestBody)}
                       </Text>
 
                       <Text style={[styles.detailLabel, { marginTop: 10 }]}>
-                        📥 响应 Body:
+                        响应 Body:
                       </Text>
                       <Text style={styles.detailCode}>
                         {truncateText(log.responseBody, 4000)}

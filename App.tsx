@@ -137,7 +137,7 @@ export default Sentry.wrap(function App() {
       }
     });
     const subError = NativeSpeech.onSpeechError((e) => {
-      setLiveTranscript(`⚠️ 语音识别异常: ${e.message}`);
+      setLiveTranscript(`语音识别异常: ${e.message}`);
       liveTranscriptRef.current = '';
     });
     return () => {
@@ -290,7 +290,7 @@ export default Sentry.wrap(function App() {
       setLiveTranscript('正在开启原生听写，请说话...');
       const started = await NativeSpeech.start('zh-CN');
       if (!started) {
-        setLiveTranscript('⚠️ 语音识别启动失败：请检查麦克风权限，或在真机上测试（模拟器可能不支持中文语言包）');
+        setLiveTranscript('语音识别启动失败：请检查麦克风权限，或在真机上测试（模拟器可能不支持中文语言包）');
       }
     } else {
       setIsMicActive(false);
@@ -373,8 +373,8 @@ export default Sentry.wrap(function App() {
               <ActivityIndicator size="small" color="#4fc3f7" />
               <Text style={styles.processingText}>
                 {pluginManager.getActiveOcrId() === 'cloud-vlm'
-                  ? '☁️ 云端视觉大模型分析中...'
-                  : '📱 本地场景识别中...'}
+                  ? '正在分析画面...'
+                  : '正在识别场景...'}
               </Text>
             </View>
           )}
@@ -383,8 +383,8 @@ export default Sentry.wrap(function App() {
           {isMicActive && (
             <View style={styles.liveTranscriptCard}>
               <View style={styles.liveHeaderRow}>
-                <Text style={styles.liveBadge}>🎙️ 实时语音转录中</Text>
-                <Text style={styles.liveRecordingPulse}>● REC</Text>
+                <Text style={styles.liveBadge}>实时语音转录中</Text>
+                <Text style={styles.liveRecordingPulse}>REC</Text>
               </View>
               <Text style={styles.liveTranscriptText}>
                 {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}

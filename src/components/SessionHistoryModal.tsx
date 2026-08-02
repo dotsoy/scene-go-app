@@ -33,7 +33,7 @@ export const SessionHistoryModal: React.FC<SessionHistoryModalProps> = ({
         <View style={styles.container}>
           {/* Header */}
           <View style={styles.header}>
-            <Text style={styles.title}>💬 对话记录</Text>
+            <Text style={styles.title}>对话记录</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>

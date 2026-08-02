@@ -112,15 +112,15 @@ function buildFollowUpRequestBody(base64: string, question: string, history: Cha
 
 export class CloudVlmOcrPlugin implements OcrPlugin {
   id = 'cloud-vlm';
-  name = '云端视觉大模型 (OpenRouter Free Router)';
-  description = '使用 OpenRouter 官方 openrouter/free 自由路由免费模型深度解析场景';
+  name = '云端视觉识别';
+  description = '通过 OpenRouter 识别摄像头画面场景';
 
   async recognizeText(imageUri: string): Promise<OcrResult> {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) {
       return {
         rawText: '',
-        lines: ['[未配置 API Key，请在 ⚙️ 设置中填入]'],
+        lines: ['[未配置 API Key，请在设置中填入]'],
         confidence: 0,
       };
     }
@@ -189,7 +189,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         if (response.status === 401) {
           return {
             rawText: respText,
-            lines: [`[API Key 鉴权失败 (${response.status})，请在 ⚙️ 设置中确认你的 Key 是否有效]`] ,
+            lines: [`[API Key 鉴权失败 (${response.status})，请在设置中确认你的 Key 是否有效]`],
             confidence: 0,
           };
         }
@@ -274,11 +274,11 @@ export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
     const obj = JSON.parse(jsonStr.trim());
     if (obj.title || obj.translatedText) {
       return {
-        title: obj.title || '云端 VLM 场景解读',
-        category: obj.category || 'CLOUD_VLM',
+        title: obj.title || '场景解读',
+        category: obj.category || 'SCENE',
         originalText: rawText,
         translatedText: obj.translatedText || rawText,
-        tips: Array.isArray(obj.tips) ? obj.tips : ['来自云端大模型解析'],
+        tips: Array.isArray(obj.tips) ? obj.tips : ['来自场景图像分析'],
         recommendedPhrases: Array.isArray(obj.recommendedPhrases)
           ? obj.recommendedPhrases
           : [],
@@ -289,11 +289,11 @@ export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
   }
 
   return {
-    title: '云端 VLM 视觉场景解读',
-    category: 'CLOUD_VLM',
+    title: '场景解读',
+    category: 'SCENE',
     originalText: rawText,
     translatedText: rawText,
-    tips: ['来自云端视觉大模型实时分析'],
+    tips: ['来自场景图像分析'],
     recommendedPhrases: ['Excuse me, could you explain this? (请问能解释一下这个吗？)'],
   };
 }

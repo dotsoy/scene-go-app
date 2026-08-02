@@ -67,7 +67,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 
       {/* 工具箱入口 */}
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenTools} activeOpacity={0.75}>
-        <Text style={styles.btnText} numberOfLines={1}>🧰</Text>
+        <Text style={styles.btnText} numberOfLines={1}>MORE</Text>
       </TouchableOpacity>
     </View>
   );

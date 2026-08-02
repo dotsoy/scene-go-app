@@ -72,7 +72,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
             <View style={styles.titleRow}>
               <View style={styles.categoryBadge}>
                 <Text style={styles.categoryBadgeText}>
-                  {scenarioResult?.category || 'AI SCENE'}
+                  {scenarioResult?.category || 'SCENE'}
                 </Text>
               </View>
               <Text style={styles.headerTitle}>
@@ -111,9 +111,9 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
               </View>
             )}
 
-            {/* 多轮对话流：首条为 AI 场景解读，其后为追问问答 */}
+            {/* 多轮对话流：首条为场景解读，其后为追问问答 */}
             <View style={styles.chatSection}>
-              <Text style={styles.sectionLabel}>AI 场景解读与追问：</Text>
+              <Text style={styles.sectionLabel}>场景解读与追问：</Text>
               {turns.length === 0 ? (
                 <View style={[styles.bubbleRow, styles.aiRow]}>
                   <View style={[styles.bubble, styles.aiBubble]}>
@@ -174,7 +174,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
                       style={styles.phraseChip}
                       onPress={() => handleSpeak(phrase)}
                     >
-                      <Text style={styles.phraseText}>🔊 {phrase}</Text>
+                      <Text style={styles.phraseText}>{phrase}</Text>
                     </TouchableOpacity>
                   ))}
                 </View>
@@ -186,7 +186,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
           <View style={styles.footerInputRow}>
             <TextInput
               style={styles.textInput}
-              placeholder="向 AI 追问细节 (如: 价格包含服务费吗?)"
+              placeholder="追问细节 (如: 价格包含服务费吗?)"
               placeholderTextColor="#71717a"
               value={userPrompt}
               onChangeText={setUserPrompt}
