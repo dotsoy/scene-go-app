@@ -21,6 +21,9 @@ interface FlashCardViewProps {
   currentIndex: number;
   totalCards: number;
   onNextCard: () => void;
+  /** 安全卡等需要"点击展开详情"的卡片：存在时卡体点击/按钮改为打开详情 */
+  detailLabel?: string;
+  onShowDetail?: () => void;
 }
 
 export const FlashCardView: React.FC<FlashCardViewProps> = ({
@@ -28,6 +31,8 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
   currentIndex,
   totalCards,
   onNextCard,
+  detailLabel,
+  onShowDetail,
 }) => {
   const handlePlayAudio = (e: GestureResponderEvent) => {
     e.stopPropagation();
@@ -57,10 +62,10 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
         </View>
       </View>
 
-      {/* 点击卡片任意主体区域可快速切卡 */}
+      {/* 点击卡片任意主体区域可快速切卡；安全卡改为打开详情 */}
       <TouchableOpacity
         style={styles.cardBody}
-        onPress={onNextCard}
+        onPress={onShowDetail ?? onNextCard}
         activeOpacity={0.9}
       >
         <Text style={styles.cardTitle}>{card.title}</Text>
@@ -80,9 +85,15 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
             <Text style={styles.audioPillText}>PLAY AUDIO</Text>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
-            <Text style={styles.nextCardPillText}>{'NEXT CARD ->'}</Text>
-          </TouchableOpacity>
+          {detailLabel && onShowDetail ? (
+            <TouchableOpacity style={styles.nextCardPill} onPress={onShowDetail} activeOpacity={0.8}>
+              <Text style={styles.nextCardPillText}>{detailLabel}</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
+              <Text style={styles.nextCardPillText}>{'NEXT CARD ->'}</Text>
+            </TouchableOpacity>
+          )}
         </View>
       </TouchableOpacity>
 

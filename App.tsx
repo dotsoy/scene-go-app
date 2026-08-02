@@ -8,13 +8,18 @@ import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
+import { CountrySelectModal } from './src/components/CountrySelectModal';
+import { CountrySwitchPromptModal } from './src/components/CountrySwitchPromptModal';
+import { SafetyDetailModal } from './src/components/SafetyDetailModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
 import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { scenarioToCard } from './src/utils/cardBuilder';
-import { getLocationContext } from './src/utils/locationContext';
+import { getLocationContext, getPlaceContext, PlaceContext } from './src/utils/locationContext';
+import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore';
+import { getCountrySafety } from './src/data/countrySafety';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
@@ -69,6 +74,12 @@ export default Sentry.wrap(function App() {
   // 表达卡栈：动态生成卡在前，Tap&Talk 兑底卡恒在末尾；cardIndex 指向当前展示卡
   const [cards, setCards] = useState<CardData[]>([TAP_TALK_CARD]);
   const [cardIndex, setCardIndex] = useState<number>(0);
+  // 当前国家/地区（缓存的用户选择）与 GPS 检测位置
+  const [currentCountry, setCurrentCountry] = useState<SavedCountry | null>(null);
+  const [detectedPlace, setDetectedPlace] = useState<PlaceContext | null>(null);
+  const [isCountrySelectOpen, setIsCountrySelectOpen] = useState<boolean>(false);
+  const [switchPrompt, setSwitchPrompt] = useState<{ detectedName: string } | null>(null);
+  const [isSafetyDetailOpen, setIsSafetyDetailOpen] = useState<boolean>(false);
   const cameraRef = useRef<unknown>(null);
   // REC 指示呼吸动画
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -353,6 +364,84 @@ export default Sentry.wrap(function App() {
     setIsCardVisible(true);
   };
 
+  /** 当前位置预设安全卡（卡栈第一张） */
+  const buildSafetyCard = (country: SavedCountry): CardData => {
+    const s = getCountrySafety(country.code)!;
+    const city = detectedPlace?.city ?? '';
+    return {
+      id: `safety-${country.code}`,
+      categoryTag: '本地安全指南',
+      locationName: `${country.nameZh}${city ? ' · ' + city : ''}`,
+      title: `${country.nameZh}安全与实用信息`,
+      targetText: s.sos.local,
+      phonetic: s.sos.phonetic,
+      subText: `紧急电话：警察 ${s.emergency.police} · 急救 ${s.emergency.ambulance} · 火警 ${s.emergency.fire}${s.emergency.touristPolice ? ` · 旅游警察 ${s.emergency.touristPolice}` : ''}`,
+      localTip: `使领馆领保 ${s.embassy} · ${s.tipping}`,
+      languageCode: s.langCode,
+    };
+  };
+
+  const ensureSafetyCard = (country: SavedCountry) => {
+    if (!getCountrySafety(country.code)) return;
+    addExpressionCard(buildSafetyCard(country));
+  };
+
+  /** 确认国家选择（首次启动/手动切换）：缓存 + 生成安全卡 */
+  const handleCountryConfirm = (code: string) => {
+    const s = getCountrySafety(code);
+    if (!s) {
+      setIsCountrySelectOpen(false);
+      return;
+    }
+    const saved: SavedCountry = { code, nameZh: s.nameZh, savedAt: Date.now() };
+    setCurrentCountry(saved);
+    saveCountry(saved);
+    ensureSafetyCard(saved);
+    setIsCountrySelectOpen(false);
+  };
+
+  const handleSwitchCountry = () => {
+    if (!switchPrompt || !detectedPlace?.countryCode) return;
+    setSwitchPrompt(null);
+    handleCountryConfirm(detectedPlace.countryCode);
+  };
+
+  const handleKeepCountry = () => {
+    if (!currentCountry) return;
+    setSwitchPrompt(null);
+    ensureSafetyCard(currentCountry);
+  };
+
+  // 国家流程：首次启动选择（GPS 检测高亮）；再次打开 GPS 与缓存比对，不同则询问
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      const cached = await loadCountry();
+      const place = await getPlaceContext();
+      if (cancelled) return;
+      setDetectedPlace(place);
+      if (!cached) {
+        // 首次启动：打开国家选择（检测结果高亮）
+        setIsCountrySelectOpen(true);
+        return;
+      }
+      setCurrentCountry(cached);
+      if (place?.countryCode && place.countryCode !== cached.code) {
+        const detected = getCountrySafety(place.countryCode);
+        if (detected) {
+          setSwitchPrompt({ detectedName: detected.nameZh });
+        } else {
+          ensureSafetyCard(cached);
+        }
+      } else {
+        ensureSafetyCard(cached);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
   const handleAddNote = (content: string, category: string) => {
     const now = new Date();
     const pad = (n: number) => n.toString().padStart(2, '0');
@@ -387,6 +476,20 @@ export default Sentry.wrap(function App() {
               <Text style={styles.statusText}>{isMicActive ? 'LIVE' : 'IDLE'}</Text>
             </View>
           </View>
+
+          {/* 当前位置栏：显示当前国家/城市，点击可手动切换 */}
+          <TouchableOpacity
+            style={styles.locationBar}
+            onPress={() => setIsCountrySelectOpen(true)}
+            activeOpacity={0.75}
+          >
+            <View style={[styles.locationDot, currentCountry ? styles.dotGreen : styles.dotAmber]} />
+            <Text style={styles.locationText} numberOfLines={1}>
+              {currentCountry ? currentCountry.nameZh : '未选择国家'}
+              {detectedPlace?.city ? ` · ${detectedPlace.city}` : ''}
+            </Text>
+            <Text style={styles.locationChange}>切换 ›</Text>
+          </TouchableOpacity>
 
           {/* Processing Indicator */}
           {processingLabel && (
@@ -434,6 +537,10 @@ export default Sentry.wrap(function App() {
                 currentIndex={cardIndex}
                 totalCards={cards.length}
                 onNextCard={handleNextScenario}
+                detailLabel={currentCard.id.startsWith('safety-') ? '安全信息' : undefined}
+                onShowDetail={
+                  currentCard.id.startsWith('safety-') ? () => setIsSafetyDetailOpen(true) : undefined
+                }
               />
             ) : (
               <View style={styles.hiddenCardContainer}>
@@ -505,6 +612,29 @@ export default Sentry.wrap(function App() {
           visible={isLogsOpen}
           onClose={() => setIsLogsOpen(false)}
           onDismiss={handleDeferredSnapshot}
+        />
+
+        <CountrySelectModal
+          visible={isCountrySelectOpen}
+          detected={detectedPlace}
+          currentCode={currentCountry?.code}
+          onClose={() => setIsCountrySelectOpen(false)}
+          onConfirm={handleCountryConfirm}
+        />
+
+        <CountrySwitchPromptModal
+          visible={!!switchPrompt}
+          detectedName={switchPrompt?.detectedName ?? ''}
+          currentName={currentCountry?.nameZh ?? ''}
+          onSwitch={handleSwitchCountry}
+          onKeep={handleKeepCountry}
+        />
+
+        <SafetyDetailModal
+          visible={isSafetyDetailOpen}
+          safety={currentCountry ? getCountrySafety(currentCountry.code) : null}
+          place={detectedPlace}
+          onClose={() => setIsSafetyDetailOpen(false)}
         />
       </CameraBackground>
     </SafeAreaView>
@@ -619,6 +749,39 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.8,
+  },
+  locationBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'center',
+    backgroundColor: 'rgba(24, 24, 27, 0.9)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderWidth: 1,
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    marginTop: 8,
+    maxWidth: '92%',
+  },
+  locationDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    marginRight: 7,
+  },
+  locationText: {
+    color: '#d4d4d8',
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  locationChange: {
+    color: '#71717a',
+    fontSize: 11,
+    fontWeight: '600',
+    marginLeft: 8,
+  },
+  dotAmber: {
+    backgroundColor: '#f59e0b',
   },
   centerCardArea: {
     flex: 1,
