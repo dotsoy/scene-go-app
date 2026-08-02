@@ -9,6 +9,7 @@ import {
   Platform,
 } from 'react-native';
 import { apiLogger, ApiLogEntry } from '../utils/ApiLogger';
+import { COLORS, FONT } from '../theme/tokens';
 
 interface ApiLogModalProps {
   visible: boolean;
@@ -162,6 +163,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1e293b',
   },
   title: {
+    fontFamily: FONT.bold,
     color: '#38bdf8',
     fontSize: 16,
     fontWeight: '700',
@@ -178,6 +180,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   clearBtnText: {
+    fontFamily: FONT.semibold,
     color: '#94a3b8',
     fontSize: 12,
     fontWeight: '600',
@@ -198,6 +201,7 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyText: {
+    fontFamily: FONT.semibold,
     color: '#94a3b8',
     fontSize: 15,
     fontWeight: '600',
@@ -230,9 +234,10 @@ const styles = StyleSheet.create({
   timestamp: {
     color: '#64748b',
     fontSize: 11,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontFamily: FONT.mono,
   },
   modelTag: {
+    fontFamily: FONT.semibold,
     color: '#a855f7',
     fontSize: 11,
     fontWeight: '600',
@@ -253,6 +258,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(234, 179, 8, 0.2)',
   },
   statusText: {
+    fontFamily: FONT.semibold,
     color: '#f8fafc',
     fontSize: 11,
     fontWeight: '600',
@@ -260,7 +266,7 @@ const styles = StyleSheet.create({
   urlText: {
     color: '#cbd5e1',
     fontSize: 12,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontFamily: FONT.mono,
   },
   detailBox: {
     marginTop: 10,
@@ -269,6 +275,7 @@ const styles = StyleSheet.create({
     borderTopColor: '#334155',
   },
   detailLabel: {
+    fontFamily: FONT.semibold,
     color: '#38bdf8',
     fontSize: 12,
     fontWeight: '600',
@@ -277,7 +284,7 @@ const styles = StyleSheet.create({
   detailCode: {
     color: '#e2e8f0',
     fontSize: 11,
-    fontFamily: Platform.OS === 'ios' ? 'Menlo' : 'monospace',
+    fontFamily: FONT.mono,
     backgroundColor: '#090d16',
     padding: 8,
     borderRadius: 6,

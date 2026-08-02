@@ -14,6 +14,7 @@ import {
   setOpenRouterApiKey,
   clearOpenRouterApiKey,
 } from '../utils/SecureConfig';
+import { COLORS, FONT } from '../theme/tokens';
 
 interface PluginSelectorModalProps {
   visible: boolean;
@@ -180,6 +181,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerTitle: {
+    fontFamily: FONT.bold,
     color: '#fff',
     fontSize: 18,
     fontWeight: '700',
@@ -192,6 +194,7 @@ const styles = StyleSheet.create({
     fontSize: 18,
   },
   sectionTitle: {
+    fontFamily: FONT.semibold,
     color: '#aaa',
     fontSize: 13,
     fontWeight: '600',
@@ -206,6 +209,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   singleEngineName: {
+    fontFamily: FONT.bold,
     color: '#4fc3f7',
     fontSize: 15,
     fontWeight: '700',
@@ -229,6 +233,7 @@ const styles = StyleSheet.create({
   },
   pluginInfo: {},
   pluginName: {
+    fontFamily: FONT.semibold,
     color: '#ccc',
     fontSize: 15,
     fontWeight: '600',
@@ -272,6 +277,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   saveBtnText: {
+    fontFamily: FONT.bold,
     color: '#000',
     fontWeight: '700',
     fontSize: 14,
@@ -283,6 +289,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   clearBtnText: {
+    fontFamily: FONT.semibold,
     color: '#f44',
     fontWeight: '600',
     fontSize: 14,

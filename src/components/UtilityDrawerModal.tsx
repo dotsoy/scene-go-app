@@ -1,5 +1,6 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { COLORS, FONT } from '../theme/tokens';
 
 export type ToolKind = 'logs' | 'history' | 'settings';
 
@@ -86,6 +87,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1c1c1e',
   },
   title: {
+    fontFamily: FONT.bold,
     color: '#f4f4f5',
     fontSize: 16,
     fontWeight: '700',
@@ -115,6 +117,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   toolTitle: {
+    fontFamily: FONT.semibold,
     color: '#f4f4f5',
     fontSize: 14,
     fontWeight: '600',
@@ -125,6 +128,7 @@ const styles = StyleSheet.create({
     marginTop: 3,
   },
   toolArrow: {
+    fontFamily: FONT.bold,
     color: '#52525b',
     fontSize: 20,
     fontWeight: '700',

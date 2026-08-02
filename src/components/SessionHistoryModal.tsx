@@ -8,6 +8,7 @@ import {
   FlatList,
 } from 'react-native';
 import { SavedSession } from '../utils/SessionStore';
+import { COLORS, FONT } from '../theme/tokens';
 
 interface SessionHistoryModalProps {
   visible: boolean;
@@ -104,6 +105,7 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1e293b',
   },
   title: {
+    fontFamily: FONT.bold,
     color: '#38bdf8',
     fontSize: 16,
     fontWeight: '700',
@@ -119,7 +121,7 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
   },
   sessionCard: {
-    backgroundColor: '#1e293b',
+    backgroundColor: COLORS.bgCard,
     borderRadius: 10,
     padding: 12,
     marginBottom: 10,
@@ -133,6 +135,7 @@ const styles = StyleSheet.create({
     marginBottom: 6,
   },
   sessionTitle: {
+    fontFamily: FONT.semibold,
     color: '#f8fafc',
     fontSize: 14,
     fontWeight: '600',
@@ -140,6 +143,7 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   deleteText: {
+    fontFamily: FONT.semibold,
     color: '#f87171',
     fontSize: 12,
     fontWeight: '600',
@@ -153,6 +157,7 @@ const styles = StyleSheet.create({
     paddingVertical: 60,
   },
   emptyText: {
+    fontFamily: FONT.semibold,
     color: '#94a3b8',
     fontSize: 15,
     fontWeight: '600',

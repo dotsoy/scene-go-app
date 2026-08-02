@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { NoteItem } from '../utils/NoteStore';
 import * as Clipboard from 'expo-clipboard';
+import { COLORS, FONT } from '../theme/tokens';
 
 interface QuickNotesModalProps {
   visible: boolean;
@@ -244,6 +245,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   displayMeta: {
+    fontFamily: FONT.bold,
     color: '#71717a',
     fontSize: 12,
     fontWeight: '700',
@@ -251,6 +253,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   displayText: {
+    fontFamily: FONT.extrabold,
     color: '#ffffff',
     fontSize: 28,
     fontWeight: '800',
@@ -270,6 +273,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   displayBtnText: {
+    fontFamily: FONT.bold,
     color: '#ffffff',
     fontSize: 13,
     fontWeight: '700',
@@ -281,6 +285,7 @@ const styles = StyleSheet.create({
     marginBottom: 16,
   },
   headerTitle: {
+    fontFamily: FONT.extrabold,
     color: '#ffffff',
     fontSize: 14,
     fontWeight: '800',
@@ -291,6 +296,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
   },
   closeBtnText: {
+    fontFamily: FONT.bold,
     color: '#71717a',
     fontSize: 11,
     fontWeight: '700',
@@ -339,6 +345,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   tagText: {
+    fontFamily: FONT.bold,
     color: '#a1a1aa',
     fontSize: 10,
     fontWeight: '700',
@@ -355,12 +362,14 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
   submitBtnText: {
+    fontFamily: FONT.bold,
     color: '#ffffff',
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 0.8,
   },
   sectionTitle: {
+    fontFamily: FONT.bold,
     color: '#52525b',
     fontSize: 11,
     fontWeight: '700',
@@ -385,6 +394,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffffff',
   },
   filterTagText: {
+    fontFamily: FONT.semibold,
     color: '#a1a1aa',
     fontSize: 11,
     fontWeight: '600',
@@ -415,16 +425,19 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   copyText: {
+    fontFamily: FONT.semibold,
     color: '#38bdf8',
     fontSize: 11,
     fontWeight: '600',
   },
   deleteText: {
+    fontFamily: FONT.semibold,
     color: '#f87171',
     fontSize: 11,
     fontWeight: '600',
   },
   noteCategory: {
+    fontFamily: FONT.bold,
     color: '#e4e4e7',
     fontSize: 10,
     fontWeight: '700',

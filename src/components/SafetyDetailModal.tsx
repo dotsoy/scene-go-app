@@ -32,20 +32,29 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
 }) => {
   const [speaking, setSpeaking] = useState(false);
 
-  // 当地时间（时区来自逆地理编码）
+  // 当地时间 + GMT 偏移（时区来自逆地理编码）
   const localTime = useMemo(() => {
     if (!place?.timezone) return null;
     try {
-      return new Intl.DateTimeFormat('zh-CN', {
+      const now = new Date();
+      const time = new Intl.DateTimeFormat('zh-CN', {
         timeZone: place.timezone,
         hour: '2-digit',
         minute: '2-digit',
         weekday: 'short',
-      }).format(new Date());
+      }).format(now);
+      // GMT 偏移：当前 UTC 时间在该时区的偏移
+      const shifted = new Intl.DateTimeFormat('en-US', {
+        timeZone: place.timezone,
+        timeZoneName: 'longOffset',
+      }).formatToParts(new Date());
+      const offset = shifted.find((p) => p.type === 'timeZoneName')?.value ?? '';
+      const cityLabel = place.city ? ` · ${place.city}` : '';
+      return `${time}${cityLabel} ${offset}`;
     } catch {
       return null;
     }
-  }, [place?.timezone, visible]);
+  }, [place?.timezone, place?.city, visible]);
 
   const dial = (number: string) => {
     Linking.openURL(`tel:${number.replace(/[^+\d]/g, '')}`).catch(() => {});

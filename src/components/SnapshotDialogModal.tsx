@@ -13,6 +13,7 @@ import {
 } from 'react-native';
 import * as Speech from 'expo-speech';
 import { ScenarioResult, ChatTurn } from '../plugins/types';
+import { COLORS, FONT } from '../theme/tokens';
 
 interface SnapshotDialogModalProps {
   visible: boolean;
@@ -250,11 +251,13 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   categoryBadgeText: {
+    fontFamily: FONT.extrabold,
     color: '#ffffff',
     fontSize: 10,
     fontWeight: '800',
   },
   headerTitle: {
+    fontFamily: FONT.bold,
     color: '#ffffff',
     fontSize: 16,
     fontWeight: '700',
@@ -268,17 +271,19 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   collectBtn: {
-    backgroundColor: '#27272a',
+    backgroundColor: COLORS.bgCardLight,
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 8,
   },
   collectBtnText: {
+    fontFamily: FONT.bold,
     color: '#38bdf8',
     fontSize: 12,
     fontWeight: '700',
   },
   closeBtnText: {
+    fontFamily: FONT.semibold,
     color: '#a1a1aa',
     fontSize: 12,
     fontWeight: '600',
@@ -322,6 +327,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
   },
   sectionLabel: {
+    fontFamily: FONT.semibold,
     color: '#a1a1aa',
     fontSize: 12,
     fontWeight: '600',
@@ -351,7 +357,7 @@ const styles = StyleSheet.create({
     borderBottomRightRadius: 4,
   },
   aiBubble: {
-    backgroundColor: '#27272a',
+    backgroundColor: COLORS.bgCardLight,
     borderBottomLeftRadius: 4,
   },
   userBubbleText: {
@@ -365,7 +371,7 @@ const styles = StyleSheet.create({
     lineHeight: 20,
   },
   tipsContainer: {
-    backgroundColor: '#27272a',
+    backgroundColor: COLORS.bgCardLight,
     padding: 12,
     borderRadius: 12,
     marginBottom: 12,
@@ -401,6 +407,7 @@ const styles = StyleSheet.create({
     borderRadius: 18,
   },
   phraseText: {
+    fontFamily: FONT.semibold,
     color: '#38bdf8',
     fontSize: 12,
     fontWeight: '600',
@@ -428,6 +435,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
   },
   sendBtnText: {
+    fontFamily: FONT.bold,
     color: '#ffffff',
     fontWeight: '700',
     fontSize: 13,
