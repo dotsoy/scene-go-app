@@ -15,6 +15,10 @@ export interface CardData {
   localTip: string;
   languageCode: string;
   badgeColor?: string;
+  /** 备用表达短语（当地语言 (中文翻译)），点击可朗读 */
+  phrases?: string[];
+  /** 出行提示列表（LOCAL PROTOCOL 展开） */
+  tips?: string[];
 }
 
 interface FlashCardViewProps {
@@ -78,6 +82,35 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
 
         {/* 读音与补充说明 */}
         <Text style={styles.phoneticText}>{card.phonetic}</Text>
+
+        {/* 备用表达短语（点击朗读） */}
+        {card.phrases && card.phrases.length > 0 && (
+          <View style={styles.phrasesBlock}>
+            <Text style={styles.phrasesHeader}>常用表达</Text>
+            {card.phrases.slice(0, 3).map((phrase, idx) => (
+              <TouchableOpacity
+                key={idx}
+                style={styles.phraseRow}
+                onPress={() =>
+                  Speech.speak(phrase.split('(')[0].trim(), {
+                    language: card.languageCode,
+                    pitch: 1.0,
+                    rate: 0.85,
+                  })
+                }
+                activeOpacity={0.6}
+              >
+                <Text style={styles.phraseLocal} numberOfLines={1}>
+                  {phrase.split('(')[0].trim()}
+                </Text>
+                <Text style={styles.phraseZh} numberOfLines={1}>
+                  {phrase.includes('(') ? phrase.slice(phrase.indexOf('(') + 1, phrase.lastIndexOf(')')) : ''}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        )}
+
         <Text style={styles.englishText}>{card.subText}</Text>
 
         {/* 底部双操作按钮栏：PLAY AUDIO (左) 与 放大显眼的 NEXT CARD 按钮 (右) */}
@@ -96,6 +129,16 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
       <View style={styles.tipBox}>
         <Text style={styles.tipHeader}>LOCAL PROTOCOL</Text>
         <Text style={styles.tipBody}>{card.localTip}</Text>
+        {card.tips && card.tips.length > 0 && (
+          <View style={styles.tipList}>
+            {card.tips.map((tip, idx) => (
+              <View key={idx} style={styles.tipRow}>
+                <Text style={styles.tipBullet}>•</Text>
+                <Text style={styles.tipRowText}>{tip}</Text>
+              </View>
+            ))}
+          </View>
+        )}
         {tipActionLabel && onTipAction && (
           <TouchableOpacity style={styles.tipActionRow} onPress={onTipAction} activeOpacity={0.7}>
             <Text style={styles.tipActionText}>{tipActionLabel} ›</Text>
@@ -192,7 +235,41 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
     color: COLORS.textSecondary,
     fontSize: 13,
-    marginBottom: 4,
+    marginBottom: 10,
+  },
+  phrasesBlock: {
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    marginBottom: 12,
+  },
+  phrasesHeader: {
+    fontFamily: FONT.mono,
+    color: COLORS.textTertiary,
+    fontSize: 9,
+    letterSpacing: 1,
+    marginBottom: 6,
+  },
+  phraseRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  phraseLocal: {
+    fontFamily: FONT.semibold,
+    color: '#e4e4e7',
+    fontSize: 13,
+    flex: 1,
+  },
+  phraseZh: {
+    fontFamily: FONT.regular,
+    color: COLORS.textTertiary,
+    fontSize: 11,
+    marginLeft: 12,
   },
   englishText: {
     fontFamily: FONT.regular,
@@ -266,5 +343,24 @@ const styles = StyleSheet.create({
     color: '#d4d4d8',
     fontSize: 12,
     lineHeight: 18,
+  },
+  tipList: {
+    marginTop: 6,
+  },
+  tipRow: {
+    flexDirection: 'row',
+    marginTop: 4,
+  },
+  tipBullet: {
+    color: COLORS.accentYellow,
+    marginRight: 6,
+    fontSize: 12,
+  },
+  tipRowText: {
+    fontFamily: FONT.regular,
+    color: '#c4c4cc',
+    fontSize: 11,
+    lineHeight: 16,
+    flex: 1,
   },
 });

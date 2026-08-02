@@ -31,7 +31,8 @@ const CARD_SYSTEM_PROMPT = `你是 SceneGo 出行助手。用户正在异国旅�
   "phonetic": "当地语言发音的拉丁转写",
   "subText": "补充说明（当地语言或英文）",
   "localTip": "中文当地惯例提示（小费/计费/注意事项）",
-  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）"
+  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）",
+  "phrases": ["备用表达1（当地语言，括号内中文翻译）", "备用表达2（当地语言，括号内中文翻译）", "备用表达3（当地语言，括号内中文翻译）"]
 }`;
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
