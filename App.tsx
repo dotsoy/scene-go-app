@@ -51,7 +51,7 @@ const TAP_TALK_CARD: CardData = {
 };
 
 export default Sentry.wrap(function App() {
-  // 字体加载：未就绪前保持启动画面
+  // 字体加载：未就绪前保持启动画面（注意：必须放在所有 hooks 之后提前返回，避免 hooks 数量跳变崩溃）
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
     'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
@@ -60,13 +60,6 @@ export default Sentry.wrap(function App() {
     'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
     'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
   });
-  if (!fontsLoaded) {
-    return (
-      <View style={styles.fontLoading}>
-        <ActivityIndicator size="large" color="#4fc3f7" />
-      </View>
-    );
-  }
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
@@ -490,6 +483,15 @@ export default Sentry.wrap(function App() {
     setNotes((prev) => prev.filter((n) => n.id !== id));
     noteStore.remove(id);
   };
+
+  // 字体加载完成前保持启动画面（所有 hooks 已执行，此处提前返回安全）
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.fontLoading}>
+        <ActivityIndicator size="large" color="#4fc3f7" />
+      </View>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
