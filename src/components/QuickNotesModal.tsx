@@ -33,13 +33,16 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
   const [searchQuery, setSearchQuery] = useState('');
   // 全屏大字展示的笔记
   const [displayNote, setDisplayNote] = useState<NoteItem | null>(null);
+  // 列表分类过滤 tab（'ALL' 或分类名）
+  const [categoryFilter, setCategoryFilter] = useState('ALL');
 
   const categories = ['VOUCHER', 'VOICE', 'CARD', 'BILL'];
 
   const filteredNotes = notes.filter(
     (item) =>
-      item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.category.toLowerCase().includes(searchQuery.toLowerCase())
+      (categoryFilter === 'ALL' || item.category === categoryFilter) &&
+      (item.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 
   const handleSave = () => {
@@ -134,6 +137,26 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
             <TouchableOpacity style={styles.submitBtn} onPress={handleSave}>
               <Text style={styles.submitBtnText}>SAVE NOTE</Text>
             </TouchableOpacity>
+          </View>
+
+          {/* 分类过滤 tab */}
+          <View style={styles.filterRow}>
+            {['ALL', ...categories].map((cat) => (
+              <TouchableOpacity
+                key={cat}
+                style={[styles.filterTag, categoryFilter === cat && styles.filterTagActive]}
+                onPress={() => setCategoryFilter(cat)}
+              >
+                <Text
+                  style={[
+                    styles.filterTagText,
+                    categoryFilter === cat && styles.filterTagTextActive,
+                  ]}
+                >
+                  {cat}
+                </Text>
+              </TouchableOpacity>
+            ))}
           </View>
 
           {/* 列表 */}
@@ -343,6 +366,31 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
     marginBottom: 10,
+  },
+  filterRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 10,
+  },
+  filterTag: {
+    backgroundColor: '#1c1c1e',
+    paddingHorizontal: 12,
+    paddingVertical: 5,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+  },
+  filterTagActive: {
+    backgroundColor: '#ffffff',
+  },
+  filterTagText: {
+    color: '#a1a1aa',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  filterTagTextActive: {
+    color: '#000000',
   },
   listContent: {
     paddingBottom: 20,
