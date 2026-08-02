@@ -13,6 +13,7 @@
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
 		96905EF65AED1B983A6B3ABC /* libPods-SceneGo.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 58EEBF8E8E6FB1BC6CAF49B5 /* libPods-SceneGo.a */; };
 		B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */; };
+		C1D2E3F4A5B6C7D8E9F0A1B2 /* SceneGoSpeechRecognizer.m in Sources */ = {isa = PBXBuildFile; fileRef = B1C2D3E4F5A6B7C8D9E0F1A2 /* SceneGoSpeechRecognizer.m */; };
 		B2C3D4E5F67890123456789A /* SceneGoVisionClassifier.m in Sources */ = {isa = PBXBuildFile; fileRef = A1B2C3D4E5F6789012345678 /* SceneGoVisionClassifier.m */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
 		BD38E1D7303021AA64285F3D /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = B594153BE79EBB22A3CE5860 /* PrivacyInfo.xcprivacy */; };
@@ -31,6 +32,8 @@
 		A1B2C3D4E5F6789012345678 /* SceneGoVisionClassifier.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objc; name = SceneGoVisionClassifier.m; path = SceneGo/Classifier/SceneGoVisionClassifier.m; sourceTree = "<group>"; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = SceneGo/SplashScreen.storyboard; sourceTree = "<group>"; };
 		B594153BE79EBB22A3CE5860 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = SceneGo/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		B1C2D3E4F5A6B7C8D9E0F1A2 /* SceneGoSpeechRecognizer.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = SceneGoSpeechRecognizer.m; path = SceneGo/Speech/SceneGoSpeechRecognizer.m; sourceTree = "<group>"; };
+		B1C2D3E4F5A6B7C8D9E0F1A3 /* SceneGoSpeechRecognizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SceneGoSpeechRecognizer.h; path = SceneGo/Speech/SceneGoSpeechRecognizer.h; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		FAC715A2D49A985799AEE119 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-SceneGo/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
@@ -48,7 +51,7 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		13B07FAE1A68108700A75B9A /* SceneGo */ = {
+			13B07FAE1A68108700A75B9A /* SceneGo */ = {
 			isa = PBXGroup;
 			children = (
 				BB2F792B24A3F905000567C9 /* Supporting */,
@@ -59,6 +62,8 @@
 				13B07FB71A68108700A75B9A /* main.m */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
 				B594153BE79EBB22A3CE5860 /* PrivacyInfo.xcprivacy */,
+				B1C2D3E4F5A6B7C8D9E0F1A2 /* SceneGoSpeechRecognizer.m */,
+				B1C2D3E4F5A6B7C8D9E0F1A3 /* SceneGoSpeechRecognizer.h */,
 			);
 			name = SceneGo;
 			sourceTree = "<group>";
@@ -342,6 +347,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B2C3D4E5F67890123456789A /* SceneGoVisionClassifier.m in Sources */,
+				C1D2E3F4A5B6C7D8E9F0A1B2 /* SceneGoSpeechRecognizer.m in Sources */,
 				13B07FBC1A68108700A75B9A /* AppDelegate.mm in Sources */,
 				13B07FC11A68108700A75B9A /* main.m in Sources */,
 				B18059E884C0ABDD17F3DC3D /* ExpoModulesProvider.swift in Sources */,

@@ -45,7 +45,7 @@ RCT_EXPORT_METHOD(startListening:(NSString *)localeStr
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 {
-    [SFSpeechRecognizer requestAuthorization:^(SFSpeechRestrictedState status) {
+    [SFSpeechRecognizer requestAuthorization:^(SFSpeechRecognizerAuthorizationStatus status) {
         dispatch_async(dispatch_get_main_queue(), ^{
             if (status != SFSpeechRecognizerAuthorizationStatusAuthorized) {
                 reject(@"auth_denied", @"Speech recognition permission denied", nil);
@@ -104,7 +104,7 @@ RCT_EXPORT_METHOD(startListening:(NSString *)localeStr
     }];
 
     AVAudioFormat *recordingFormat = [inputNode outputFormatForBus:0];
-    [inputNode tapOnBus:0 bufferSize:1024 format:recordingFormat block:^(AVAudioPCMBuffer * _Nonnull buffer, AVAudioTime * _Nonnull when) {
+    [inputNode installTapOnBus:0 bufferSize:1024 format:recordingFormat block:^(AVAudioPCMBuffer * _Nonnull buffer, AVAudioTime * _Nonnull when) {
         [weakSelf.recognitionRequest appendAudioPCMBuffer:buffer];
     }];
 
