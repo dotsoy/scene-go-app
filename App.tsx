@@ -495,11 +495,12 @@ export default Sentry.wrap(function App() {
   }
 
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ExpoStatusBar style="light" />
-      <StatusBar barStyle="light-content" />
+    // 渐变背景最外层（全屏含安全区），SafeAreaView 透明内嵌负责安全区留白
+    <CameraBackground>
+      <SafeAreaView style={styles.safeArea}>
+        <ExpoStatusBar style="light" />
+        <StatusBar barStyle="light-content" />
 
-      <CameraBackground>
         <View style={styles.mainLayout}>
           {/* Top Header */}
           <View style={styles.topHeader}>
@@ -704,15 +705,15 @@ export default Sentry.wrap(function App() {
           profile={userProfile}
           onClose={() => setIsSafetyDetailOpen(false)}
         />
-      </CameraBackground>
-    </SafeAreaView>
+      </SafeAreaView>
+    </CameraBackground>
   );
 });
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#09090b',
+    backgroundColor: 'transparent',
   },
   fontLoading: {
     flex: 1,
