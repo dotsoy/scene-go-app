@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { useDoubleTap } from '../utils/useDoubleTap';
 
 interface ControlBarProps {
   isCameraActive: boolean;
@@ -9,7 +10,12 @@ interface ControlBarProps {
   onCaptureFrame: () => void;
   /** 相机开启时取消：退出取景但不触发云端分析 */
   onCancelCamera: () => void;
-  onToggleMic: () => void;
+  /** 麦克风启动（MIC OFF 态点按） */
+  onStartMic: () => void;
+  /** 麦克风单击：停止转录，不做任何操作 */
+  onMicSingleTap: () => void;
+  /** 麦克风双击：停止转录，理解意图生成表达卡 */
+  onMicDoubleTap: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
   /** 打开工具箱抽屉（收纳 LOG/对话记录/设置） */
@@ -23,35 +29,15 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onToggleCamera,
   onCaptureFrame,
   onCancelCamera,
-  onToggleMic,
+  onStartMic,
+  onMicSingleTap,
+  onMicDoubleTap,
   onToggleCard,
   onOpenNotes,
   onOpenTools,
 }) => {
-  // SNAP 双击/单击：双击 = 拍照+云端分析+关闭相机；单击 = 仅关闭相机不分析
-  const DOUBLE_TAP_MS = 280;
-  const tapTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  useEffect(() => {
-    return () => {
-      if (tapTimerRef.current) clearTimeout(tapTimerRef.current);
-    };
-  }, []);
-
-  const handleSnapPress = () => {
-    if (tapTimerRef.current) {
-      // 双击窗口内第二次点击：拍照 + 分析 + 关闭相机
-      clearTimeout(tapTimerRef.current);
-      tapTimerRef.current = null;
-      onCaptureFrame();
-      return;
-    }
-    // 首击：等待双击窗口；窗口内无第二击则单击关闭相机（不做任何操作）
-    tapTimerRef.current = setTimeout(() => {
-      tapTimerRef.current = null;
-      onCancelCamera();
-    }, DOUBLE_TAP_MS);
-  };
+  const handleSnapPress = useDoubleTap(onCancelCamera, onCaptureFrame);
+  const handleMicPress = useDoubleTap(onMicSingleTap, onMicDoubleTap);
   return (
     <View style={styles.barContainer}>
       {/* 摄像头开关：双击 = 拍照+分析+关相机；单击 = 仅关闭不分析 */}
@@ -70,16 +56,25 @@ export const ControlBar: React.FC<ControlBarProps> = ({
         </TouchableOpacity>
       )}
 
-      {/* 麦克风开关 */}
-      <TouchableOpacity
-        style={[styles.btn, isMicActive ? styles.btnActive : styles.btnMuted]}
-        onPress={onToggleMic}
-        activeOpacity={0.75}
-      >
-        <Text style={[styles.btnText, isMicActive && styles.btnTextActive]} numberOfLines={1}>
-          {isMicActive ? 'MIC ON' : 'MIC OFF'}
-        </Text>
-      </TouchableOpacity>
+      {/* 麦克风开关：双击 = 停止+理解意图生成卡；单击 = 仅关闭不操作 */}
+      {isMicActive ? (
+        <TouchableOpacity
+          style={[styles.btn, styles.btnActive]}
+          onPress={handleMicPress}
+          activeOpacity={0.75}
+        >
+          <Text style={[styles.btnText, styles.btnTextActive]} numberOfLines={1}>MIC</Text>
+          <Text style={styles.btnHint} numberOfLines={1}>双击生成卡 · 单击关闭</Text>
+        </TouchableOpacity>
+      ) : (
+        <TouchableOpacity
+          style={[styles.btn, styles.btnMuted]}
+          onPress={onStartMic}
+          activeOpacity={0.75}
+        >
+          <Text style={styles.btnText} numberOfLines={1}>MIC OFF</Text>
+        </TouchableOpacity>
+      )}
 
       {/* FlashCard 开关 */}
       <TouchableOpacity

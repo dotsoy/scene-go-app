@@ -14,7 +14,6 @@ import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { scenarioToCard } from './src/utils/cardBuilder';
-import { detectCardIntent } from './src/utils/intentDetector';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
@@ -268,35 +267,55 @@ export default Sentry.wrap(function App() {
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
-  const handleToggleMic = async () => {
-    if (!micActiveRef.current) {
-      // 期望状态先行，杜绝授权异步窗口内的重复触发
-      micActiveRef.current = true;
-      liveTranscriptRef.current = '';
-      setIsMicActive(true);
-      setLiveTranscript('正在开启原生听写，请说话...');
-      const started = await NativeSpeech.start('zh-CN');
-      if (!started.ok) {
-        // 启动失败：若用户已快速关回（micActiveRef 已 false）则静默，否则回滚并展示真实原因
-        if (micActiveRef.current) {
-          micActiveRef.current = false;
-          setIsMicActive(false);
-          setLiveTranscript(`语音识别启动失败: ${started.error}`);
-        }
+  /** 启动麦克风（MIC OFF 态点按） */
+  const handleStartMic = async () => {
+    // 期望状态先行，杜绝授权异步窗口内的重复触发
+    micActiveRef.current = true;
+    liveTranscriptRef.current = '';
+    setIsMicActive(true);
+    setLiveTranscript('正在开启原生听写，请说话...');
+    const started = await NativeSpeech.start('zh-CN');
+    if (!started.ok) {
+      // 启动失败：若用户已快速关回（micActiveRef 已 false）则静默，否则回滚并展示真实原因
+      if (micActiveRef.current) {
+        micActiveRef.current = false;
+        setIsMicActive(false);
+        setLiveTranscript(`语音识别启动失败: ${started.error}`);
       }
-    } else {
-      micActiveRef.current = false;
-      setIsMicActive(false);
-      await NativeSpeech.stop();
-      // 从 ref 读取最新转录：await 期间到达的 final 事件不会丢失
-      const finalTranscript = liveTranscriptRef.current;
-      if (finalTranscript && !finalTranscript.includes('正在开启')) {
-        handleAddNote(finalTranscript, 'VOICE');
-        // 弱自动：命中意图关键词则生成当地语言表达卡（异步，不阻塞停止流程）
-        handleMaybeGenerateCardFromSpeech(finalTranscript);
+    }
+  };
+
+  /** 停止麦克风，返回最终转录文本（await 期间到达的 final 事件不会丢失） */
+  const stopMic = async (): Promise<string> => {
+    micActiveRef.current = false;
+    setIsMicActive(false);
+    await NativeSpeech.stop();
+    const finalTranscript = liveTranscriptRef.current;
+    liveTranscriptRef.current = '';
+    setLiveTranscript('');
+    return finalTranscript;
+  };
+
+  /** 麦克风单击：停止转录，不做任何操作 */
+  const handleMicSingleTap = async () => {
+    await stopMic();
+  };
+
+  /** 麦克风双击：停止转录，理解意图生成表达卡（双击即显式意图信号） */
+  const handleMicDoubleTap = async () => {
+    const transcript = await stopMic();
+    if (!transcript || transcript.includes('正在开启')) return;
+    handleAddNote(transcript, 'VOICE');
+    setIsProcessing(true);
+    try {
+      const result = await pluginManager.generateCardFromText(transcript);
+      if (result && result.targetText) {
+        addExpressionCard(scenarioToCard(result, '当前位置'));
       }
-      liveTranscriptRef.current = '';
-      setLiveTranscript('');
+    } catch (err) {
+      console.warn('[Voice Card Error]:', err);
+    } finally {
+      setIsProcessing(false);
     }
   };
 
@@ -329,22 +348,6 @@ export default Sentry.wrap(function App() {
     setCards((prev) => [card, ...prev.filter((c) => c.id !== card.id)]);
     setCardIndex(0);
     setIsCardVisible(true);
-  };
-
-  /** 语音意图弱自动：转录命中意图关键词 → 文本驱动动态卡生成 */
-  const handleMaybeGenerateCardFromSpeech = async (transcript: string) => {
-    if (!transcript || !detectCardIntent(transcript)) return;
-    setIsProcessing(true);
-    try {
-      const result = await pluginManager.generateCardFromText(transcript);
-      if (result && result.targetText) {
-        addExpressionCard(scenarioToCard(result, '当前位置'));
-      }
-    } catch (err) {
-      console.warn('[Voice Card Error]:', err);
-    } finally {
-      setIsProcessing(false);
-    }
   };
 
   const handleAddNote = (content: string, category: string) => {
@@ -452,7 +455,9 @@ export default Sentry.wrap(function App() {
               setIsCameraReady(false);
               setIsCameraActive(false);
             }}
-            onToggleMic={handleToggleMic}
+            onStartMic={handleStartMic}
+            onMicSingleTap={handleMicSingleTap}
+            onMicDoubleTap={handleMicDoubleTap}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
             onOpenTools={() => setIsToolsOpen(true)}
