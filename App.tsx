@@ -4,6 +4,8 @@ import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
 import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
+import { CameraPreviewBox } from './src/components/CameraPreviewBox';
+import { CaptureDock } from './src/components/CaptureDock';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal } from './src/components/QuickNotesModal';
@@ -497,7 +499,7 @@ export default Sentry.wrap(function App() {
       <ExpoStatusBar style="light" />
       <StatusBar barStyle="light-content" />
 
-      <CameraBackground isCameraActive={isCameraActive} cameraRef={cameraRef} onCameraReady={() => setIsCameraReady(true)}>
+      <CameraBackground>
         <View style={styles.mainLayout}>
           {/* Top Header */}
           <View style={styles.topHeader}>
@@ -574,10 +576,14 @@ export default Sentry.wrap(function App() {
             </View>
           ) : null}
 
-          {/* Center Card */}
+          {/* Center Card / 内嵌取景 */}
           <View style={styles.centerCardArea}>
-            {/* 相机取景时隐藏卡片占位，避免 CARD HIDDEN 叠在取景框上 */}
-            {isCameraActive ? null : isCardVisible ? (
+            {isCameraActive ? (
+              <CameraPreviewBox
+                cameraRef={cameraRef}
+                onCameraReady={() => setIsCameraReady(true)}
+              />
+            ) : isCardVisible ? (
               <FlashCardView
                 card={currentCard}
                 currentIndex={cardIndex}
@@ -605,21 +611,25 @@ export default Sentry.wrap(function App() {
             )}
           </View>
 
-          {/* Bottom Floating Control Bar */}
-          <ControlBar
+          {/* 卡片下方的输入双按钮：CAM 拍照 / MIC 说话 */}
+          <CaptureDock
             isCameraActive={isCameraActive}
             isMicActive={isMicActive}
-            isCardVisible={isCardVisible}
-            onToggleCamera={handleToggleCamera}
-            onCaptureFrame={handleCaptureFrame}
-            onCancelCamera={() => {
-              // 取消：只退出取景，不拍照、不触发云端分析
+            onCamTap={handleToggleCamera}
+            onCamDoubleTap={handleCaptureFrame}
+            onCamSingleTap={() => {
+              // 单击：只退出取景，不拍照、不触发云端分析
               setIsCameraReady(false);
               setIsCameraActive(false);
             }}
-            onStartMic={handleStartMic}
-            onMicSingleTap={handleMicSingleTap}
+            onMicTap={handleStartMic}
             onMicDoubleTap={handleMicDoubleTap}
+            onMicSingleTap={handleMicSingleTap}
+          />
+
+          {/* Bottom Control Bar：仅状态开关与入口 */}
+          <ControlBar
+            isCardVisible={isCardVisible}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
             onOpenTools={() => setIsToolsOpen(true)}

@@ -1,23 +1,10 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ControlBarBtn } from './ControlBarBtn';
-import { useDoubleTap } from '../utils/useDoubleTap';
 import { COLORS, LAYOUT } from '../theme/tokens';
 
 interface ControlBarProps {
-  isCameraActive: boolean;
-  isMicActive: boolean;
   isCardVisible: boolean;
-  onToggleCamera: () => void;
-  onCaptureFrame: () => void;
-  /** 相机开启时取消：退出取景但不触发云端分析 */
-  onCancelCamera: () => void;
-  /** 麦克风启动（MIC OFF 态点按） */
-  onStartMic: () => void;
-  /** 麦克风单击：停止转录，不做任何操作 */
-  onMicSingleTap: () => void;
-  /** 麦克风双击：停止转录，理解意图生成表达卡 */
-  onMicDoubleTap: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
   /** 打开工具箱抽屉（收纳 LOG/对话记录/设置） */
@@ -25,45 +12,17 @@ interface ControlBarProps {
 }
 
 /**
- * 底部控制栏（精修版）：相机态不改变按钮形态——
- * 始终 5 个同形按钮，仅状态变化：
- * - CAM：关闭时点按开启；开启后高亮，双击=拍照分析+关相机，单击=仅关闭
- * - MIC：双击=停止+生成卡，单击=仅停止
+ * 底部控制栏（卡片中心化后精简版）：CAM/MIC 已上移到卡片下方的 CaptureDock，
+ * 此处仅保留状态开关与入口：CARD / NOTES / MORE。
  */
 export const ControlBar: React.FC<ControlBarProps> = ({
-  isCameraActive,
-  isMicActive,
   isCardVisible,
-  onToggleCamera,
-  onCaptureFrame,
-  onCancelCamera,
-  onStartMic,
-  onMicSingleTap,
-  onMicDoubleTap,
   onToggleCard,
   onOpenNotes,
   onOpenTools,
 }) => {
-  // CAM：双击 = 拍照+云端分析+关闭相机；单击 = 仅关闭相机
-  const handleCamPress = useDoubleTap(onCancelCamera, onCaptureFrame);
-  // MIC：双击 = 停止+生成卡；单击 = 仅停止
-  const handleMicPress = useDoubleTap(onMicSingleTap, onMicDoubleTap);
-  const micPress = isMicActive ? handleMicPress : onStartMic;
-
   return (
     <View style={styles.bar}>
-      <ControlBarBtn
-        label={isCameraActive ? 'CAM ON' : 'CAM OFF'}
-        active={isCameraActive}
-        hint={isCameraActive ? '双击分析 · 单击关闭' : undefined}
-        onPress={isCameraActive ? handleCamPress : onToggleCamera}
-      />
-      <ControlBarBtn
-        label={isMicActive ? 'MIC ON' : 'MIC OFF'}
-        active={isMicActive}
-        hint={isMicActive ? '双击生成卡 · 单击关闭' : undefined}
-        onPress={micPress}
-      />
       <ControlBarBtn
         label={isCardVisible ? 'CARD ON' : 'CARD OFF'}
         active={isCardVisible}

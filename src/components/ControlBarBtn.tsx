@@ -8,6 +8,10 @@ interface ControlBarBtnProps {
   hint?: string;
   /** 激活态（绿，带光晕） */
   active?: boolean;
+  /** 危险/拍摄态（红调，无光晕） */
+  danger?: boolean;
+  /** 加高（卡片区输入按钮用） */
+  tall?: boolean;
   onPress: () => void;
 }
 
@@ -21,15 +25,22 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
   label,
   hint,
   active,
+  danger,
+  tall,
   onPress,
 }) => {
   return (
     <Pressable
       style={({ pressed }) => [
         styles.btn,
+        tall && styles.btnTall,
         hint && styles.btnWide,
         pressed && styles.btnPressed,
-        active ? styles.btnActive : styles.btnIdle,
+        danger
+          ? styles.btnDanger
+          : active
+            ? styles.btnActive
+            : styles.btnIdle,
         active && styles.glowActive,
       ]}
       onPress={onPress}
@@ -37,9 +48,20 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
       {({ pressed }) => (
         <>
           <View style={[styles.labelRow, pressed && styles.labelRowPressed]}>
-            {active && <View style={styles.stateDot} />}
+            {(active || danger) && (
+              <View
+                style={[styles.stateDot, danger ? styles.dotDanger : styles.dotActive]}
+              />
+            )}
             <Text
-              style={[styles.label, active ? styles.labelActive : styles.labelIdle]}
+              style={[
+                styles.label,
+                danger
+                  ? styles.labelDanger
+                  : active
+                    ? styles.labelActive
+                    : styles.labelIdle,
+              ]}
               numberOfLines={1}
             >
               {label}
@@ -69,6 +91,9 @@ const styles = StyleSheet.create({
   btnWide: {
     minWidth: 90,
   },
+  btnTall: {
+    height: 48,
+  },
   btnPressed: {
     transform: [{ scale: 0.96 }],
     opacity: 0.85,
@@ -77,6 +102,10 @@ const styles = StyleSheet.create({
   btnIdle: {
     backgroundColor: 'rgba(255,255,255,0.07)',
     borderColor: 'rgba(255,255,255,0.14)',
+  },
+  btnDanger: {
+    backgroundColor: 'rgba(244,67,54,0.18)',
+    borderColor: 'rgba(239,83,80,0.4)',
   },
   btnActive: {
     backgroundColor: 'rgba(76,175,80,0.18)',
@@ -101,7 +130,15 @@ const styles = StyleSheet.create({
     height: 4,
     borderRadius: 2,
     marginRight: 5,
+  },
+  dotActive: {
     backgroundColor: COLORS.accentGreen,
+  },
+  dotDanger: {
+    backgroundColor: COLORS.accentRed,
+  },
+  dotDanger: {
+    backgroundColor: COLORS.accentRed,
   },
   label: {
     fontFamily: FONT.bold,
@@ -113,6 +150,9 @@ const styles = StyleSheet.create({
   },
   labelActive: {
     color: COLORS.accentGreen,
+  },
+  labelDanger: {
+    color: COLORS.accentRed,
   },
   hint: {
     fontFamily: FONT.regular,
