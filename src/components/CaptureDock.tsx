@@ -58,8 +58,8 @@ export const CaptureDock: React.FC<CaptureDockProps> = ({
 const styles = StyleSheet.create({
   dock: {
     flexDirection: 'row',
+    justifyContent: 'center',
     gap: 12,
-    paddingHorizontal: 20,
     paddingTop: 6,
     paddingBottom: 8,
   },

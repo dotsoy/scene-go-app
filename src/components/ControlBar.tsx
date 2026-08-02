@@ -24,12 +24,13 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   return (
     <View style={styles.bar}>
       <ControlBarBtn
+        fill
         label={isCardVisible ? 'CARD ON' : 'CARD OFF'}
         active={isCardVisible}
         onPress={onToggleCard}
       />
-      <ControlBarBtn label="NOTES" onPress={onOpenNotes} />
-      <ControlBarBtn label="MORE" onPress={onOpenTools} />
+      <ControlBarBtn fill label="NOTES" onPress={onOpenNotes} />
+      <ControlBarBtn fill label="MORE" onPress={onOpenTools} />
     </View>
   );
 };
@@ -37,10 +38,10 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 const styles = StyleSheet.create({
   bar: {
     height: LAYOUT.mainBarHeight,
-    // 无独立底色/描边：按钮直接浮在主背景（渐变全屏）上
+    // 无独立底色/描边：按钮直接浮在主背景（渐变全屏）上；fill 按钮均分填充
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    gap: 10,
     paddingHorizontal: 14,
     paddingBottom: 4,
   },

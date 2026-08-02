@@ -12,6 +12,8 @@ interface ControlBarBtnProps {
   danger?: boolean;
   /** 加高（卡片区输入按钮用） */
   tall?: boolean;
+  /** 填充剩余宽度（底部栏均分） */
+  fill?: boolean;
   onPress: () => void;
 }
 
@@ -27,6 +29,7 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
   active,
   danger,
   tall,
+  fill,
   onPress,
 }) => {
   return (
@@ -34,6 +37,7 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
       style={({ pressed }) => [
         styles.btn,
         tall && styles.btnTall,
+        fill && styles.btnFill,
         hint && styles.btnWide,
         pressed && styles.btnPressed,
         danger
@@ -93,6 +97,9 @@ const styles = StyleSheet.create({
   },
   btnTall: {
     height: 48,
+  },
+  btnFill: {
+    flex: 1,
   },
   btnPressed: {
     transform: [{ scale: 0.96 }],
