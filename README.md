@@ -1,70 +1,115 @@
 # SceneGo
 
-SceneGo is a context-aware mobile translation application built with Expo (React Native) and Python. It automatically detects real-time travel contexts (airport taxi, dining allergen warnings, tax refunds, emergency SOS) using LBS geofencing and motion sensors, rendering high-contrast flash cards for instant local communication.
+Zero-search, context-aware travel assistance for overseas trips. Point the camera at a menu, sign, or ticket machine — SceneGo reads the scene, explains it, and hands you a high-contrast local-language flash card to show a driver, cashier, or police officer.
+
+Built with Expo / React Native. Client-only: no backend required.
+
+## Features
+
+- **Scene snapshot analysis** — capture a photo, cloud vision model interprets the scene (menu, signboard, station, store) and returns a structured interpretation with tips and useful phrases.
+- **Multi-turn follow-up** — keep asking about the same photo (prices, allergens, directions). Conversations persist locally and can be resumed later.
+- **Zero-search flash cards** — high-contrast, large-type cards for high-frequency needs (taxi by meter, allergen warnings, tax refund, SOS), with local-language TTS.
+- **Realtime speech transcription** — native iOS `SFSpeechRecognizer` bridge (Expo Local Module) with live transcript banner and auto-archiving to notes.
+- **Quick notes** — vouchers, Wi-Fi passwords, refund numbers; persist across launches, one-tap copy, fullscreen large-type display, and voice-memo auto-archive.
+- **Session history** — past snapshot conversations are saved locally (AsyncStorage) and restorable.
+- **Plugin architecture** — OCR / matcher / speech engines are pluggable:
+  - Cloud OCR: OpenRouter vision models (`openrouter/free`)
+  - Local matcher: keyword dictionary with Chinese/English/Thai/Japanese coverage
+  - Optional on-device: Qwen2.5-0.5B (llama.rn) and Whisper-Tiny (whisper.rn)
+- **Crash reporting** — Sentry with source maps and dSYM upload.
 
 ## Architecture
 
-- **Frontend (`App.tsx`, `src/components/`)**: Single-page Expo (React Native) app with camera feed toggle, zero-search flash cards, TTS audio playback, and quick notes modal.
-- **Backend Engine (`server/`)**: FastAPI server (`server/main.py`) providing location scenario inference (`server/engine/scene_detector.py`) and multilingual card templates (`server/engine/card_templates.py`).
-
-## Directory Structure
-
-```text
-scenego/
-├── App.tsx                     # Expo React Native App Entry Point
-├── app.json                    # Expo Configuration & Permissions
-├── package.json                # Frontend Node Dependencies
-├── server/                     # Python Backend Engine & API
-│   ├── main.py                 # FastAPI Application Server
-│   ├── requirements.txt        # Python Dependencies
-│   ├── engine/                 # Scenario Inference & Card Generator
-│   │   ├── scene_detector.py
-│   │   └── card_templates.py
-│   └── tests/                  # Unit Tests
-│       └── test_scene_engine.py
-├── src/                        # Frontend Components
-│   └── components/
-│       ├── CameraBackground.tsx
-│       ├── FlashCardView.tsx
-│       ├── ControlBar.tsx
-│       └── QuickNotesModal.tsx
-└── docs/                       # Specifications & Strategy
-    ├── PRODUCT_STRATEGY.md
-    ├── PRD.md
-    ├── ARCHITECTURE.md
-    └── EXPO_PROJECT_MANAGEMENT.md
 ```
+┌────────────────────────────────────────────┐
+│ App (Expo / React Native)                  │
+│  App.tsx                                   │
+│  ├── CameraBackground ── snapshot          │
+│  ├── plugins/                              │
+│  │   ├── CloudVlmOcrPlugin  (OpenRouter)   │
+│  │   ├── LocalDictMatcherPlugin (offline)  │
+│  │   ├── QwenLocalPlugin / WhisperSpeech   │
+│  │   └── PluginManager (pipeline)          │
+│  ├── modules/scenego-speech (Swift,        │
+│  │   SFSpeechRecognizer Local Module)      │
+│  ├── utils/ SessionStore / NoteStore       │
+│  │         (AsyncStorage + Keychain)       │
+│  └── components/ FlashCard, Snapshot,      │
+│              Notes, Logs, SessionHistory   │
+└────────────────────────────────────────────┘
+```
+
+Recognition pipeline: snapshot → plugin pipeline (`recognizeText` → `match`) → structured `ScenarioResult` → flash card + follow-up chat.
 
 ## Quick Start
 
-### 1. Frontend (Expo / React Native)
+Requirements: Node 18+, Bun or npm, Xcode (iOS) with CocoaPods.
 
 ```bash
-# Install dependencies
-npm install
+# install dependencies
+bun install            # or: npm install
 
-# Start Expo dev server
+# iOS (native module autolinking, builds dev client)
+npx expo run:ios
+
+# or just Metro for Expo Go / web
 npx expo start
 ```
 
-### 2. Backend (FastAPI / Python Engine)
+### Environment variables
 
-```bash
-cd server
-pip install -r requirements.txt
-python3 main.py
+Create a `.env` file (`.env.example` committed as a template):
+
+```env
+# OpenRouter API key for cloud vision recognition
+EXPO_PUBLIC_OPENROUTER_API_KEY=sk-or-v1-...
+
+# Sentry (optional): auth token for source map / dSYM upload
+SENTRY_AUTH_TOKEN=...
 ```
 
-### 3. Run Unit Tests
+The API key is also configurable in-app (Settings → 识别引擎设置), stored in the iOS Keychain.
 
-```bash
-cd server
-python3 -m pytest tests/
+## Project Layout
+
+```text
+scenego/
+├── App.tsx                     # Entry: Sentry init, app state, modals
+├── app.json                    # Expo config, permissions, plugins
+├── modules/
+│   └── scenego-speech/         # Expo Local Module (Swift)
+│       ├── expo-module.config.json
+│       ├── ios/SceneGoSpeech.podspec
+│       └── ios/SceneGoSpeechRecognizer.swift
+├── src/
+│   ├── components/             # FlashCard, SnapshotDialog, ControlBar,
+│   │                           # QuickNotes, ApiLog, SessionHistory,
+│   │                           # PluginSelector, CameraBackground
+│   ├── plugins/                # OCR / matcher / speech plugins
+│   │   ├── PluginManager.ts    # pipeline: recognize → match
+│   │   └── ocr/ matchers/ speech/
+│   └── utils/                  # NativeSpeech, SessionStore, NoteStore,
+│                               # SecureConfig (Keychain), ApiLogger
+├── ios/                        # Expo prebuild output (custom native)
+├── docs/                       # PRD, architecture, strategy
+└── .env.example                # env template
 ```
 
-## Documentation
+## Native Module
 
-- [Product Strategy](docs/PRODUCT_STRATEGY.md)
-- [Product Requirements (PRD)](docs/PRD.md)
-- [System Architecture](docs/ARCHITECTURE.md)
-- [Expo Engineering & Project Management Plan](docs/EXPO_PROJECT_MANAGEMENT.md)
+`SceneGoSpeechRecognizer` is an **Expo Local Module** (`modules/scenego-speech`), auto-discovered by autolinking — no manual Xcode project edits required. It bridges `SFSpeechRecognizer` + `AVAudioEngine` for realtime dictation, with locale fallback (zh-CN → zh-* → en-US) and audio-session lifecycle management.
+
+## Tech Stack
+
+- Expo SDK 51 / React Native 0.74 (TypeScript)
+- expo-modules-core (Swift local module), expo-camera, expo-speech, expo-clipboard, expo-secure-store
+- AsyncStorage (sessions & notes), Sentry React Native
+- OpenRouter chat completions API for vision
+
+## Contributing
+
+PRs welcome. Keep changes focused, run `npx tsc --noEmit` before submitting, and test on both simulator and a physical device where possible (speech recognition differs).
+
+## License
+
+MIT
