@@ -99,10 +99,10 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 const styles = StyleSheet.create({
   bar: {
     height: LAYOUT.mainBarHeight,
-    // 与主题底色一致（近黑），避免蓝调色带与背景割裂
-    backgroundColor: 'rgba(9,9,11,0.9)',
+    // 中性炭灰（贴近 bgCard），比纯黑更有层次，且不带蓝调
+    backgroundColor: 'rgba(18,18,20,0.92)',
     borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.1)',
+    borderTopColor: 'rgba(255,255,255,0.12)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
