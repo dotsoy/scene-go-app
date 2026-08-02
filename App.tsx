@@ -11,6 +11,7 @@ import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
+import { modelManager } from './src/utils/ModelManager';
 import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
@@ -96,6 +97,15 @@ export default Sentry.wrap(function App() {
   const cameraRef = useRef<unknown>(null);
   // 最新转录文本的 ref 副本：避免 async 回调读取到过期的闭包 state
   const liveTranscriptRef = useRef<string>('');
+
+  // 启动时探测本地模型：已下载的 Qwen/Whisper 自动注册并激活，无文件则静默跳过（不影响云端主链路）
+  useEffect(() => {
+    modelManager.initializeExistingModels().then((loaded) => {
+      if (loaded) {
+        console.log('[Models] 本地模型已加载:', pluginManager.getActiveMatcherId());
+      }
+    });
+  }, []);
 
   // 绑定原生 iOS SFSpeechRecognizer 听写监听
   useEffect(() => {

@@ -44,6 +44,10 @@ class PluginManager {
     return this.activeOcrId;
   }
 
+  getActiveMatcherId(): string {
+    return this.activeMatcherId;
+  }
+
   getOcrPlugins(): OcrPlugin[] {
     return Array.from(this.ocrPlugins.values());
   }
