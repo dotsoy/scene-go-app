@@ -55,7 +55,8 @@
       ],
       "expo-secure-store",
       "./plugins/withSentryAlwaysOutOfDate",
-      "./plugins/withResetAutoSigning"
+      "./plugins/withResetAutoSigning",
+      "expo-font"
     ]
   }
 }

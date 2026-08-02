@@ -25,6 +25,7 @@ import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
 import * as Sentry from '@sentry/react-native';
+import { useFonts } from 'expo-font';
 
 Sentry.init({
   dsn: 'https://71913c9b41554c4dd80d559db168205a@o4511835504574464.ingest.us.sentry.io/4511835559428096',
@@ -48,6 +49,22 @@ const TAP_TALK_CARD: CardData = {
 };
 
 export default Sentry.wrap(function App() {
+  // 字体加载：未就绪前保持启动画面
+  const [fontsLoaded] = useFonts({
+    'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
+    'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
+    'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
+    'Inter-ExtraBold': require('./assets/fonts/Inter-ExtraBold.ttf'),
+    'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
+    'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
+  });
+  if (!fontsLoaded) {
+    return (
+      <View style={styles.fontLoading}>
+        <ActivityIndicator size="large" color="#4fc3f7" />
+      </View>
+    );
+  }
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
@@ -663,6 +680,12 @@ export default Sentry.wrap(function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
+    backgroundColor: '#09090b',
+  },
+  fontLoading: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#09090b',
   },
   mainLayout: {
