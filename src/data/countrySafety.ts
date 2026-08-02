@@ -31,6 +31,20 @@ export interface CountrySafety {
 
 export const COUNTRY_SAFETY: CountrySafety[] = [
   {
+    code: 'CN',
+    nameZh: '中国',
+    nameEn: 'China',
+    langCode: 'zh-CN',
+    emergency: { police: '110', ambulance: '120', fire: '119' },
+    embassy: '',
+    tipping: '无小费文化',
+    voltage: '220V · A/C/I 型插座',
+    currency: '人民币 CNY',
+    water: '自来水不建议直饮，喝烧开的水或瓶装水',
+    scams: ['景区门口"低价团"/黄牛票', '火车站/机场"好心人"代购车票骗局'],
+    sos: { local: '请帮我报警', phonetic: 'Qing bang wo bao jing' },
+  },
+  {
     code: 'TH',
     nameZh: '泰国',
     nameEn: 'Thailand',

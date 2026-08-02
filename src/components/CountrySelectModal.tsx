@@ -2,6 +2,11 @@ import React, { useEffect, useState } from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { COUNTRY_SAFETY } from '../data/countrySafety';
 import { PlaceContext } from '../utils/locationContext';
+import {
+  UserProfile,
+  NATIONALITY_OPTIONS,
+  LANGUAGE_OPTIONS,
+} from '../utils/userProfile';
 
 interface CountrySelectModalProps {
   visible: boolean;
@@ -9,37 +14,93 @@ interface CountrySelectModalProps {
   detected?: PlaceContext | null;
   /** 当前已选国家码（手动切换时预选） */
   currentCode?: string | null;
+  /** 已保存的用户档案（手动打开时预选） */
+  profile?: UserProfile | null;
   onClose: () => void;
-  onConfirm: (code: string) => void;
+  onConfirm: (code: string, profile: UserProfile) => void;
 }
 
+/** 首次启动/手动切换：设置用户档案（国籍+语言）+ 当前国家/地区 */
 export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
   visible,
   detected,
   currentCode,
+  profile,
   onClose,
   onConfirm,
 }) => {
   const [selected, setSelected] = useState<string>(currentCode ?? '');
+  const [nationality, setNationality] = useState<string>('CN');
+  const [language, setLanguage] = useState<string>('zh-CN');
 
   useEffect(() => {
     if (!visible) return;
-    // 预选：检测结果优先（若在支持列表内），否则当前选择，否则第一个
+    // 国家预选：检测结果优先（若在支持列表内），否则当前选择，否则第一个
     const detectedCode = detected?.countryCode ?? null;
     const valid = COUNTRY_SAFETY.some((c) => c.code === detectedCode);
     setSelected(valid ? detectedCode! : (currentCode ?? COUNTRY_SAFETY[0].code));
-  }, [visible, detected, currentCode]);
+    // 档案预选：已存档案优先；国籍缺省用检测结果或中国
+    if (profile) {
+      setNationality(profile.nationality);
+      setLanguage(profile.language);
+    } else {
+      const natValid = NATIONALITY_OPTIONS.some((n) => n.code === detectedCode);
+      setNationality(natValid ? detectedCode! : 'CN');
+      setLanguage('zh-CN');
+    }
+  }, [visible, detected, currentCode, profile]);
 
   const detectedSupported = detected?.countryCode
     ? COUNTRY_SAFETY.some((c) => c.code === detected.countryCode)
     : false;
 
+  const handleConfirm = () => {
+    if (!selected) return;
+    onConfirm(selected, { nationality, language });
+  };
+
   return (
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.sheet}>
-          <Text style={styles.title}>选择当前国家/地区</Text>
-          <Text style={styles.subtitle}>将按此国家生成安全信息与实用卡片</Text>
+          <Text style={styles.title}>设置您的档案</Text>
+          <Text style={styles.subtitle}>SceneGo 面向各国人士，请选择您的国籍与语言</Text>
+
+          {/* 档案：国籍 */}
+          <Text style={styles.sectionLabel}>您的国籍</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
+            {NATIONALITY_OPTIONS.map((n) => {
+              const active = nationality === n.code;
+              return (
+                <TouchableOpacity
+                  key={n.code}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => setNationality(n.code)}
+                >
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{n.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          {/* 档案：语言 */}
+          <Text style={styles.sectionLabel}>您的语言</Text>
+          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
+            {LANGUAGE_OPTIONS.map((l) => {
+              const active = language === l.code;
+              return (
+                <TouchableOpacity
+                  key={l.code}
+                  style={[styles.chip, active && styles.chipActive]}
+                  onPress={() => setLanguage(l.code)}
+                >
+                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{l.name}</Text>
+                </TouchableOpacity>
+              );
+            })}
+          </ScrollView>
+
+          <Text style={[styles.sectionLabel, styles.countryLabel]}>当前国家/地区（生成安全信息卡片）</Text>
 
           {detected && (
             <View style={styles.detectedBox}>
@@ -50,9 +111,9 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
               {detectedSupported ? (
                 <TouchableOpacity
                   style={styles.detectedUseBtn}
-                  onPress={() => onConfirm(detected.countryCode!)}
+                  onPress={() => setSelected(detected.countryCode!)}
                 >
-                  <Text style={styles.detectedUseText}>使用此国家</Text>
+                  <Text style={styles.detectedUseText}>使用检测结果</Text>
                 </TouchableOpacity>
               ) : (
                 <Text style={styles.detectedUnsupported}>
@@ -88,7 +149,7 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
           </ScrollView>
 
           <View style={styles.footer}>
-            <TouchableOpacity style={styles.confirmBtn} onPress={() => selected && onConfirm(selected)}>
+            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
               <Text style={styles.confirmBtnText}>确认</Text>
             </TouchableOpacity>
             <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
@@ -113,10 +174,23 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     padding: 20,
     paddingBottom: 32,
-    maxHeight: '80%',
+    maxHeight: '85%',
   },
   title: { color: '#ffffff', fontSize: 18, fontWeight: '800' },
-  subtitle: { color: '#a1a1aa', fontSize: 12, marginTop: 4, marginBottom: 14 },
+  subtitle: { color: '#a1a1aa', fontSize: 12, marginTop: 4, marginBottom: 12 },
+  sectionLabel: { color: '#38bdf8', fontSize: 12, fontWeight: '800', marginTop: 10, marginBottom: 8 },
+  countryLabel: { marginTop: 16 },
+  chipRow: { flexGrow: 0 },
+  chip: {
+    backgroundColor: '#27272a',
+    borderRadius: 14,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    marginRight: 6,
+  },
+  chipActive: { backgroundColor: 'rgba(56,189,248,0.2)' },
+  chipText: { color: '#a1a1aa', fontSize: 12, fontWeight: '600' },
+  chipTextActive: { color: '#38bdf8' },
   detectedBox: {
     backgroundColor: 'rgba(16,185,129,0.1)',
     borderColor: 'rgba(16,185,129,0.35)',

@@ -19,6 +19,7 @@ import { NativeSpeech } from './src/utils/NativeSpeech';
 import { scenarioToCard } from './src/utils/cardBuilder';
 import { getLocationContext, getPlaceContext, PlaceContext } from './src/utils/locationContext';
 import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore';
+import { loadUserProfile, saveUserProfile, UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
@@ -74,8 +75,9 @@ export default Sentry.wrap(function App() {
   // 表达卡栈：动态生成卡在前，Tap&Talk 兑底卡恒在末尾；cardIndex 指向当前展示卡
   const [cards, setCards] = useState<CardData[]>([TAP_TALK_CARD]);
   const [cardIndex, setCardIndex] = useState<number>(0);
-  // 当前国家/地区（缓存的用户选择）与 GPS 检测位置
+  // 当前国家/地区（缓存的用户选择）与 GPS 检测位置；用户档案（国籍+语言）
   const [currentCountry, setCurrentCountry] = useState<SavedCountry | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [detectedPlace, setDetectedPlace] = useState<PlaceContext | null>(null);
   const [isCountrySelectOpen, setIsCountrySelectOpen] = useState<boolean>(false);
   const [switchPrompt, setSwitchPrompt] = useState<{ detectedName: string } | null>(null);
@@ -386,9 +388,11 @@ export default Sentry.wrap(function App() {
     addExpressionCard(buildSafetyCard(country));
   };
 
-  /** 确认国家选择（首次启动/手动切换）：缓存 + 生成安全卡 */
-  const handleCountryConfirm = (code: string) => {
+  /** 确认国家选择（首次启动/手动切换）：保存档案 + 缓存国家 + 生成安全卡 */
+  const handleCountryConfirm = (code: string, profile: UserProfile) => {
     const s = getCountrySafety(code);
+    setUserProfile(profile);
+    saveUserProfile(profile);
     if (!s) {
       setIsCountrySelectOpen(false);
       return;
@@ -403,7 +407,8 @@ export default Sentry.wrap(function App() {
   const handleSwitchCountry = () => {
     if (!switchPrompt || !detectedPlace?.countryCode) return;
     setSwitchPrompt(null);
-    handleCountryConfirm(detectedPlace.countryCode);
+    // 切换国家时保留当前档案
+    handleCountryConfirm(detectedPlace.countryCode, userProfile ?? { nationality: 'CN', language: 'zh-CN' });
   };
 
   const handleKeepCountry = () => {
@@ -417,11 +422,13 @@ export default Sentry.wrap(function App() {
     let cancelled = false;
     (async () => {
       const cached = await loadCountry();
+      const profile = await loadUserProfile();
       const place = await getPlaceContext();
       if (cancelled) return;
+      setUserProfile(profile);
       setDetectedPlace(place);
       if (!cached) {
-        // 首次启动：打开国家选择（检测结果高亮）
+        // 首次启动（或档案/国家未设置）：打开选择（检测结果高亮）
         setIsCountrySelectOpen(true);
         return;
       }
@@ -477,7 +484,7 @@ export default Sentry.wrap(function App() {
             </View>
           </View>
 
-          {/* 当前位置栏：显示当前国家/城市，点击可手动切换 */}
+          {/* 当前位置栏：GPS 实际位置；与设置国家不一致时并排展示 */}
           <TouchableOpacity
             style={styles.locationBar}
             onPress={() => setIsCountrySelectOpen(true)}
@@ -485,8 +492,18 @@ export default Sentry.wrap(function App() {
           >
             <View style={[styles.locationDot, currentCountry ? styles.dotGreen : styles.dotAmber]} />
             <Text style={styles.locationText} numberOfLines={1}>
-              {currentCountry ? currentCountry.nameZh : '未选择国家'}
-              {detectedPlace?.city ? ` · ${detectedPlace.city}` : ''}
+              {(() => {
+                const gpsName =
+                  detectedPlace && (detectedPlace.country || detectedPlace.city)
+                    ? [detectedPlace.country, detectedPlace.city].filter(Boolean).join(' · ')
+                    : null;
+                const selectedName = currentCountry?.nameZh ?? '未选择国家';
+                const mismatch =
+                  !!gpsName &&
+                  !!currentCountry &&
+                  detectedPlace?.countryCode !== currentCountry.code;
+                return mismatch ? `位置 ${gpsName} · 设置 ${selectedName}` : selectedName;
+              })()}
             </Text>
             <Text style={styles.locationChange}>切换 ›</Text>
           </TouchableOpacity>
@@ -618,6 +635,7 @@ export default Sentry.wrap(function App() {
           visible={isCountrySelectOpen}
           detected={detectedPlace}
           currentCode={currentCountry?.code}
+          profile={userProfile}
           onClose={() => setIsCountrySelectOpen(false)}
           onConfirm={handleCountryConfirm}
         />
@@ -634,6 +652,7 @@ export default Sentry.wrap(function App() {
           visible={isSafetyDetailOpen}
           safety={currentCountry ? getCountrySafety(currentCountry.code) : null}
           place={detectedPlace}
+          profile={userProfile}
           onClose={() => setIsSafetyDetailOpen(false)}
         />
       </CameraBackground>

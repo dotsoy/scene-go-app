@@ -11,11 +11,14 @@ import {
 import * as Speech from 'expo-speech';
 import { CountrySafety } from '../data/countrySafety';
 import { PlaceContext } from '../utils/locationContext';
+import { UserProfile } from '../utils/userProfile';
 
 interface SafetyDetailModalProps {
   visible: boolean;
   safety?: CountrySafety | null;
   place?: PlaceContext | null;
+  /** 用户档案：决定使领馆信息展示（各国人士） */
+  profile?: UserProfile | null;
   onClose: () => void;
 }
 
@@ -24,6 +27,7 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
   visible,
   safety,
   place,
+  profile,
   onClose,
 }) => {
   const [speaking, setSpeaking] = useState(false);
@@ -120,12 +124,18 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
             </View>
 
             <View style={styles.section}>
-              <Text style={styles.sectionLabel}>中国使领馆（领事保护）</Text>
-              <TouchableOpacity style={styles.dialRow} onPress={() => dial(safety.embassy)}>
-                <Text style={styles.dialLabel}>领事保护热线</Text>
-                <Text style={styles.dialNumber}>{safety.embassy}</Text>
-                <Text style={styles.dialHint}>拨打 ›</Text>
-              </TouchableOpacity>
+              <Text style={styles.sectionLabel}>使领馆（领事保护）</Text>
+              {profile?.nationality === 'CN' && safety.embassy ? (
+                <TouchableOpacity style={styles.dialRow} onPress={() => dial(safety.embassy)}>
+                  <Text style={styles.dialLabel}>中国驻当地领保热线</Text>
+                  <Text style={styles.dialNumber}>{safety.embassy}</Text>
+                  <Text style={styles.dialHint}>拨打 ›</Text>
+                </TouchableOpacity>
+              ) : (
+                <Text style={styles.sectionBody}>
+                  请通过您本国驻当地使领馆求助（内置数据暂仅覆盖中国籍用户）。
+                </Text>
+              )}
             </View>
 
             <View style={styles.section}>
