@@ -334,7 +334,8 @@ export default Sentry.wrap(function App() {
 
   const handleAddNote = (content: string, category: string) => {
     const now = new Date();
-    const timeStr = `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    const timeStr = `${pad(now.getMonth() + 1)}-${pad(now.getDate())} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
     const newEntry: NoteItem = {
       id: Date.now().toString(),
       content,
