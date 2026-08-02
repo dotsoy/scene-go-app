@@ -15,6 +15,7 @@
         "expo-device": "~6.0.2",
         "expo-file-system": "~17.0.1",
         "expo-font": "~12.0.10",
+        "expo-image-manipulator": "~12.0.5",
         "expo-keep-awake": "~13.0.2",
         "expo-linear-gradient": "~13.0.2",
         "expo-location": "~17.0.1",
@@ -834,6 +835,10 @@
     "expo-file-system": ["expo-file-system@17.0.1", "", { "peerDependencies": { "expo": "*" } }, "sha512-dYpnZJqTGj6HCYJyXAgpFkQWsiCH3HY1ek2cFZVHFoEc5tLz9gmdEgTF6nFHurvmvfmXqxi7a5CXyVm0aFYJBw=="],
 
     "expo-font": ["expo-font@12.0.10", "", { "dependencies": { "fontfaceobserver": "^2.1.0" }, "peerDependencies": { "expo": "*" } }, "sha512-Q1i2NuYri3jy32zdnBaHHCya1wH1yMAsI+3CCmj9zlQzlhsS9Bdwcj2W3c5eU5FvH2hsNQy4O+O1NnM6o/pDaQ=="],
+
+    "expo-image-loader": ["expo-image-loader@4.7.0", "", { "peerDependencies": { "expo": "*" } }, "sha512-cx+MxxsAMGl9AiWnQUzrkJMJH4eNOGlu7XkLGnAXSJrRoIiciGaKqzeaD326IyCTV+Z1fXvIliSgNW+DscvD8g=="],
+
+    "expo-image-manipulator": ["expo-image-manipulator@12.0.5", "", { "dependencies": { "expo-image-loader": "~4.7.0" }, "peerDependencies": { "expo": "*" } }, "sha512-zJ8yINjckYw/yfoSuICt4yJ9xr112+W9e5QVXwK3nCAHr7sv45RQ5sxte0qppf594TPl+UoV6Tjim7WpoKipRQ=="],
 
     "expo-json-utils": ["expo-json-utils@0.13.1", "", {}, "sha512-mlfaSArGVb+oJmUcR22jEONlgPp0wj4iNIHfQ2je9Q8WTOqMc0Ws9tUciz3JdJnhffdHqo/k8fpvf0IRmN5HPA=="],
 

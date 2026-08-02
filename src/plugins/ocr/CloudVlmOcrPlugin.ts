@@ -37,6 +37,51 @@ const CARD_SYSTEM_PROMPT = `你是 SceneGo 出行助手。用户正在异国旅�
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
 const MODEL_ID = 'openrouter/free';
 
+/** 请求超时（毫秒）：弱网下避免 fetch 无限挂起 */
+const FETCH_TIMEOUT_MS = 30_000;
+/** 网络异常最大尝试次数（含首次） */
+const MAX_ATTEMPTS = 2;
+
+/** 带超时的 POST 请求 + 网络异常自动重试（HTTP 非 2xx 不重试） */
+async function postWithTimeoutRetry(
+  url: string,
+  headers: Record<string, string>,
+  body: string,
+  logId: string,
+): Promise<{ ok: boolean; status: number; text: string }> {
+  let lastError: unknown = null;
+  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+    const start = Date.now();
+    try {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
+      let resp: Response;
+      try {
+        resp = await fetch(url, {
+          method: 'POST',
+          headers,
+          body,
+          signal: controller.signal,
+        });
+      } finally {
+        clearTimeout(timer);
+      }
+      const text = await resp.text();
+      apiLogger.logResponse(logId, resp.status, Date.now() - start, text);
+      return { ok: resp.ok, status: resp.status, text };
+    } catch (err) {
+      lastError = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      if (attempt < MAX_ATTEMPTS) {
+        console.warn(`[CloudVlm] 网络异常(${msg})，第 ${attempt + 1} 次重试`);
+      }
+    }
+  }
+  const errMsg = lastError instanceof Error ? lastError.message : String(lastError);
+  apiLogger.logResponse(logId, 0, 0, `网络异常: ${errMsg}`);
+  return { ok: false, status: 0, text: `[网络异常: ${errMsg}]` };
+}
+
 /** 安全转换图片为 Base64 字符串（具备 FileSystem 原生模块 + Fetch Blob 双层降级） */
 async function convertImageToBase64(imageUri: string): Promise<string> {
   try {
@@ -191,33 +236,31 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         'X-OpenRouter-Title': 'SceneGo',
       };
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: actualHeaders,
-        body: JSON.stringify(reqBodyObject),
-      });
+      const { ok, status, text: respText } = await postWithTimeoutRetry(
+        url,
+        actualHeaders,
+        JSON.stringify(reqBodyObject),
+        logId,
+      );
 
       const durationMs = Date.now() - startTime;
-      const respText = await response.text();
 
-      apiLogger.logResponse(logId, response.status, durationMs, respText);
-
-      console.log(`=============== [CloudVlm 响应 (${response.status})] ===============`);
+      console.log(`=============== [CloudVlm 响应 (${status})] ===============`);
       console.log(respText);
       console.log('=====================================================');
 
-      if (!response.ok) {
-        console.warn('[CloudVlm API Error]:', response.status, respText);
-        if (response.status === 401) {
+      if (!ok) {
+        console.warn('[CloudVlm API Error]:', status, respText);
+        if (status === 401) {
           return {
             rawText: respText,
-            lines: [`[API Key 鉴权失败 (${response.status})，请在设置中确认你的 Key 是否有效]`],
+            lines: [`[API Key 鉴权失败 (${status})，请在设置中确认你的 Key 是否有效]`],
             confidence: 0,
           };
         }
         return {
           rawText: respText,
-          lines: [`[云端识别失败: HTTP ${response.status}]`],
+          lines: [`[云端识别失败: HTTP ${status}]`],
           confidence: 0,
         };
       }
@@ -244,7 +287,6 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
 
     const url = OPENROUTER_API_URL;
     const model = MODEL_ID;
-    const startTime = Date.now();
 
     try {
       const base64 = await convertImageToBase64(imageUri);
@@ -262,18 +304,14 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         requestBody: `[Follow-Up Question]: ${question}\n[History]: ${history.length} turns`,
       });
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: actualHeaders,
-        body: JSON.stringify(buildFollowUpRequestBody(base64, question, history)),
-      });
+      const { ok, status, text: respText } = await postWithTimeoutRetry(
+        url,
+        actualHeaders,
+        JSON.stringify(buildFollowUpRequestBody(base64, question, history)),
+        logId,
+      );
 
-      const durationMs = Date.now() - startTime;
-      const respText = await response.text();
-
-      apiLogger.logResponse(logId, response.status, durationMs, respText);
-
-      if (!response.ok) return `响应错误 (${response.status}): ${respText}`;
+      if (!ok) return `响应错误 (${status}): ${respText}`;
 
       const data = JSON.parse(respText);
       return data?.choices?.[0]?.message?.content || respText;
@@ -290,7 +328,6 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
 
     const url = OPENROUTER_API_URL;
     const model = MODEL_ID;
-    const startTime = Date.now();
 
     try {
       const actualHeaders: Record<string, string> = {
@@ -319,16 +356,14 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         requestBody: `[Card From Text]: ${text}`,
       });
 
-      const response = await fetch(url, {
-        method: 'POST',
-        headers: actualHeaders,
-        body: JSON.stringify(body),
-      });
-      const durationMs = Date.now() - startTime;
-      const respText = await response.text();
-      apiLogger.logResponse(logId, response.status, durationMs, respText);
+      const { ok, status, text: respText } = await postWithTimeoutRetry(
+        url,
+        actualHeaders,
+        JSON.stringify(body),
+        logId,
+      );
 
-      if (!response.ok) return null;
+      if (!ok || status === 0) return null;
       const data = JSON.parse(respText);
       const content = data?.choices?.[0]?.message?.content || '';
       return parseVlmScenarioResult(content);

@@ -18,6 +18,7 @@ import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModa
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { scenarioToCard } from './src/utils/cardBuilder';
 import { getLocationContext, getPlaceContext, PlaceContext } from './src/utils/locationContext';
+import { compressImage } from './src/utils/imageCompress';
 import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore';
 import { loadUserProfile, saveUserProfile, UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
@@ -249,6 +250,10 @@ export default Sentry.wrap(function App() {
           photoUri = photo?.uri || null;
         } catch (camErr) {
           console.log('[Camera] 真实摄像头捕获失败 (模拟器环境)，启用模拟快照降级:', camErr);
+        }
+        // 上传前压缩（最长边 1280px + JPEG 0.7），弱网体验优化
+        if (photoUri) {
+          photoUri = await compressImage(photoUri);
         }
       }
 

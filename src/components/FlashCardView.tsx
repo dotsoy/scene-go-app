@@ -264,6 +264,7 @@ const styles = StyleSheet.create({
     marginBottom: 4,
   },
   tipBody: {
+    fontFamily: FONT.regular,
     color: '#d4d4d8',
     fontSize: 12,
     lineHeight: 18,
