@@ -454,6 +454,11 @@ export default Sentry.wrap(function App() {
             isCardVisible={isCardVisible}
             onToggleCamera={handleToggleCamera}
             onCaptureFrame={handleCaptureFrame}
+            onCancelCamera={() => {
+              // 取消：只退出取景，不拍照、不触发云端分析
+              setIsCameraReady(false);
+              setIsCameraActive(false);
+            }}
             onToggleMic={handleToggleMic}
             onToggleCard={() => setIsCardVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}

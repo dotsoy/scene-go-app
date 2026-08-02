@@ -7,6 +7,8 @@ interface ControlBarProps {
   isCardVisible: boolean;
   onToggleCamera: () => void;
   onCaptureFrame: () => void;
+  /** 相机开启时取消：退出取景但不触发云端分析 */
+  onCancelCamera: () => void;
   onToggleMic: () => void;
   onToggleCard: () => void;
   onOpenNotes: () => void;
@@ -20,6 +22,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   isCardVisible,
   onToggleCamera,
   onCaptureFrame,
+  onCancelCamera,
   onToggleMic,
   onToggleCard,
   onOpenNotes,
@@ -29,9 +32,15 @@ export const ControlBar: React.FC<ControlBarProps> = ({
     <View style={styles.barContainer}>
       {/* 摄像头开关与实时截图按键 */}
       {isCameraActive ? (
-        <TouchableOpacity style={[styles.btn, styles.btnActiveSnap]} onPress={onCaptureFrame} activeOpacity={0.75}>
-          <Text style={styles.btnTextSnap} numberOfLines={1}>SNAP & OFF</Text>
-        </TouchableOpacity>
+        <View style={styles.cameraBtnGroup}>
+          <TouchableOpacity style={[styles.btn, styles.btnActiveSnap]} onPress={onCaptureFrame} activeOpacity={0.75}>
+            <Text style={styles.btnTextSnap} numberOfLines={1}>SNAP & OFF</Text>
+          </TouchableOpacity>
+          {/* 取消：退出相机取景，不触发云端分析 */}
+          <TouchableOpacity style={[styles.btn, styles.btnCancel]} onPress={onCancelCamera} activeOpacity={0.75}>
+            <Text style={styles.btnTextCancel} numberOfLines={1}>取消</Text>
+          </TouchableOpacity>
+        </View>
       ) : (
         <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onToggleCamera} activeOpacity={0.75}>
           <Text style={styles.btnText} numberOfLines={1}>CAM OFF</Text>
@@ -118,5 +127,18 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     letterSpacing: 0.5,
+  },
+  cameraBtnGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+  },
+  btnCancel: {
+    backgroundColor: 'rgba(255,255,255,0.08)',
+  },
+  btnTextCancel: {
+    color: '#a1a1aa',
+    fontSize: 10,
+    fontWeight: '700',
   },
 });
