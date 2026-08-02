@@ -1,5 +1,5 @@
-import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import React, { useMemo, useRef, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, PanResponder } from 'react-native';
 
 interface ControlBarProps {
   isCameraActive: boolean;
@@ -28,19 +28,80 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onOpenNotes,
   onOpenTools,
 }) => {
+  // SNAP 长按上滑取消：点按 = 拍照分析；长按 450ms 后上滑 = 退出取景不分析
+  const LONG_PRESS_MS = 450;
+  const SWIPE_UP_THRESHOLD = -40;
+  const cancelArmedRef = useRef(false);
+  const longPressFiredRef = useRef(false);
+  const holdTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [cancelArmed, setCancelArmed] = useState(false);
+
+  const cleanupHold = () => {
+    if (holdTimerRef.current) {
+      clearTimeout(holdTimerRef.current);
+      holdTimerRef.current = null;
+    }
+    cancelArmedRef.current = false;
+    setCancelArmed(false);
+  };
+
+  const snapPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+          longPressFiredRef.current = false;
+          cancelArmedRef.current = false;
+          holdTimerRef.current = setTimeout(() => {
+            longPressFiredRef.current = true;
+            cancelArmedRef.current = true;
+            setCancelArmed(true);
+          }, LONG_PRESS_MS);
+        },
+        onPanResponderMove: (_evt, gesture) => {
+          if (cancelArmedRef.current && gesture.dy < SWIPE_UP_THRESHOLD) {
+            // 长按达标 + 上滑：退出取景，不触发云端分析
+            cleanupHold();
+            onCancelCamera();
+          }
+        },
+        onPanResponderRelease: (_evt, gesture) => {
+          const wasTap =
+            !longPressFiredRef.current &&
+            Math.abs(gesture.dx) < 12 &&
+            Math.abs(gesture.dy) < 12;
+          cleanupHold();
+          if (wasTap) {
+            onCaptureFrame();
+          }
+        },
+        onPanResponderTerminate: cleanupHold,
+      }),
+    [onCaptureFrame, onCancelCamera],
+  );
   return (
     <View style={styles.barContainer}>
-      {/* 摄像头开关与实时截图按键 */}
+      {/* 摄像头开关与实时截图按键：点按 = 拍照分析；长按后上滑 = 取消不分析 */}
       {isCameraActive ? (
-        <View style={styles.cameraBtnGroup}>
-          <TouchableOpacity style={[styles.btn, styles.btnActiveSnap]} onPress={onCaptureFrame} activeOpacity={0.75}>
-            <Text style={styles.btnTextSnap} numberOfLines={1}>SNAP & OFF</Text>
-          </TouchableOpacity>
-          {/* 取消：退出相机取景，不触发云端分析 */}
-          <TouchableOpacity style={[styles.btn, styles.btnCancel]} onPress={onCancelCamera} activeOpacity={0.75}>
-            <Text style={styles.btnTextCancel} numberOfLines={1}>取消</Text>
-          </TouchableOpacity>
-        </View>
+        <TouchableOpacity
+          style={[
+            styles.btn,
+            cancelArmed ? styles.btnCancelArmed : styles.btnActiveSnap,
+          ]}
+          {...snapPanResponder.panHandlers}
+          activeOpacity={0.75}
+        >
+          <Text
+            style={[
+              styles.btnTextSnap,
+              cancelArmed && styles.btnTextCancelArmed,
+            ]}
+            numberOfLines={1}
+          >
+            {cancelArmed ? '上滑取消' : 'SNAP & OFF'}
+          </Text>
+        </TouchableOpacity>
       ) : (
         <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onToggleCamera} activeOpacity={0.75}>
           <Text style={styles.btnText} numberOfLines={1}>CAM OFF</Text>
@@ -113,6 +174,9 @@ const styles = StyleSheet.create({
   btnActiveSnap: {
     backgroundColor: 'rgba(244,67,54,0.35)',
   },
+  btnCancelArmed: {
+    backgroundColor: 'rgba(255,255,255,0.14)',
+  },
   btnText: {
     color: '#777',
     fontSize: 10,
@@ -128,17 +192,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 0.5,
   },
-  cameraBtnGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-  },
-  btnCancel: {
-    backgroundColor: 'rgba(255,255,255,0.08)',
-  },
-  btnTextCancel: {
-    color: '#a1a1aa',
-    fontSize: 10,
-    fontWeight: '700',
+  btnTextCancelArmed: {
+    color: '#ffffff',
   },
 });
