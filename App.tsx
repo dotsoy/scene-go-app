@@ -140,6 +140,8 @@ export default Sentry.wrap(function App() {
     const subError = NativeSpeech.onSpeechError((e) => {
       setLiveTranscript(`语音识别异常: ${e.message}`);
       liveTranscriptRef.current = '';
+      // 原生侧已停止，回滚录音状态，避免 UI 显示 ON 而实际未录音
+      setIsMicActive(false);
     });
     return () => {
       subResult.remove();
@@ -291,6 +293,8 @@ export default Sentry.wrap(function App() {
       setLiveTranscript('正在开启原生听写，请说话...');
       const started = await NativeSpeech.start('zh-CN');
       if (!started) {
+        // 启动失败：回滚状态，避免 MIC 显示 ON 而实际未录音
+        setIsMicActive(false);
         setLiveTranscript('语音识别启动失败：请检查麦克风权限，或在真机上测试（模拟器可能不支持中文语言包）');
       }
     } else {

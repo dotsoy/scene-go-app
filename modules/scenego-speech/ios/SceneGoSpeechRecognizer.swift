@@ -105,8 +105,12 @@ public class SceneGoSpeechRecognizer: Module {
       }
 
       if let error {
-        NSLog("[Speech] recognition error: %@", error.localizedDescription)
-        self.sendEvent("onSpeechError", ["message": error.localizedDescription])
+        // cancel 是用户主动停止触发的正常错误（NSUserCancelledError），不视为异常，不上报
+        let nsError = error as NSError
+        if nsError.code != NSUserCancelledError {
+          NSLog("[Speech] recognition error: %@", error.localizedDescription)
+          self.sendEvent("onSpeechError", ["message": error.localizedDescription])
+        }
       }
 
       if error != nil || (result?.isFinal ?? false) {
@@ -138,5 +142,7 @@ public class SceneGoSpeechRecognizer: Module {
     }
     recognitionTask?.cancel()
     recognitionTask = nil
+    // 释放录音会话，避免持续占用麦克风
+    try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
   }
 }
