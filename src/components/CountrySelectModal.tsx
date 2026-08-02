@@ -7,6 +7,7 @@ import {
   NATIONALITY_OPTIONS,
   LANGUAGE_OPTIONS,
 } from '../utils/userProfile';
+import { COLORS, FONT } from '../theme/tokens';
 
 interface CountrySelectModalProps {
   visible: boolean;
@@ -20,7 +21,9 @@ interface CountrySelectModalProps {
   onConfirm: (code: string, profile: UserProfile) => void;
 }
 
-/** 首次启动/手动切换：设置用户档案（国籍+语言）+ 当前国家/地区 */
+const GRID_FIRST = 6; // 首屏网格 2×3，其余由「更多」展开
+
+/** 首次启动/手动切换：目的地国家（网格）+ 用户档案（国籍/语言）—— spec §4 06 */
 export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
   visible,
   detected,
@@ -30,16 +33,18 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
   onConfirm,
 }) => {
   const [selected, setSelected] = useState<string>(currentCode ?? '');
+  const [showAll, setShowAll] = useState(false);
   const [nationality, setNationality] = useState<string>('CN');
   const [language, setLanguage] = useState<string>('zh-CN');
+  const [expandedCell, setExpandedCell] = useState<'nationality' | 'language' | null>(null);
 
   useEffect(() => {
     if (!visible) return;
-    // 国家预选：检测结果优先（若在支持列表内），否则当前选择，否则第一个
     const detectedCode = detected?.countryCode ?? null;
     const valid = COUNTRY_SAFETY.some((c) => c.code === detectedCode);
     setSelected(valid ? detectedCode! : (currentCode ?? COUNTRY_SAFETY[0].code));
-    // 档案预选：已存档案优先；国籍缺省用检测结果或中国
+    setShowAll(false);
+    setExpandedCell(null);
     if (profile) {
       setNationality(profile.nationality);
       setLanguage(profile.language);
@@ -50,113 +55,115 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
     }
   }, [visible, detected, currentCode, profile]);
 
-  const detectedSupported = detected?.countryCode
-    ? COUNTRY_SAFETY.some((c) => c.code === detected.countryCode)
-    : false;
-
-  const handleConfirm = () => {
-    if (!selected) return;
-    onConfirm(selected, { nationality, language });
-  };
+  const gridCountries = showAll ? COUNTRY_SAFETY : COUNTRY_SAFETY.slice(0, GRID_FIRST);
 
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
+    <Modal visible={visible} animationType="fade" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
-        <View style={styles.sheet}>
-          <Text style={styles.title}>设置您的档案</Text>
-          <Text style={styles.subtitle}>SceneGo 面向各国人士，请选择您的国籍与语言</Text>
+        <ScrollView style={styles.cardScroll} contentContainerStyle={styles.card} showsVerticalScrollIndicator={false}>
+          {/* Header */}
+          <View style={styles.header}>
+            <Text style={styles.title}>设置目的地国家 / 地区</Text>
+            <TouchableOpacity onPress={onClose} style={styles.headerClose}>
+              <Text style={styles.headerCloseText}>✕</Text>
+            </TouchableOpacity>
+          </View>
 
-          {/* 档案：国籍 */}
-          <Text style={styles.sectionLabel}>您的国籍</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
-            {NATIONALITY_OPTIONS.map((n) => {
-              const active = nationality === n.code;
-              return (
-                <TouchableOpacity
-                  key={n.code}
-                  style={[styles.chip, active && styles.chipActive]}
-                  onPress={() => setNationality(n.code)}
-                >
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{n.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          {/* 档案：语言 */}
-          <Text style={styles.sectionLabel}>您的语言</Text>
-          <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipRow}>
-            {LANGUAGE_OPTIONS.map((l) => {
-              const active = language === l.code;
-              return (
-                <TouchableOpacity
-                  key={l.code}
-                  style={[styles.chip, active && styles.chipActive]}
-                  onPress={() => setLanguage(l.code)}
-                >
-                  <Text style={[styles.chipText, active && styles.chipTextActive]}>{l.name}</Text>
-                </TouchableOpacity>
-              );
-            })}
-          </ScrollView>
-
-          <Text style={[styles.sectionLabel, styles.countryLabel]}>当前国家/地区（生成安全信息卡片）</Text>
-
+          {/* GPS 检测横幅 */}
           {detected && (
-            <View style={styles.detectedBox}>
-              <Text style={styles.detectedLabel}>检测到您当前所在</Text>
-              <Text style={styles.detectedName}>
-                {detected.country ?? `${detected.lat.toFixed(3)}, ${detected.lng.toFixed(3)}`}
+            <View style={styles.gpsBanner}>
+              <View style={[styles.gpsDot, styles.dotGreen]} />
+              <Text style={styles.gpsText}>
+                检测到当前位置：{detected.country ?? `${detected.lat.toFixed(3)}, ${detected.lng.toFixed(3)}`}
+                {detected.city ? `（${detected.city}）` : ''}
               </Text>
-              {detectedSupported ? (
-                <TouchableOpacity
-                  style={styles.detectedUseBtn}
-                  onPress={() => setSelected(detected.countryCode!)}
-                >
-                  <Text style={styles.detectedUseText}>使用检测结果</Text>
-                </TouchableOpacity>
-              ) : (
-                <Text style={styles.detectedUnsupported}>
-                  当前国家暂未收录，请从下方列表选择
-                </Text>
-              )}
             </View>
           )}
 
-          <ScrollView style={styles.list} showsVerticalScrollIndicator={false}>
-            {COUNTRY_SAFETY.map((c) => {
-              const isSelected = selected === c.code;
+          {/* 目的地国家网格 */}
+          <Text style={styles.sectionLabel}>目的地</Text>
+          <View style={styles.grid}>
+            {gridCountries.map((c) => {
+              const active = selected === c.code;
               return (
                 <TouchableOpacity
                   key={c.code}
-                  style={[styles.row, isSelected && styles.rowSelected]}
+                  style={[styles.chip, active && styles.chipActive]}
                   onPress={() => setSelected(c.code)}
                 >
-                  <View style={styles.rowTextWrap}>
-                    <Text style={[styles.rowName, isSelected && styles.rowNameSelected]}>
-                      {c.nameZh} · {c.nameEn}
-                    </Text>
-                    <Text style={styles.rowMeta}>
-                      {c.currency} · {c.voltage.split(' · ')[0]}
-                    </Text>
-                  </View>
-                  <View style={[styles.radio, isSelected && styles.radioSelected]}>
-                    {isSelected && <View style={styles.radioDot} />}
-                  </View>
+                  <Text style={[styles.chipText, active && styles.chipTextActive]} numberOfLines={1}>
+                    {c.nameZh}
+                  </Text>
                 </TouchableOpacity>
               );
             })}
-          </ScrollView>
+            {!showAll && (
+              <TouchableOpacity style={styles.chip} onPress={() => setShowAll(true)}>
+                <Text style={styles.chipText}>更多</Text>
+              </TouchableOpacity>
+            )}
+          </View>
 
-          <View style={styles.footer}>
-            <TouchableOpacity style={styles.confirmBtn} onPress={handleConfirm}>
-              <Text style={styles.confirmBtnText}>确认</Text>
+          {/* 用户档案 */}
+          <Text style={styles.sectionLabel}>用户档案</Text>
+          <View style={styles.profileRow}>
+            <TouchableOpacity
+              style={styles.profileCell}
+              onPress={() => setExpandedCell(expandedCell === 'nationality' ? null : 'nationality')}
+            >
+              <Text style={styles.profileLabel}>国籍</Text>
+              <Text style={styles.profileValue}>
+                {NATIONALITY_OPTIONS.find((n) => n.code === nationality)?.name ?? nationality}
+              </Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.closeBtn} onPress={onClose}>
-              <Text style={styles.closeBtnText}>关闭</Text>
+            <TouchableOpacity
+              style={styles.profileCell}
+              onPress={() => setExpandedCell(expandedCell === 'language' ? null : 'language')}
+            >
+              <Text style={styles.profileLabel}>语言</Text>
+              <Text style={styles.profileValue}>
+                {LANGUAGE_OPTIONS.find((l) => l.code === language)?.name ?? language}
+              </Text>
             </TouchableOpacity>
           </View>
-        </View>
+          {expandedCell === 'nationality' && (
+            <View style={styles.expandWrap}>
+              {NATIONALITY_OPTIONS.map((n) => (
+                <TouchableOpacity
+                  key={n.code}
+                  style={[styles.miniChip, nationality === n.code && styles.miniChipActive]}
+                  onPress={() => {
+                    setNationality(n.code);
+                    setExpandedCell(null);
+                  }}
+                >
+                  <Text style={[styles.miniChipText, nationality === n.code && styles.miniChipTextActive]}>{n.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+          {expandedCell === 'language' && (
+            <View style={styles.expandWrap}>
+              {LANGUAGE_OPTIONS.map((l) => (
+                <TouchableOpacity
+                  key={l.code}
+                  style={[styles.miniChip, language === l.code && styles.miniChipActive]}
+                  onPress={() => {
+                    setLanguage(l.code);
+                    setExpandedCell(null);
+                  }}
+                >
+                  <Text style={[styles.miniChipText, language === l.code && styles.miniChipTextActive]}>{l.name}</Text>
+                </TouchableOpacity>
+              ))}
+            </View>
+          )}
+
+          {/* 确认 */}
+          <TouchableOpacity style={styles.confirmBtn} onPress={() => selected && onConfirm(selected, { nationality, language })}>
+            <Text style={styles.confirmBtnText}>确认并生成安全卡</Text>
+          </TouchableOpacity>
+        </ScrollView>
       </View>
     </Modal>
   );
@@ -165,87 +172,101 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
 const styles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.6)',
-    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.65)',
+    justifyContent: 'center',
+    padding: 28,
   },
-  sheet: {
-    backgroundColor: '#18181b',
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
+  cardScroll: { flexGrow: 0 },
+  card: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: 16,
     padding: 20,
-    paddingBottom: 32,
-    maxHeight: '85%',
   },
-  title: { color: '#ffffff', fontSize: 18, fontWeight: '800' },
-  subtitle: { color: '#a1a1aa', fontSize: 12, marginTop: 4, marginBottom: 12 },
-  sectionLabel: { color: '#38bdf8', fontSize: 12, fontWeight: '800', marginTop: 10, marginBottom: 8 },
-  countryLabel: { marginTop: 16 },
-  chipRow: { flexGrow: 0 },
-  chip: {
-    backgroundColor: '#27272a',
-    borderRadius: 14,
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    marginRight: 6,
-  },
-  chipActive: { backgroundColor: 'rgba(56,189,248,0.2)' },
-  chipText: { color: '#a1a1aa', fontSize: 12, fontWeight: '600' },
-  chipTextActive: { color: '#38bdf8' },
-  detectedBox: {
-    backgroundColor: 'rgba(16,185,129,0.1)',
-    borderColor: 'rgba(16,185,129,0.35)',
-    borderWidth: 1,
-    borderRadius: 12,
-    padding: 12,
-    marginBottom: 12,
-  },
-  detectedLabel: { color: '#a1a1aa', fontSize: 11 },
-  detectedName: { color: '#34d399', fontSize: 16, fontWeight: '700', marginTop: 2, marginBottom: 8 },
-  detectedUseBtn: {
-    backgroundColor: '#10b981',
-    borderRadius: 8,
-    paddingVertical: 8,
+  header: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 14,
   },
-  detectedUseText: { color: '#ffffff', fontSize: 13, fontWeight: '700' },
-  detectedUnsupported: { color: '#f59e0b', fontSize: 12 },
-  list: { flexGrow: 0 },
-  row: {
+  title: { fontFamily: FONT.bold, color: '#ffffff', fontSize: 16 },
+  headerClose: { padding: 4 },
+  headerCloseText: { color: COLORS.textSecondary, fontSize: 16 },
+  gpsBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    paddingVertical: 12,
+    backgroundColor: 'rgba(76,175,80,0.12)',
+    borderRadius: 8,
     paddingHorizontal: 12,
-    borderRadius: 10,
-    marginBottom: 4,
+    paddingVertical: 10,
+    marginBottom: 16,
   },
-  rowSelected: { backgroundColor: 'rgba(56,189,248,0.12)' },
-  rowTextWrap: { flex: 1 },
-  rowName: { color: '#d4d4d8', fontSize: 14, fontWeight: '600' },
-  rowNameSelected: { color: '#38bdf8' },
-  rowMeta: { color: '#71717a', fontSize: 11, marginTop: 2 },
-  radio: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
-    borderWidth: 2,
-    borderColor: '#3f3f46',
-    alignItems: 'center',
-    justifyContent: 'center',
+  gpsDot: { width: 6, height: 6, borderRadius: 3, marginRight: 8 },
+  dotGreen: { backgroundColor: '#10b981' },
+  gpsText: { fontFamily: FONT.regular, color: '#34d399', fontSize: 12, flex: 1 },
+  sectionLabel: {
+    fontFamily: FONT.bold,
+    color: COLORS.textTertiary,
+    fontSize: 11,
+    letterSpacing: 1,
+    marginBottom: 10,
   },
-  radioSelected: { borderColor: '#38bdf8' },
-  radioDot: { width: 8, height: 8, borderRadius: 4, backgroundColor: '#38bdf8' },
-  footer: { flexDirection: 'row', gap: 10, marginTop: 14 },
-  confirmBtn: {
-    flex: 1,
-    backgroundColor: '#38bdf8',
+  grid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginBottom: 20,
+  },
+  chip: {
+    flexBasis: '31%',
+    backgroundColor: '#27272a',
     borderRadius: 10,
     paddingVertical: 12,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  confirmBtnText: { color: '#0c0c0e', fontSize: 15, fontWeight: '800' },
-  closeBtn: {
-    paddingHorizontal: 18,
+  chipActive: {
+    backgroundColor: 'rgba(79,195,247,0.18)',
+    borderColor: COLORS.accentBlue,
+  },
+  chipText: { fontFamily: FONT.semibold, color: COLORS.textTertiary, fontSize: 12 },
+  chipTextActive: { color: COLORS.accentBlue },
+  profileRow: {
+    flexDirection: 'row',
+    gap: 10,
+    marginBottom: 8,
+  },
+  profileCell: {
+    flex: 1,
+    backgroundColor: COLORS.bgCardLight,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  profileLabel: { fontFamily: FONT.regular, color: COLORS.textTertiary, fontSize: 10 },
+  profileValue: { fontFamily: FONT.semibold, color: COLORS.textPrimary, fontSize: 13, marginTop: 2 },
+  expandWrap: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 6,
+    marginBottom: 10,
+  },
+  miniChip: {
+    backgroundColor: '#27272a',
+    borderRadius: 12,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
+  },
+  miniChipActive: { backgroundColor: 'rgba(79,195,247,0.18)' },
+  miniChipText: { fontFamily: FONT.regular, color: COLORS.textTertiary, fontSize: 11 },
+  miniChipTextActive: { color: COLORS.accentBlue },
+  confirmBtn: {
+    backgroundColor: COLORS.accentBlue,
+    borderRadius: 10,
+    height: 48,
+    alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 12,
   },
-  closeBtnText: { color: '#a1a1aa', fontSize: 14, fontWeight: '600' },
+  confirmBtnText: { fontFamily: FONT.bold, color: '#0a0a1e', fontSize: 14 },
 });
