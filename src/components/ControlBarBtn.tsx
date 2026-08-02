@@ -137,9 +137,6 @@ const styles = StyleSheet.create({
   dotDanger: {
     backgroundColor: COLORS.accentRed,
   },
-  dotDanger: {
-    backgroundColor: COLORS.accentRed,
-  },
   label: {
     fontFamily: FONT.bold,
     fontSize: 9,
