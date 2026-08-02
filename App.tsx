@@ -408,14 +408,18 @@ export default Sentry.wrap(function App() {
             </View>
           )}
 
-          {/* Live Speech Transcript Banner */}
-          {isMicActive && (
+          {/* Live Speech Transcript Banner：isMicActive 或存在文案时显示，错误回滚不引发横幅闪灭 */}
+          {(isMicActive || liveTranscript) && (
             <View style={styles.liveTranscriptCard}>
               <View style={styles.liveHeaderRow}>
-                <Text style={styles.liveBadge}>实时语音转录中</Text>
-                <Animated.Text style={[styles.liveRecordingPulse, { opacity: pulseAnim }]}>
-                  REC
-                </Animated.Text>
+                <Text style={styles.liveBadge}>
+                  {isMicActive ? '实时语音转录中' : '语音识别提示'}
+                </Text>
+                {isMicActive && (
+                  <Animated.Text style={[styles.liveRecordingPulse, { opacity: pulseAnim }]}>
+                    REC
+                  </Animated.Text>
+                )}
               </View>
               <Text style={styles.liveTranscriptText}>
                 {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
