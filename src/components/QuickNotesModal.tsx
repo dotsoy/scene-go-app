@@ -28,10 +28,10 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
   onDeleteNote,
 }) => {
   const [newNote, setNewNote] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('TRIP');
+  const [selectedCategory, setSelectedCategory] = useState('VOUCHER');
   const [searchQuery, setSearchQuery] = useState('');
 
-  const categories = ['TRIP', 'BILL', 'TAX', 'SAFETY'];
+  const categories = ['VOUCHER', 'VOICE', 'CARD', 'BILL'];
 
   const filteredNotes = notes.filter(
     (item) =>
