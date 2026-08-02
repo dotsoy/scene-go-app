@@ -74,31 +74,44 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
             </TouchableOpacity>
           </View>
 
-          {/* OCR 引擎选择 */}
-          <Text style={styles.sectionTitle}>场景识别引擎</Text>
-          {ocrPlugins.map((plugin) => (
-            <TouchableOpacity
-              key={plugin.id}
-              style={[
-                styles.pluginRow,
-                activeOcrId === plugin.id && styles.pluginRowActive,
-              ]}
-              onPress={() => handleSelectOcr(plugin.id)}
-            >
-              <View style={styles.pluginInfo}>
-                <Text
+          {/* OCR 引擎选择：仅注册了多个引擎时才显示单选区，避免单一引擎时出现假选择 UI */}
+          {ocrPlugins.length > 1 && (
+            <>
+              <Text style={styles.sectionTitle}>场景识别引擎</Text>
+              {ocrPlugins.map((plugin) => (
+                <TouchableOpacity
+                  key={plugin.id}
                   style={[
-                    styles.pluginName,
-                    activeOcrId === plugin.id && styles.pluginNameActive,
+                    styles.pluginRow,
+                    activeOcrId === plugin.id && styles.pluginRowActive,
                   ]}
+                  onPress={() => handleSelectOcr(plugin.id)}
                 >
-                  {activeOcrId === plugin.id ? '● ' : '○ '}
-                  {plugin.name}
-                </Text>
-                <Text style={styles.pluginDesc}>{plugin.description}</Text>
-              </View>
-            </TouchableOpacity>
-          ))}
+                  <View style={styles.pluginInfo}>
+                    <Text
+                      style={[
+                        styles.pluginName,
+                        activeOcrId === plugin.id && styles.pluginNameActive,
+                      ]}
+                    >
+                      {activeOcrId === plugin.id ? '● ' : '○ '}
+                      {plugin.name}
+                    </Text>
+                    <Text style={styles.pluginDesc}>{plugin.description}</Text>
+                  </View>
+                </TouchableOpacity>
+              ))}
+            </>
+          )}
+
+          {/* 单一引擎时仅展示当前引擎信息 */}
+          {ocrPlugins.length === 1 && (
+            <View style={styles.singleEngineBox}>
+              <Text style={styles.sectionTitle}>当前识别引擎</Text>
+              <Text style={styles.singleEngineName}>{ocrPlugins[0].name}</Text>
+              <Text style={styles.singleEngineDesc}>{ocrPlugins[0].description}</Text>
+            </View>
+          )}
 
           {/* API Key 配置 */}
           <Text style={[styles.sectionTitle, { marginTop: 20 }]}>
@@ -185,6 +198,22 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     textTransform: 'uppercase',
     letterSpacing: 1,
+  },
+  singleEngineBox: {
+    backgroundColor: '#252540',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 8,
+  },
+  singleEngineName: {
+    color: '#4fc3f7',
+    fontSize: 15,
+    fontWeight: '700',
+  },
+  singleEngineDesc: {
+    color: '#777',
+    fontSize: 12,
+    marginTop: 4,
   },
   pluginRow: {
     backgroundColor: '#252540',
