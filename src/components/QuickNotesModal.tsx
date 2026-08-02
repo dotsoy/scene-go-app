@@ -31,6 +31,8 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
   const [newNote, setNewNote] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('VOUCHER');
   const [searchQuery, setSearchQuery] = useState('');
+  // 全屏大字展示的笔记
+  const [displayNote, setDisplayNote] = useState<NoteItem | null>(null);
 
   const categories = ['VOUCHER', 'VOICE', 'CARD', 'BILL'];
 
@@ -48,6 +50,38 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
 
   return (
     <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
+      {displayNote ? (
+        /* 全屏大字展示：适合递给司机/前台/店员查看 */
+        <View style={styles.displayOverlay}>
+          <TouchableOpacity
+            style={styles.displayBackdrop}
+            activeOpacity={1}
+            onPress={() => setDisplayNote(null)}
+          />
+          <View style={styles.displayCard}>
+            <Text style={styles.displayMeta}>
+              {displayNote.category} · {displayNote.timestamp}
+            </Text>
+            <Text style={styles.displayText} selectable>
+              {displayNote.content}
+            </Text>
+            <View style={styles.displayActions}>
+              <TouchableOpacity
+                style={styles.displayBtn}
+                onPress={() => Clipboard.setStringAsync(displayNote.content)}
+              >
+                <Text style={styles.displayBtnText}>复制</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.displayBtn}
+                onPress={() => setDisplayNote(null)}
+              >
+                <Text style={styles.displayBtnText}>关闭</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      ) : (
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.overlay}
@@ -110,7 +144,11 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
             data={filteredNotes}
             keyExtractor={(item) => item.id}
             renderItem={({ item }) => (
-              <View style={styles.noteCard}>
+              <TouchableOpacity
+                style={styles.noteCard}
+                activeOpacity={0.85}
+                onPress={() => setDisplayNote(item)}
+              >
                 <View style={styles.noteHeader}>
                   <Text style={styles.noteCategory}>{item.category}</Text>
                   <View style={styles.noteHeaderRight}>
@@ -130,7 +168,7 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
                   </View>
                 </View>
                 <Text style={styles.noteText}>{item.content}</Text>
-              </View>
+              </TouchableOpacity>
             )}
             ListEmptyComponent={
               <Text style={styles.emptyText}>
@@ -143,6 +181,7 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
           />
         </View>
       </KeyboardAvoidingView>
+      )}
     </Modal>
   );
 };
@@ -161,6 +200,56 @@ const styles = StyleSheet.create({
     padding: 20,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  displayOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  displayBackdrop: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  displayCard: {
+    backgroundColor: '#000000',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
+    borderRadius: 16,
+    padding: 24,
+    marginHorizontal: 24,
+    maxWidth: 480,
+    width: '100%',
+  },
+  displayMeta: {
+    color: '#71717a',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 16,
+  },
+  displayText: {
+    color: '#ffffff',
+    fontSize: 28,
+    fontWeight: '800',
+    lineHeight: 40,
+    letterSpacing: 0.5,
+  },
+  displayActions: {
+    flexDirection: 'row',
+    gap: 12,
+    marginTop: 28,
+  },
+  displayBtn: {
+    flex: 1,
+    backgroundColor: '#27272a',
+    borderRadius: 10,
+    paddingVertical: 12,
+    alignItems: 'center',
+  },
+  displayBtnText: {
+    color: '#ffffff',
+    fontSize: 13,
+    fontWeight: '700',
   },
   header: {
     flexDirection: 'row',
