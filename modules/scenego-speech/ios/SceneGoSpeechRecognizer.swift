@@ -7,6 +7,8 @@ public class SceneGoSpeechRecognizer: Module {
   private var recognitionRequest: SFSpeechAudioBufferRecognitionRequest?
   private var recognitionTask: SFSpeechRecognitionTask?
   private let audioEngine = AVAudioEngine()
+  // 授权回调期间收到 stop 时置位，授权完成后放弃启动（消除快速连点导致的双任务竞争）
+  private var stopRequested = false
 
   public func definition() -> ModuleDefinition {
     Name("SceneGoSpeechRecognizer")
@@ -24,8 +26,14 @@ public class SceneGoSpeechRecognizer: Module {
   }
 
   private func startListening(locale: String, promise: Promise) {
+    stopRequested = false
     SFSpeechRecognizer.requestAuthorization { status in
       DispatchQueue.main.async {
+        // 授权窗口内用户已点关闭：放弃本次启动，避免 stop 后录音仍在后台运行
+        guard !self.stopRequested else {
+          promise.resolve(false)
+          return
+        }
         guard status == .authorized else {
           promise.reject("auth_denied", "Speech recognition permission denied")
           return
@@ -136,6 +144,7 @@ public class SceneGoSpeechRecognizer: Module {
   }
 
   private func stopListening() {
+    stopRequested = true
     if audioEngine.isRunning {
       audioEngine.stop()
       recognitionRequest?.endAudio()

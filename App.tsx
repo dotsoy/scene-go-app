@@ -111,6 +111,8 @@ export default Sentry.wrap(function App() {
   const cameraRef = useRef<unknown>(null);
   // 最新转录文本的 ref 副本：避免 async 回调读取到过期的闭包 state
   const liveTranscriptRef = useRef<string>('');
+  // 麦克风期望状态 ref：同步 isMicActive，防止授权异步窗口内重复触发
+  const micActiveRef = useRef(false);
   // 日志弹窗可见性的 ref 副本（async 管线内读取最新值）
   const isLogsOpenRef = useRef(false);
   // 待展示的快照弹窗标记：LOG dismiss 动画完成后再 present，避免 UIKit modal 队列冲突
@@ -141,6 +143,7 @@ export default Sentry.wrap(function App() {
       setLiveTranscript(`语音识别异常: ${e.message}`);
       liveTranscriptRef.current = '';
       // 原生侧已停止，回滚录音状态，避免 UI 显示 ON 而实际未录音
+      micActiveRef.current = false;
       setIsMicActive(false);
     });
     return () => {
@@ -287,17 +290,21 @@ export default Sentry.wrap(function App() {
   };
 
   const handleToggleMic = async () => {
-    if (!isMicActive) {
+    if (!micActiveRef.current) {
+      // 期望状态先行，杜绝授权异步窗口内的重复触发
+      micActiveRef.current = true;
       liveTranscriptRef.current = '';
       setIsMicActive(true);
       setLiveTranscript('正在开启原生听写，请说话...');
       const started = await NativeSpeech.start('zh-CN');
       if (!started) {
-        // 启动失败：回滚状态，避免 MIC 显示 ON 而实际未录音
+        // 启动失败（含授权窗口内被 stop 取消）：回滚状态
+        micActiveRef.current = false;
         setIsMicActive(false);
         setLiveTranscript('语音识别启动失败：请检查麦克风权限，或在真机上测试（模拟器可能不支持中文语言包）');
       }
     } else {
+      micActiveRef.current = false;
       setIsMicActive(false);
       await NativeSpeech.stop();
       // 从 ref 读取最新转录：await 期间到达的 final 事件不会丢失
