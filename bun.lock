@@ -10,6 +10,7 @@
         "@sentry/react-native": "5.36.0",
         "expo": "~51.0.0",
         "expo-camera": "~15.0.13",
+        "expo-clipboard": "~6.0.3",
         "expo-dev-client": "~4.0.29",
         "expo-device": "~6.0.2",
         "expo-file-system": "~17.0.1",
@@ -812,6 +813,8 @@
     "expo-asset": ["expo-asset@10.0.10", "", { "dependencies": { "expo-constants": "~16.0.0", "invariant": "^2.2.4", "md5-file": "^3.2.3" }, "peerDependencies": { "expo": "*" } }, "sha512-0qoTIihB79k+wGus9wy0JMKq7DdenziVx3iUkGvMAy2azscSgWH6bd2gJ9CGnhC6JRd3qTMFBL0ou/fx7WZl7A=="],
 
     "expo-camera": ["expo-camera@15.0.16", "", { "dependencies": { "invariant": "^2.2.4" }, "peerDependencies": { "expo": "*" } }, "sha512-FLE02DMqkjwsb7IugKAqQvBe6s+TCQeb5LupO1+r//wAhBwmHncOrc6zV95ZEC2f9PTPK34nFH/s8CDGiVzIAA=="],
+
+    "expo-clipboard": ["expo-clipboard@6.0.3", "", { "peerDependencies": { "expo": "*" } }, "sha512-RIKDsuHkYfaspifbFpVC8sBVFKR05L7Pj7mU2/XkbrW9m01OBNvdpGraXEMsTFCx97xMGsZpEw9pPquL4j4xVg=="],
 
     "expo-constants": ["expo-constants@16.0.2", "", { "dependencies": { "@expo/config": "~9.0.0", "@expo/env": "~0.3.0" }, "peerDependencies": { "expo": "*" } }, "sha512-9tNY3OVO0jfiMzl7ngb6IOyR5VFzNoN5OOazUWoeGfmMqVB5kltTemRvKraK9JRbBKIw+SOYLEmF0sEqgFZ6OQ=="],
 

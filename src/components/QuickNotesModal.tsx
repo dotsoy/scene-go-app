@@ -11,6 +11,7 @@ import {
   Platform,
 } from 'react-native';
 import { NoteItem } from '../utils/NoteStore';
+import * as Clipboard from 'expo-clipboard';
 
 interface QuickNotesModalProps {
   visible: boolean;
@@ -113,6 +114,12 @@ export const QuickNotesModal: React.FC<QuickNotesModalProps> = ({
                 <View style={styles.noteHeader}>
                   <Text style={styles.noteCategory}>{item.category}</Text>
                   <View style={styles.noteHeaderRight}>
+                    <TouchableOpacity
+                      onPress={() => Clipboard.setStringAsync(item.content)}
+                      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    >
+                      <Text style={styles.copyText}>复制</Text>
+                    </TouchableOpacity>
                     <Text style={styles.noteTime}>{item.timestamp}</Text>
                     <TouchableOpacity
                       onPress={() => onDeleteNote(item.id)}
@@ -269,6 +276,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 10,
+  },
+  copyText: {
+    color: '#38bdf8',
+    fontSize: 11,
+    fontWeight: '600',
   },
   deleteText: {
     color: '#f87171',
