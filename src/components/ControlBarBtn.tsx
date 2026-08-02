@@ -90,22 +90,22 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
 
 const styles = StyleSheet.create({
   btn: {
-    minWidth: 56,
-    height: 46,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    minWidth: 54,
+    height: 38,
+    borderRadius: 10,
+    paddingHorizontal: 10,
     borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   btnWide: {
-    minWidth: 100,
+    minWidth: 90,
   },
   btnLarge: {
     flex: 1,
-    height: 64,
-    borderRadius: 14,
-    paddingHorizontal: 18,
+    height: 56,
+    borderRadius: 12,
+    paddingHorizontal: 16,
   },
   btnPressed: {
     transform: [{ scale: 0.96 }],
@@ -147,9 +147,9 @@ const styles = StyleSheet.create({
     opacity: 0.9,
   },
   stateDot: {
-    width: 5,
-    height: 5,
-    borderRadius: 2.5,
+    width: 4,
+    height: 4,
+    borderRadius: 2,
     marginRight: 5,
   },
   dotActive: {
@@ -160,11 +160,11 @@ const styles = StyleSheet.create({
   },
   label: {
     fontFamily: FONT.bold,
-    fontSize: 10,
-    letterSpacing: 0.8,
+    fontSize: 9,
+    letterSpacing: 0.7,
   },
   labelLarge: {
-    fontSize: 18,
+    fontSize: 17,
     letterSpacing: 2.5,
   },
   labelIdle: {
@@ -179,12 +179,12 @@ const styles = StyleSheet.create({
   hint: {
     fontFamily: FONT.regular,
     color: '#6b7280',
-    fontSize: 8,
-    marginTop: 2,
+    fontSize: 7.5,
+    marginTop: 1,
     letterSpacing: 0.3,
   },
   hintLarge: {
-    fontSize: 9,
-    marginTop: 3,
+    fontSize: 8.5,
+    marginTop: 2,
   },
 });
