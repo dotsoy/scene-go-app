@@ -15,6 +15,7 @@ import {
   clearOpenRouterApiKey,
 } from '../utils/SecureConfig';
 import { COLORS, FONT } from '../theme/tokens';
+import { SheetHandle, SHEET_SAFE_BOTTOM } from './SheetHandle';
 
 interface PluginSelectorModalProps {
   visible: boolean;
@@ -67,6 +68,7 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <SheetHandle />
           {/* 标题栏 */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>识别引擎设置</Text>

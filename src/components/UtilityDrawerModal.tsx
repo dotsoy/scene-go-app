@@ -1,6 +1,7 @@
 import React from 'react';
 import { Modal, View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, FONT } from '../theme/tokens';
+import { SheetHandle, SHEET_SAFE_BOTTOM } from './SheetHandle';
 
 export type ToolKind = 'logs' | 'history' | 'settings';
 
@@ -33,6 +34,7 @@ export const UtilityDrawerModal: React.FC<UtilityDrawerModalProps> = ({
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <SheetHandle />
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>工具箱</Text>

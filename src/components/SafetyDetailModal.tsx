@@ -12,6 +12,7 @@ import * as Speech from 'expo-speech';
 import { CountrySafety } from '../data/countrySafety';
 import { PlaceContext } from '../utils/locationContext';
 import { UserProfile } from '../utils/userProfile';
+import { SheetHandle, SHEET_SAFE_BOTTOM } from './SheetHandle';
 
 interface SafetyDetailModalProps {
   visible: boolean;
@@ -93,7 +94,8 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.sheet}>
-          <View style={styles.header}>
+
+          <SheetHandle /><View style={styles.header}>
             <Text style={styles.title}>{safety.nameZh} · 安全与实用信息</Text>
             <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
               <Text style={styles.closeBtnText}>关闭</Text>
@@ -182,7 +184,7 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     padding: 20,
-    paddingBottom: 32,
+    paddingBottom: 34,
     maxHeight: '85%',
   },
   header: {

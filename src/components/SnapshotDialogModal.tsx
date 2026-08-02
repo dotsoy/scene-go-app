@@ -14,6 +14,7 @@ import {
 import * as Speech from 'expo-speech';
 import { ScenarioResult, ChatTurn } from '../plugins/types';
 import { COLORS, FONT } from '../theme/tokens';
+import { SheetHandle, SHEET_SAFE_BOTTOM } from './SheetHandle';
 
 interface SnapshotDialogModalProps {
   visible: boolean;
@@ -78,6 +79,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
         style={styles.modalOverlay}
       >
         <View style={styles.dialogCard}>
+          <SheetHandle />
           {/* Header */}
           <View style={styles.header}>
             <View style={styles.titleRow}>
@@ -232,6 +234,8 @@ const styles = StyleSheet.create({
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
+  
+      paddingBottom: 34,
   },
   header: {
     flexDirection: 'row',

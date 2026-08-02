@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { apiLogger, ApiLogEntry } from '../utils/ApiLogger';
 import { COLORS, FONT } from '../theme/tokens';
+import { SheetHandle, SHEET_SAFE_BOTTOM } from './SheetHandle';
 
 interface ApiLogModalProps {
   visible: boolean;
@@ -53,6 +54,7 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose, onDi
     >
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <SheetHandle />
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>API 请求/响应 日志监控</Text>
@@ -152,6 +154,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     height: '80%',
     padding: 16,
+  
+      paddingBottom: 34,
   },
   header: {
     flexDirection: 'row',

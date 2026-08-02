@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { SavedSession } from '../utils/SessionStore';
 import { COLORS, FONT } from '../theme/tokens';
+import { SheetHandle, SHEET_SAFE_BOTTOM } from './SheetHandle';
 
 interface SessionHistoryModalProps {
   visible: boolean;
@@ -32,6 +33,7 @@ export const SessionHistoryModal: React.FC<SessionHistoryModalProps> = ({
     <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose} onDismiss={onDismiss}>
       <View style={styles.overlay}>
         <View style={styles.container}>
+          <SheetHandle />
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>对话记录</Text>
@@ -94,6 +96,8 @@ const styles = StyleSheet.create({
     borderTopRightRadius: 20,
     height: '70%',
     padding: 16,
+  
+      paddingBottom: 34,
   },
   header: {
     flexDirection: 'row',

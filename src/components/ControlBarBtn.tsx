@@ -106,17 +106,17 @@ const styles = StyleSheet.create({
     transform: [{ scale: 0.96 }],
     opacity: 0.85,
   },
-  // 状态底色
+  // 状态底色（§7.4 次按钮规范：半透明白 + 细描边；激活态品牌绿；危险态同为次按钮样式）
   btnIdle: {
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderColor: COLORS.borderSubtle,
+    backgroundColor: 'rgba(255,255,255,0.07)',
+    borderColor: 'rgba(255,255,255,0.14)',
   },
   btnActive: {
-    backgroundColor: 'rgba(76,175,80,0.16)',
-    borderColor: 'rgba(129,199,132,0.35)',
+    backgroundColor: 'rgba(76,175,80,0.18)',
+    borderColor: 'rgba(129,199,132,0.4)',
   },
   btnDanger: {
-    backgroundColor: 'rgba(244,67,54,0.28)',
+    backgroundColor: 'rgba(244,67,54,0.18)',
     borderColor: 'rgba(239,83,80,0.4)',
   },
   // 光晕
@@ -156,7 +156,7 @@ const styles = StyleSheet.create({
     letterSpacing: 2,
   },
   labelIdle: {
-    color: '#9ca3af',
+    color: 'rgba(255,255,255,0.7)',
   },
   labelActive: {
     color: COLORS.accentGreen,
