@@ -94,11 +94,14 @@ export default Sentry.wrap(function App() {
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<unknown>(null);
+  // 最新转录文本的 ref 副本：避免 async 回调读取到过期的闭包 state
+  const liveTranscriptRef = useRef<string>('');
 
   // 绑定原生 iOS SFSpeechRecognizer 听写监听
   useEffect(() => {
     const sub = NativeSpeech.onSpeechResult((e) => {
       if (e.transcript) {
+        liveTranscriptRef.current = e.transcript;
         setLiveTranscript(e.transcript);
       }
     });
@@ -187,15 +190,19 @@ export default Sentry.wrap(function App() {
 
   const handleToggleMic = async () => {
     if (!isMicActive) {
+      liveTranscriptRef.current = '';
       setIsMicActive(true);
       setLiveTranscript('正在开启原生听写，请说话...');
       await NativeSpeech.start('zh-CN');
     } else {
       setIsMicActive(false);
       await NativeSpeech.stop();
-      if (liveTranscript && !liveTranscript.includes('正在开启')) {
-        handleAddNote(liveTranscript, 'VOICE');
+      // 从 ref 读取最新转录：await 期间到达的 final 事件不会丢失
+      const finalTranscript = liveTranscriptRef.current;
+      if (finalTranscript && !finalTranscript.includes('正在开启')) {
+        handleAddNote(finalTranscript, 'VOICE');
       }
+      liveTranscriptRef.current = '';
       setLiveTranscript('');
     }
   };
