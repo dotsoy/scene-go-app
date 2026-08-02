@@ -1473,6 +1473,8 @@ PODS:
     - ReactCommon/turbomodule/core
     - Sentry/HybridSDK (= 8.41.0)
     - Yoga
+  - SceneGoSpeech (1.0.0):
+    - ExpoModulesCore
   - Sentry/HybridSDK (8.41.0)
   - SocketRocket (0.7.0)
   - whisper-rn (0.7.2):
@@ -1584,6 +1586,7 @@ DEPENDENCIES:
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
   - "RNSentry (from `../node_modules/@sentry/react-native`)"
+  - SceneGoSpeech (from `../modules/scenego-speech/ios`)
   - whisper-rn (from `../node_modules/whisper.rn`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
 
@@ -1747,6 +1750,8 @@ EXTERNAL SOURCES:
     :path: "../node_modules/@react-native-async-storage/async-storage"
   RNSentry:
     :path: "../node_modules/@sentry/react-native"
+  SceneGoSpeech:
+    :path: "../modules/scenego-speech/ios"
   whisper-rn:
     :path: "../node_modules/whisper.rn"
   Yoga:
@@ -1829,6 +1834,7 @@ SPEC CHECKSUMS:
   ReactCommon: f7da14a8827b72704169a48c929bcde802698361
   RNCAsyncStorage: 826b603ae9c0f88b5ac4e956801f755109fa4d5c
   RNSentry: 8c7b32aad8f042232ff82464defb3159ab2f4f47
+  SceneGoSpeech: b7e00ce92723d245992d11975cdadd92929b4f2f
   Sentry: 54d0fe6c0df448497c8ed4cce66ccf7027e1823e
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   whisper-rn: 44eb623c737954de7dd80eecd01543df292c9b9e

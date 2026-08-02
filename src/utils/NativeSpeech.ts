@@ -1,10 +1,13 @@
-import { NativeModules, NativeEventEmitter } from 'react-native';
+import { EventEmitter, requireOptionalNativeModule } from 'expo-modules-core';
 
-const { SceneGoSpeechRecognizer } = NativeModules;
+interface SpeechNativeModule {
+  startListening(locale: string): Promise<boolean>;
+  stopListening(): Promise<boolean>;
+}
 
-const speechEmitter = SceneGoSpeechRecognizer
-  ? new NativeEventEmitter(SceneGoSpeechRecognizer)
-  : null;
+const speechModule = requireOptionalNativeModule<SpeechNativeModule>('SceneGoSpeechRecognizer');
+// EventEmitter 构造要求 NativeModule 类型（带私有字段，无法结构匹配），这里 cast any
+const speechEmitter = speechModule ? new EventEmitter(speechModule as any) : null;
 
 export interface SpeechResultEvent {
   transcript: string;
@@ -16,10 +19,6 @@ export interface SpeechErrorEvent {
 }
 
 export const NativeSpeech = {
-  isAvailable(): boolean {
-    return !!SceneGoSpeechRecognizer;
-  },
-
   onSpeechResult(callback: (e: SpeechResultEvent) => void) {
     if (speechEmitter) {
       return speechEmitter.addListener('onSpeechResult', callback);
@@ -35,9 +34,9 @@ export const NativeSpeech = {
   },
 
   async start(locale: string = 'zh-CN'): Promise<boolean> {
-    if (SceneGoSpeechRecognizer?.startListening) {
+    if (speechModule?.startListening) {
       try {
-        await SceneGoSpeechRecognizer.startListening(locale);
+        await speechModule.startListening(locale);
         return true;
       } catch (err) {
         console.warn('[NativeSpeech] Start error:', err);
@@ -47,9 +46,9 @@ export const NativeSpeech = {
   },
 
   async stop(): Promise<boolean> {
-    if (SceneGoSpeechRecognizer?.stopListening) {
+    if (speechModule?.stopListening) {
       try {
-        await SceneGoSpeechRecognizer.stopListening();
+        await speechModule.stopListening();
         return true;
       } catch (err) {
         console.warn('[NativeSpeech] Stop error:', err);
