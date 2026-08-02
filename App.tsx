@@ -14,6 +14,7 @@ import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { scenarioToCard } from './src/utils/cardBuilder';
+import { getLocationContext } from './src/utils/locationContext';
 import { modelManager } from './src/utils/ModelManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
@@ -56,7 +57,7 @@ export default Sentry.wrap(function App() {
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
   const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [processingLabel, setProcessingLabel] = useState<string | null>(null);
   // 快照多轮对话历史（首条为场景解读，后续为追问问答）
   const [chatTurns, setChatTurns] = useState<ChatTurn[]>([]);
   const chatTurnsRef = useRef<ChatTurn[]>([]);
@@ -132,7 +133,7 @@ export default Sentry.wrap(function App() {
 
   /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流并持久化 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
-    setIsProcessing(true);
+    setProcessingLabel('正在回答...');
     try {
       const cloudVlm = pluginManager.getCloudVlmPlugin();
       const reply = await cloudVlm.askFollowUp(imageUri, userPrompt, chatTurnsRef.current);
@@ -150,7 +151,7 @@ export default Sentry.wrap(function App() {
     } catch (err) {
       console.warn('[AI Follow-up Error]:', err);
     } finally {
-      setIsProcessing(false);
+      setProcessingLabel(null);
     }
   };
 
@@ -206,7 +207,7 @@ export default Sentry.wrap(function App() {
 
   const handleCaptureFrame = async () => {
     if (!isCameraActive) return;
-    setIsProcessing(true);
+    setProcessingLabel('正在分析画面...');
     try {
       const cam = cameraRef.current as { takePictureAsync?: (opts: { quality: number }) => Promise<{ uri: string }> } | null;
       let photoUri: string | null = null;
@@ -229,9 +230,10 @@ export default Sentry.wrap(function App() {
       setIsCameraActive(false);
       setIsCameraReady(false);
 
-      // 触发插件管线: 场景识别 + 语义匹配
+      // 触发插件管线: 场景识别 + 语义匹配（携带位置上下文）
       console.log('[Plugins] 启动插件管线，处理图像快照...');
-      const result = await pluginManager.processImageSnapshot(photoUri);
+      const locationCtx = await getLocationContext();
+      const result = await pluginManager.processImageSnapshot(photoUri, locationCtx ?? undefined);
       console.log('[Plugin OCR 结果]:', result.ocr.rawText.slice(0, 100));
       console.log('[Plugin 场景匹配结果]:', result.scenario.title);
 
@@ -259,7 +261,7 @@ export default Sentry.wrap(function App() {
       setIsCameraActive(false);
       setIsCameraReady(false);
     } finally {
-      setIsProcessing(false);
+      setProcessingLabel(null);
     }
   };
 
@@ -306,16 +308,17 @@ export default Sentry.wrap(function App() {
     const transcript = await stopMic();
     if (!transcript || transcript.includes('正在开启')) return;
     handleAddNote(transcript, 'VOICE');
-    setIsProcessing(true);
+    setProcessingLabel('正在理解意图并生成表达卡...');
     try {
-      const result = await pluginManager.generateCardFromText(transcript);
+      const locationCtx = await getLocationContext();
+      const result = await pluginManager.generateCardFromText(transcript, locationCtx ?? undefined);
       if (result && result.targetText) {
         addExpressionCard(scenarioToCard(result, '当前位置'));
       }
     } catch (err) {
       console.warn('[Voice Card Error]:', err);
     } finally {
-      setIsProcessing(false);
+      setProcessingLabel(null);
     }
   };
 
@@ -386,14 +389,10 @@ export default Sentry.wrap(function App() {
           </View>
 
           {/* Processing Indicator */}
-          {isProcessing && (
+          {processingLabel && (
             <View style={styles.processingCard}>
               <ActivityIndicator size="small" color="#4fc3f7" />
-              <Text style={styles.processingText}>
-                {pluginManager.getActiveOcrId() === 'cloud-vlm'
-                  ? '正在分析画面...'
-                  : '正在识别场景...'}
-              </Text>
+              <Text style={styles.processingText}>{processingLabel}</Text>
             </View>
           )}
 

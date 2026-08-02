@@ -65,7 +65,10 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
 }
 
 /** 构造场景识别请求体（日志与真实请求共用同一对象，避免两处重复维护） */
-function buildSceneRequestBody(base64: string) {
+function buildSceneRequestBody(base64: string, location?: string) {
+  const userText = location
+    ? `请分析这张照片中的场景，给出出行解读。\n（用户当前所在位置：${location}，可结合位置判断场景地点与当地语言）`
+    : '请分析这张照片中的场景，给出出行解读。';
   return {
     model: MODEL_ID,
     messages: [
@@ -79,7 +82,7 @@ function buildSceneRequestBody(base64: string) {
           },
           {
             type: 'text',
-            text: '请分析这张照片中的场景，给出出行解读。',
+            text: userText,
           },
         ],
       },
@@ -134,7 +137,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
   name = '云端视觉识别';
   description = '通过 OpenRouter 识别摄像头画面场景';
 
-  async recognizeText(imageUri: string): Promise<OcrResult> {
+  async recognizeText(imageUri: string, location?: string): Promise<OcrResult> {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) {
       return {
@@ -158,7 +161,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         'X-OpenRouter-Title': 'SceneGo',
       };
 
-      const reqBodyObject = buildSceneRequestBody(base64);
+      const reqBodyObject = buildSceneRequestBody(base64, location);
 
       const fullRequestLog = JSON.stringify(
         {
@@ -281,7 +284,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
   }
 
   /** 文本驱动的动态表达卡：用户一句话描述需求（语音转写/手打）→ VLM 生成当地语言表达卡 */
-  async generateCardFromText(text: string): Promise<ScenarioResult | null> {
+  async generateCardFromText(text: string, location?: string): Promise<ScenarioResult | null> {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) return null;
 
@@ -297,11 +300,15 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         'X-OpenRouter-Title': 'SceneGo',
       };
 
+      const userContent = location
+        ? `${text}\n\n（用户当前所在位置：${location}，生成卡片请使用当地语言）`
+        : text;
+
       const body = {
         model,
         messages: [
           { role: 'system', content: CARD_SYSTEM_PROMPT },
-          { role: 'user', content: text },
+          { role: 'user', content: userContent },
         ],
         max_tokens: 512,
       };

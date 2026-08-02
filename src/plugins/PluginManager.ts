@@ -62,8 +62,8 @@ class PluginManager {
   }
 
   /** 文本驱动的动态表达卡：语音意图/手打需求 → 当地语言表达卡（无图路径） */
-  async generateCardFromText(text: string): Promise<ScenarioResult | null> {
-    return this.cloudVlmPlugin.generateCardFromText(text);
+  async generateCardFromText(text: string, location?: string): Promise<ScenarioResult | null> {
+    return this.cloudVlmPlugin.generateCardFromText(text, location);
   }
 
   /**
@@ -80,7 +80,7 @@ class PluginManager {
       this.ocrPlugins.get(this.activeOcrId) ||
       this.cloudVlmPlugin;
 
-    const ocrResult = await ocrPlugin.recognizeText(imageUri);
+    const ocrResult = await ocrPlugin.recognizeText(imageUri, location);
 
     // 云端 VLM 模式：直接从返回文本解析 ScenarioResult
     if (this.activeOcrId === 'cloud-vlm' && ocrResult.rawText) {

@@ -27,7 +27,7 @@ export interface OcrPlugin {
   id: string;
   name: string;
   description: string;
-  recognizeText(imageUri: string): Promise<OcrResult>;
+  recognizeText(imageUri: string, location?: string): Promise<OcrResult>;
 }
 
 export interface MatcherPlugin {
