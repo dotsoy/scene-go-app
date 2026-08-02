@@ -11,7 +11,7 @@ interface DictItem {
 
 const LOCAL_TRAVEL_DICTIONARY: DictItem[] = [
   {
-    keywords: ['restaurant', 'food', 'dining_room', 'cafe', 'coffee', 'bakery', 'dish', 'menu', 'tom yum', 'pad thai', 'ต้มยำ'],
+    keywords: ['restaurant', 'food', 'dining_room', 'cafe', 'coffee', 'bakery', 'dish', 'menu', 'tom yum', 'pad thai', 'ต้มยำ', '餐厅', '餐馆', '饭店', '美食', '菜单', '咖啡', '菜品', '点餐', '忌口', '过敏', '冬阴功', '泰餐', '日料'],
     title: '异国餐厅/餐食点餐场景',
     category: 'RESTAURANT',
     translatedText: '已识别到【餐厅/美食场景】。可随时拍照解析菜单、确认过敏原或询问招牌菜。',
@@ -19,7 +19,7 @@ const LOCAL_TRAVEL_DICTIONARY: DictItem[] = [
     phrases: ['Menu, please (请给我菜单)', 'Check, please (买单结账)', 'Mai Phet (请做不辣)', 'Aroy (很好吃)'],
   },
   {
-    keywords: ['airport', 'terminal', 'gate', 'flight', 'airplane', 'boarding', 'aircraft', 'concourse'],
+    keywords: ['airport', 'terminal', 'gate', 'flight', 'airplane', 'boarding', 'aircraft', 'concourse', '机场', '航站楼', '登机口', '登机', '航班', '出入境', '海关'],
     title: '机场/出入境与登机场景',
     category: 'AIRPORT',
     translatedText: '已识别到【机场/航站楼场景】。请注意登机口变更与离境退税窗口。',
@@ -27,7 +27,7 @@ const LOCAL_TRAVEL_DICTIONARY: DictItem[] = [
     phrases: ['Where is Gate __? (登机口在哪？)', 'Boarding pass (登机牌)', 'Tax Refund (退税窗口)'],
   },
   {
-    keywords: ['hotel', 'bedroom', 'room', 'reception', 'lobby', 'resort', 'concierge'],
+    keywords: ['hotel', 'bedroom', 'room', 'reception', 'lobby', 'resort', 'concierge', '酒店', '旅馆', '民宿', '前台', '入住', '退房', '客房'],
     title: '酒店入住与前台场景',
     category: 'HOTEL',
     translatedText: '已识别到【酒店/住宿场景】。支持办理入住 Check-in、查询 Wi-Fi 或延迟退房。',
@@ -35,7 +35,7 @@ const LOCAL_TRAVEL_DICTIONARY: DictItem[] = [
     phrases: ['Check-in, please (办理入住)', 'Wi-Fi password? (Wi-Fi密码是多少？)', 'Late check-out? (申请延迟退房)'],
   },
   {
-    keywords: ['street', 'road', 'traffic', 'subway', 'station', 'train', 'bus', 'vehicle', 'taxi', 'transportation'],
+    keywords: ['street', 'road', 'traffic', 'subway', 'station', 'train', 'bus', 'vehicle', 'taxi', 'transportation', '地铁', '公交', '车站', '出租', '打车', '轻轨', '交通', '街道', '路口', '高速公路', '斑马线'],
     title: '城市交通与街景出行场景',
     category: 'TRANSPORT',
     translatedText: '已识别到【街景/公共交通场景】。方便查询轻轨换乘、出租车打表或目的地问路。',
@@ -43,7 +43,7 @@ const LOCAL_TRAVEL_DICTIONARY: DictItem[] = [
     phrases: ['By meter, please (请打表)', 'Where is the station? (车站在哪？)', 'How much to __? (去__多少钱？)'],
   },
   {
-    keywords: ['store', 'shop', 'market', 'mall', 'shopping', 'supermarket', 'boutique', 'tax free', 'vat refund'],
+    keywords: ['store', 'shop', 'market', 'mall', 'shopping', 'supermarket', 'boutique', 'tax free', 'vat refund', '商场', '商店', '超市', '购物', '免税', '退税', '柜台', '专卖店'],
     title: '商场与购物退税场景',
     category: 'SHOPPING',
     translatedText: '已识别到【购物/商场场景】。支持查看免税标志 Tax Free、问价与开立退税单据。',
