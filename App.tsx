@@ -315,11 +315,13 @@ export default Sentry.wrap(function App() {
       setIsMicActive(true);
       setLiveTranscript('正在开启原生听写，请说话...');
       const started = await NativeSpeech.start('zh-CN');
-      if (!started) {
-        // 启动失败（含授权窗口内被 stop 取消）：回滚状态
-        micActiveRef.current = false;
-        setIsMicActive(false);
-        setLiveTranscript('语音识别启动失败：请检查麦克风权限，或在真机上测试（模拟器可能不支持中文语言包）');
+      if (!started.ok) {
+        // 启动失败：若用户已快速关回（micActiveRef 已 false）则静默，否则回滚并展示真实原因
+        if (micActiveRef.current) {
+          micActiveRef.current = false;
+          setIsMicActive(false);
+          setLiveTranscript(`语音识别启动失败: ${started.error}`);
+        }
       }
     } else {
       micActiveRef.current = false;

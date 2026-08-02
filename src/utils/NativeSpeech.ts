@@ -23,6 +23,11 @@ export interface SpeechErrorEvent {
   message: string;
 }
 
+export interface SpeechStartResult {
+  ok: boolean;
+  error?: string;
+}
+
 export const NativeSpeech = {
   onSpeechResult(callback: (e: SpeechResultEvent) => void) {
     if (rnEventEmitter) {
@@ -38,16 +43,22 @@ export const NativeSpeech = {
     return { remove: () => {} };
   },
 
-  async start(locale: string = 'zh-CN'): Promise<boolean> {
+  async start(locale: string = 'zh-CN'): Promise<SpeechStartResult> {
     if (speechModule?.startListening) {
       try {
         await speechModule.startListening(locale);
-        return true;
+        return { ok: true };
       } catch (err) {
-        console.warn('[NativeSpeech] Start error:', err);
+        // 透传原生 reject 的具体原因（auth_denied / audio_session_error / engine_error 等）
+        const msg =
+          typeof err === 'object' && err !== null && 'message' in err
+            ? String((err as { message: string }).message)
+            : String(err);
+        console.warn('[NativeSpeech] Start error:', msg);
+        return { ok: false, error: msg };
       }
     }
-    return false;
+    return { ok: false, error: '语音模块不可用' };
   },
 
   async stop(): Promise<boolean> {

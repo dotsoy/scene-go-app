@@ -107,11 +107,8 @@ public class SceneGoSpeechRecognizer: Module {
     recognitionRequest = request
 
     let inputNode = audioEngine.inputNode
-    if inputNode.inputFormat(forBus: 0).sampleRate == 0 {
-      // 无输入设备（模拟器未授权麦克风等）
-      promise.reject("no_input_device", "No audio input device available")
-      return
-    }
+    // 不做 inputFormat sampleRate 预检：engine 未启动时该值在部分真机上为 0，会误判无输入设备；
+    // 实际无输入/权限问题时 audioEngine.start() 会给出准确错误
 
     recognitionTask = recognizer.recognitionTask(with: request) { [weak self] result, error in
       guard let self else { return }
