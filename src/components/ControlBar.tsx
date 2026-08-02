@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ControlBarBtn } from './ControlBarBtn';
-import { COLORS, LAYOUT } from '../theme/tokens';
+import { LAYOUT } from '../theme/tokens';
 
 interface ControlBarProps {
   isCardVisible: boolean;
@@ -37,10 +37,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
 const styles = StyleSheet.create({
   bar: {
     height: LAYOUT.mainBarHeight,
-    // 中性炭灰（贴近 bgCard），比纯黑更有层次，且不带蓝调
-    backgroundColor: 'rgba(18,18,20,0.92)',
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: 'rgba(255,255,255,0.12)',
+    // 无独立底色/描边：按钮直接浮在主背景（渐变全屏）上
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
