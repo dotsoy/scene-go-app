@@ -98,12 +98,6 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
               <Text style={styles.translatedText}>
                 {scenarioResult?.translatedText || '已为您分析快照信息。'}
               </Text>
-
-              {scenarioResult?.originalText ? (
-                <Text style={styles.originalText}>
-                  原文: "{scenarioResult.originalText.replace(/\n/g, ' ')}"
-                </Text>
-              ) : null}
             </View>
 
             {/* Safety Tips */}
@@ -249,12 +243,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     fontWeight: '500',
-  },
-  originalText: {
-    color: '#71717a',
-    fontSize: 12,
-    marginTop: 6,
-    fontStyle: 'italic',
   },
   tipsContainer: {
     backgroundColor: '#27272a',
