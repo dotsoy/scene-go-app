@@ -19,6 +19,8 @@ export interface CardData {
   phrases?: string[];
   /** 出行提示列表（LOCAL PROTOCOL 展开） */
   tips?: string[];
+  /** 来源快照会话 id：卡面提供「AI 解读」入口（仅最新会话可进） */
+  sessionId?: string;
 }
 
 interface FlashCardViewProps {

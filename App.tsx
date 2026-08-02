@@ -117,14 +117,8 @@ export default Sentry.wrap(function App() {
   const liveTranscriptRef = useRef<string>('');
   // 麦克风期望状态 ref：同步 isMicActive，防止授权异步窗口内重复触发
   const micActiveRef = useRef(false);
-  // 日志弹窗可见性的 ref 副本（async 管线内读取最新值）
-  const isLogsOpenRef = useRef(false);
   // 待展示的快照弹窗标记：LOG dismiss 动画完成后再 present，避免 UIKit modal 队列冲突
   const pendingSnapshotRef = useRef(false);
-
-  useEffect(() => {
-    isLogsOpenRef.current = isLogsOpen;
-  }, [isLogsOpen]);
 
   // 启动时探测本地模型：已下载的 Qwen/Whisper 自动注册并激活，无文件则静默跳过（不影响云端主链路）
   useEffect(() => {
@@ -230,9 +224,10 @@ export default Sentry.wrap(function App() {
     setSessions(await sessionStore.getAll());
   };
 
+  /** CAM 双击：拍照 → 提取信息 → 直接生成表达卡（卡片优先，解读降级为卡面入口） */
   const handleCaptureFrame = async () => {
     if (!isCameraActive) return;
-    setProcessingLabel('正在分析画面...');
+    setProcessingLabel('正在提取信息并生成卡片...');
     try {
       const cam = cameraRef.current as { takePictureAsync?: (opts: { quality: number }) => Promise<{ uri: string }> } | null;
       let photoUri: string | null = null;
@@ -278,13 +273,11 @@ export default Sentry.wrap(function App() {
       chatTurnsRef.current = initialTurns;
       setChatTurns(initialTurns);
       persistSession(newSessionId, photoUri, result.scenario, initialTurns);
-      if (isLogsOpenRef.current) {
-        // LOG 弹窗开着：先关闭，待 dismiss 动画完成 (onDismiss) 后再弹快照
-        pendingSnapshotRef.current = true;
-        setIsLogsOpen(false);
-      } else {
-        setIsSnapshotModalOpen(true);
-      }
+      // 直接成卡：场景解读 → 表达卡，置顶卡栈（解读不再自动弹窗，走卡面「AI 解读」入口）
+      addExpressionCard({
+        ...scenarioToCard(result.scenario, locationCtx ?? '当前位置'),
+        sessionId: newSessionId,
+      });
     } catch (err) {
       console.warn('Camera snapshot error:', err);
       setIsCameraActive(false);
@@ -292,6 +285,12 @@ export default Sentry.wrap(function App() {
     } finally {
       setProcessingLabel(null);
     }
+  };
+
+  /** 卡面「AI 解读」入口：仅最新快照会话可进（状态已在内存） */
+  const handleOpenSnapshotFromCard = () => {
+    if (!currentCard.sessionId || currentCard.sessionId !== sessionIdRef.current) return;
+    setIsSnapshotModalOpen(true);
   };
 
   const handleSnapshotSubmit = async (userPrompt: string, imageUri: string) => {
@@ -585,12 +584,18 @@ export default Sentry.wrap(function App() {
                 totalCards={cards.length}
                 onNextCard={handleNextScenario}
                 tipActionLabel={
-                  currentCard.id.startsWith('safety-') ? '安全信息' : undefined
+                  currentCard.id.startsWith('safety-')
+                    ? '安全信息'
+                    : currentCard.sessionId === sessionIdRef.current
+                      ? 'AI 解读'
+                      : undefined
                 }
                 onTipAction={
                   currentCard.id.startsWith('safety-')
                     ? () => setIsSafetyDetailOpen(true)
-                    : undefined
+                    : currentCard.sessionId === sessionIdRef.current
+                      ? handleOpenSnapshotFromCard
+                      : undefined
                 }
               />
             ) : (
