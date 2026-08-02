@@ -53,7 +53,8 @@
           "organization": "personal-4ty"
         }
       ],
-      "expo-secure-store"
+      "expo-secure-store",
+      "./plugins/withSentryAlwaysOutOfDate"
     ]
   }
 }

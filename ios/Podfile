@@ -57,6 +57,18 @@ target 'SceneGo' do
       :ccache_enabled => podfile_properties['apple.ccacheEnabled'] == 'true',
     )
 
+    # 统一 pod 部署版本：低于 App 目标(13.4)的 pod 提升到 13.4，消除 Xcode 的
+    # "deployment version mismatch, expected >= 2.0 <= 26.5.99" 警告（只升不降）
+    app_deployment_target = Gem::Version.new('13.4')
+    installer.pods_project.targets.each do |target|
+      target.build_configurations.each do |config|
+        current = config.build_settings['IPHONEOS_DEPLOYMENT_TARGET']
+        if current && Gem::Version.new(current) < app_deployment_target
+          config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.4'
+        end
+      end
+    end
+
     # This is necessary for Xcode 14, because it signs resource bundles by default
     # when building for devices.
     installer.target_installation_results.pod_target_installation_results
@@ -89,6 +101,21 @@ target 'SceneGo' do
           "#if targetEnvironment(simulator)\n    return true\n    #else\n    return false\n    #endif"
         )
         File.write(uid_device_swift, patched)
+      end
+    end
+
+    # Patch expo-dev-menu DevMenuViewController.swift: TARGET_IPHONE_SIMULATOR 宏
+    # 在 Xcode 16+/iOS 18+ SDK 的 Swift 中已移除，改用 targetEnvironment 条件编译
+    dev_menu_swift = File.join(__dir__, '../node_modules/expo-dev-menu/ios/DevMenuViewController.swift')
+    if File.exist?(dev_menu_swift)
+      File.chmod(0644, dev_menu_swift)
+      content = File.read(dev_menu_swift)
+      if content.include?('let isSimulator = TARGET_IPHONE_SIMULATOR > 0')
+        patched = content.sub(
+          'let isSimulator = TARGET_IPHONE_SIMULATOR > 0',
+          "#if targetEnvironment(simulator)\n    let isSimulator = true\n#else\n    let isSimulator = false\n#endif"
+        )
+        File.write(dev_menu_swift, patched)
       end
     end
   end
