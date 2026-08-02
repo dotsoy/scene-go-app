@@ -9,7 +9,8 @@ export interface CardData {
   title: string;
   targetText: string;
   phonetic: string;
-  english: string;
+  /** 补充说明/服务语句（原 english 字段，实际存中文语义，改名避免误导） */
+  subText: string;
   localTip: string;
   languageCode: string;
   badgeColor?: string;
@@ -69,9 +70,9 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           <Text style={styles.targetText}>{card.targetText}</Text>
         </View>
 
-        {/* 读音与英文 */}
+        {/* 读音与补充说明 */}
         <Text style={styles.phoneticText}>{card.phonetic}</Text>
-        <Text style={styles.englishText}>{card.english}</Text>
+        <Text style={styles.englishText}>{card.subText}</Text>
 
         {/* 底部双操作按钮栏：PLAY AUDIO (左) 与 放大显眼的 NEXT CARD 按钮 (右) */}
         <View style={styles.actionRow}>
