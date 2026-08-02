@@ -573,7 +573,8 @@ export default Sentry.wrap(function App() {
 
           {/* Center Card */}
           <View style={styles.centerCardArea}>
-            {isCardVisible ? (
+            {/* 相机取景时隐藏卡片占位，避免 CARD HIDDEN 叠在取景框上 */}
+            {isCameraActive ? null : isCardVisible ? (
               <FlashCardView
                 card={currentCard}
                 currentIndex={cardIndex}
