@@ -27,6 +27,12 @@ export interface MatcherPlugin {
   match(text: string, location?: string): Promise<ScenarioResult>;
 }
 
+/** 多轮对话中的一轮问答（供云端 VLM 追问会话使用） */
+export interface ChatTurn {
+  role: 'user' | 'assistant';
+  content: string;
+}
+
 export interface SpeechPlugin {
   id: string;
   name: string;

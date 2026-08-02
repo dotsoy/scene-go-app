@@ -12,12 +12,14 @@ import {
   ScrollView,
 } from 'react-native';
 import * as Speech from 'expo-speech';
-import { ScenarioResult } from '../plugins/types';
+import { ScenarioResult, ChatTurn } from '../plugins/types';
 
 interface SnapshotDialogModalProps {
   visible: boolean;
   imageUri: string | null;
   scenarioResult?: ScenarioResult | null;
+  /** 多轮对话流：首条为场景解读，其后为追问与回答 */
+  turns: ChatTurn[];
   onClose: () => void;
   onSubmit: (prompt: string, imageUri: string) => void;
 }
@@ -26,6 +28,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   visible,
   imageUri,
   scenarioResult,
+  turns,
   onClose,
   onSubmit,
 }) => {
@@ -44,8 +47,9 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   };
 
   const handleSend = () => {
-    if (!imageUri) return;
-    onSubmit(userPrompt.trim(), imageUri);
+    const trimmed = userPrompt.trim();
+    if (!trimmed || !imageUri) return;
+    onSubmit(trimmed, imageUri);
     setUserPrompt('');
   };
 
@@ -92,12 +96,43 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
               </TouchableOpacity>
             )}
 
-            {/* OCR Raw Text & Interpretation */}
-            <View style={styles.infoBox}>
-              <Text style={styles.sectionLabel}>识别到的文本与解读：</Text>
-              <Text style={styles.translatedText}>
-                {scenarioResult?.translatedText || '已为您分析快照信息。'}
-              </Text>
+            {/* 多轮对话流：首条为 AI 场景解读，其后为追问问答 */}
+            <View style={styles.chatSection}>
+              <Text style={styles.sectionLabel}>AI 场景解读与追问：</Text>
+              {turns.length === 0 ? (
+                <View style={[styles.bubbleRow, styles.aiRow]}>
+                  <View style={[styles.bubble, styles.aiBubble]}>
+                    <Text style={styles.aiBubbleText}>
+                      {scenarioResult?.translatedText || '已为您分析快照信息。'}
+                    </Text>
+                  </View>
+                </View>
+              ) : (
+                turns.map((turn, idx) => (
+                  <View
+                    key={idx}
+                    style={[
+                      styles.bubbleRow,
+                      turn.role === 'user' ? styles.userRow : styles.aiRow,
+                    ]}
+                  >
+                    <View
+                      style={[
+                        styles.bubble,
+                        turn.role === 'user' ? styles.userBubble : styles.aiBubble,
+                      ]}
+                    >
+                      <Text
+                        style={
+                          turn.role === 'user' ? styles.userBubbleText : styles.aiBubbleText
+                        }
+                      >
+                        {turn.content}
+                      </Text>
+                    </View>
+                  </View>
+                ))
+              )}
             </View>
 
             {/* Safety Tips */}
@@ -224,25 +259,48 @@ const styles = StyleSheet.create({
     marginTop: 4,
     marginBottom: 4,
   },
-  infoBox: {
-    backgroundColor: '#09090b',
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.05)',
-  },
   sectionLabel: {
     color: '#a1a1aa',
     fontSize: 12,
     fontWeight: '600',
     marginBottom: 6,
   },
-  translatedText: {
-    color: '#f4f4f5',
+  chatSection: {
+    marginBottom: 12,
+  },
+  bubbleRow: {
+    flexDirection: 'row',
+    marginBottom: 8,
+  },
+  userRow: {
+    justifyContent: 'flex-end',
+  },
+  aiRow: {
+    justifyContent: 'flex-start',
+  },
+  bubble: {
+    maxWidth: '88%',
+    paddingHorizontal: 12,
+    paddingVertical: 9,
+    borderRadius: 14,
+  },
+  userBubble: {
+    backgroundColor: '#2563eb',
+    borderBottomRightRadius: 4,
+  },
+  aiBubble: {
+    backgroundColor: '#27272a',
+    borderBottomLeftRadius: 4,
+  },
+  userBubbleText: {
+    color: '#ffffff',
     fontSize: 14,
     lineHeight: 20,
-    fontWeight: '500',
+  },
+  aiBubbleText: {
+    color: '#e4e4e7',
+    fontSize: 14,
+    lineHeight: 20,
   },
   tipsContainer: {
     backgroundColor: '#27272a',

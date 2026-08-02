@@ -1,4 +1,4 @@
-import { OcrPlugin, OcrResult, ScenarioResult } from '../types';
+import { OcrPlugin, OcrResult, ScenarioResult, ChatTurn } from '../types';
 import { getOpenRouterApiKey } from '../../utils/SecureConfig';
 import { apiLogger } from '../../utils/ApiLogger';
 import * as FileSystem from 'expo-file-system';
@@ -69,27 +69,43 @@ function buildSceneRequestBody(base64: string) {
   };
 }
 
-/** 构造多轮追问请求体（同上，单一来源） */
-function buildFollowUpRequestBody(base64: string, question: string) {
+/** 构造多轮追问请求体：首轮带图，后续轮携带纯文本历史问答 */
+function buildFollowUpRequestBody(base64: string, question: string, history: ChatTurn[] = []) {
+  const messages: Array<Record<string, unknown>> = [
+    {
+      role: 'system',
+      content:
+        '你是 SceneGo 出行助手。用户正在异国旅行中，基于拍摄的照片与你多轮对话，追问具体细节。请用中文简洁回答，并尽量承接上文语境。',
+    },
+  ];
+
+  if (history.length === 0) {
+    // 单轮：图 + 当前问题
+    messages.push({
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
+        { type: 'text', text: question },
+      ],
+    });
+  } else {
+    // 多轮：图片挂到历史首问，后续轮次纯文本，保持同一会话语境
+    messages.push({
+      role: 'user',
+      content: [
+        { type: 'image_url', image_url: { url: `data:image/jpeg;base64,${base64}` } },
+        { type: 'text', text: history[0].content },
+      ],
+    });
+    for (const turn of history.slice(1)) {
+      messages.push({ role: turn.role, content: turn.content });
+    }
+    messages.push({ role: 'user', content: question });
+  }
+
   return {
     model: MODEL_ID,
-    messages: [
-      {
-        role: 'system',
-        content:
-          '你是 SceneGo 出行助手。用户正在异国旅行中，基于拍摄的照片向你追问具体细节。请用中文简洁回答。',
-      },
-      {
-        role: 'user',
-        content: [
-          {
-            type: 'image_url',
-            image_url: { url: `data:image/jpeg;base64,${base64}` },
-          },
-          { type: 'text', text: question },
-        ],
-      },
-    ],
+    messages,
     max_tokens: 512,
   };
 }
@@ -199,8 +215,8 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
     }
   }
 
-  /** 多轮追问：用户基于当前照片提出具体问题 */
-  async askFollowUp(imageUri: string, question: string): Promise<string> {
+  /** 多轮追问：用户基于当前照片提出具体问题（history 携带此前问答，首轮自动带图） */
+  async askFollowUp(imageUri: string, question: string, history: ChatTurn[] = []): Promise<string> {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) return '请先配置 API Key';
 
@@ -221,13 +237,13 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       const logId = apiLogger.logRequest({
         url,
         model,
-        requestBody: `[Follow-Up Question]: ${question}`,
+        requestBody: `[Follow-Up Question]: ${question}\n[History]: ${history.length} turns`,
       });
 
       const response = await fetch(url, {
         method: 'POST',
         headers: actualHeaders,
-        body: JSON.stringify(buildFollowUpRequestBody(base64, question)),
+        body: JSON.stringify(buildFollowUpRequestBody(base64, question, history)),
       });
 
       const durationMs = Date.now() - startTime;

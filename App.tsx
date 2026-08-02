@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
-import { pluginManager, ScenarioResult } from './src/plugins';
+import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { ControlBar } from './src/components/ControlBar';
@@ -92,6 +92,9 @@ export default Sentry.wrap(function App() {
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
   const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  // 快照多轮对话历史（首条为场景解读，后续为追问问答）
+  const [chatTurns, setChatTurns] = useState<ChatTurn[]>([]);
+  const chatTurnsRef = useRef<ChatTurn[]>([]);
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<unknown>(null);
@@ -128,30 +131,20 @@ export default Sentry.wrap(function App() {
     };
   }, []);
 
-  /** 云端 VLM 多轮追问：用户基于快照照片提出具体问题 */
+  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
     setIsProcessing(true);
     try {
       const cloudVlm = pluginManager.getCloudVlmPlugin();
-      const reply = await cloudVlm.askFollowUp(imageUri, userPrompt);
+      const reply = await cloudVlm.askFollowUp(imageUri, userPrompt, chatTurnsRef.current);
 
-      setActiveScenarioResult((prev) =>
-        prev
-          ? {
-              ...prev,
-              translatedText: reply,
-              tips: [],
-              recommendedPhrases: [],
-            }
-          : {
-              title: '追问回答',
-              category: 'FOLLOW_UP',
-              originalText: userPrompt,
-              translatedText: reply,
-              tips: [],
-              recommendedPhrases: [],
-            },
-      );
+      const newTurns = [
+        ...chatTurnsRef.current,
+        { role: 'user' as const, content: userPrompt },
+        { role: 'assistant' as const, content: reply },
+      ];
+      chatTurnsRef.current = newTurns;
+      setChatTurns(newTurns);
     } catch (err) {
       console.warn('[AI Follow-up Error]:', err);
     } finally {
@@ -192,6 +185,12 @@ export default Sentry.wrap(function App() {
 
       setActiveScenarioResult(result.scenario);
       setPendingSnapshotUri(photoUri);
+      // 新会话：首条消息为场景解读
+      const initialTurns: ChatTurn[] = [
+        { role: 'assistant', content: result.scenario.translatedText },
+      ];
+      chatTurnsRef.current = initialTurns;
+      setChatTurns(initialTurns);
       if (isLogsOpenRef.current) {
         // LOG 弹窗开着：先关闭，待 dismiss 动画完成 (onDismiss) 后再弹快照
         pendingSnapshotRef.current = true;
@@ -360,6 +359,7 @@ export default Sentry.wrap(function App() {
           visible={isSnapshotModalOpen}
           imageUri={pendingSnapshotUri}
           scenarioResult={activeScenarioResult}
+          turns={chatTurns}
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
         />
