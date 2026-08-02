@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { CameraView, useCameraPermissions } from 'expo-camera';
+import * as Device from 'expo-device';
 interface CameraBackgroundProps {
   isCameraActive: boolean;
   cameraRef?: React.RefObject<any>;
@@ -18,8 +19,8 @@ export const CameraBackground: React.FC<CameraBackgroundProps> = ({
   const [permission, requestPermission] = useCameraPermissions();
 
   useEffect(() => {
-    if (isCameraActive) {
-      // 模拟器/硬件就绪保底：在模拟器或某些设备上 onCameraReady 触发较慢，500ms 后自动开启就绪状态
+    // 仅模拟器启用就绪保底：模拟器无物理摄像头，onCameraReady 可能永不触发；真机必须等原生回调
+    if (isCameraActive && !Device.isDevice) {
       const timer = setTimeout(() => {
         onCameraReady?.();
       }, 500);
