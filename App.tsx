@@ -331,13 +331,6 @@ export default Sentry.wrap(function App() {
     setIsCardVisible(true);
   };
 
-  /** 快照解读 → 生成表达卡（动态卡主路径） */
-  const handleGenerateCardFromSnapshot = () => {
-    const result = scenarioResultRef.current;
-    if (!result) return;
-    addExpressionCard(scenarioToCard(result, '当前位置'));
-  };
-
   /** 语音意图弱自动：转录命中意图关键词 → 文本驱动动态卡生成 */
   const handleMaybeGenerateCardFromSpeech = async (transcript: string) => {
     if (!transcript || !detectCardIntent(transcript)) return;
@@ -482,7 +475,6 @@ export default Sentry.wrap(function App() {
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
           onCollect={(content) => handleAddNote(content, 'CARD')}
-          onGenerateCard={handleGenerateCardFromSnapshot}
         />
 
         <PluginSelectorModal
