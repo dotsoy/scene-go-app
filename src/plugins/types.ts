@@ -11,6 +11,16 @@ export interface ScenarioResult {
   translatedText: string;
   tips: string[];
   recommendedPhrases: string[];
+  /** 表达卡字段（动态卡）：当地语言大字 + 发音 + 惯例提示，由 VLM 推断式生成 */
+  targetText?: string;
+  /** 当地语言发音的拉丁转写 */
+  phonetic?: string;
+  /** 补充说明（当地语言或英文） */
+  subText?: string;
+  /** 中文当地惯例提示（小费/计费/注意事项） */
+  localTip?: string;
+  /** BCP-47 语言代码（如 th-TH / ja-JP / en-US） */
+  languageCode?: string;
 }
 
 export interface OcrPlugin {

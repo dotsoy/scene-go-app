@@ -61,6 +61,11 @@ class PluginManager {
     return this.cloudVlmPlugin;
   }
 
+  /** 文本驱动的动态表达卡：语音意图/手打需求 → 当地语言表达卡（无图路径） */
+  async generateCardFromText(text: string): Promise<ScenarioResult | null> {
+    return this.cloudVlmPlugin.generateCardFromText(text);
+  }
+
   /**
    * 核心管线：拍摄 → 识别 → 语义匹配
    *

@@ -24,6 +24,8 @@ interface SnapshotDialogModalProps {
   onSubmit: (prompt: string, imageUri: string) => void;
   /** 收藏当前解读到笔记 */
   onCollect: (content: string) => void;
+  /** 将当前场景解读生成为当地语言表达卡（动态卡主路径） */
+  onGenerateCard: () => void;
 }
 
 export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
@@ -34,6 +36,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   onClose,
   onSubmit,
   onCollect,
+  onGenerateCard,
 }) => {
   const [userPrompt, setUserPrompt] = useState('');
   const [isFullImageVisible, setIsFullImageVisible] = useState(false);
@@ -90,6 +93,13 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
               </Text>
             </View>
             <View style={styles.headerActions}>
+              <TouchableOpacity
+                style={styles.generateCardBtn}
+                onPress={onGenerateCard}
+                disabled={!scenarioResult}
+              >
+                <Text style={styles.generateCardBtnText}>生成表达卡</Text>
+              </TouchableOpacity>
               <TouchableOpacity style={styles.collectBtn} onPress={handleCollect}>
                 <Text style={styles.collectBtnText}>收藏</Text>
               </TouchableOpacity>
@@ -275,6 +285,19 @@ const styles = StyleSheet.create({
   },
   collectBtnText: {
     color: '#38bdf8',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  generateCardBtn: {
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: 'rgba(16, 185, 129, 0.5)',
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  generateCardBtnText: {
+    color: '#10b981',
     fontSize: 12,
     fontWeight: '700',
   },

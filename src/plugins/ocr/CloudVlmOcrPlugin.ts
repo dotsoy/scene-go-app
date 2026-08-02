@@ -12,7 +12,26 @@ const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异
   "category": "场景分类（RESTAURANT / AIRPORT / HOTEL / TRANSPORT / SHOPPING / ATTRACTION / SIGN / OTHER）",
   "translatedText": "对照片内容的详细中文解读与翻译（包含价格、关键细节等）",
   "tips": ["出行避坑提示1", "避坑提示2", "避坑提示3"],
-  "recommendedPhrases": ["当地语言实用短语1 (中文翻译)", "短语2 (中文翻译)"]
+  "recommendedPhrases": ["当地语言实用短语1 (中文翻译)", "短语2 (中文翻译)"],
+  "targetText": "如果这个场景需要向当地人表达诉求（点餐、问路、砍价等），给出当地语言的核心表达句；纯展示类场景（路牌/菜单阅读）则省略",
+  "phonetic": "targetText 的当地语言发音拉丁转写",
+  "subText": "补充说明（当地语言或英文，如忌口细节）",
+  "localTip": "中文当地惯例提示（小费/计费/注意事项）",
+  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）"
+}`;
+
+const CARD_SYSTEM_PROMPT = `你是 SceneGo 出行助手。用户正在异国旅行，会用一句话描述当下的表达需求（可能来自语音转写）。
+根据需求生成一张"递给当地人看"的高对比度表达卡，语言必须用当地语言（按需求语境推断语种，如泰语/日语/英语）。
+
+你必须严格以如下 JSON 格式回复（不要输出任何其他内容）：
+{
+  "title": "卡片的中文标题（如：出租车按表计费）",
+  "category": "场景分类（RESTAURANT / AIRPORT / HOTEL / TRANSPORT / SHOPPING / ATTRACTION / SIGN / OTHER）",
+  "targetText": "当地语言大字表达（递给当地人看的核心句）",
+  "phonetic": "当地语言发音的拉丁转写",
+  "subText": "补充说明（当地语言或英文）",
+  "localTip": "中文当地惯例提示（小费/计费/注意事项）",
+  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）"
 }`;
 
 const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
@@ -260,6 +279,57 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       return `网络错误: ${errMsg}`;
     }
   }
+
+  /** 文本驱动的动态表达卡：用户一句话描述需求（语音转写/手打）→ VLM 生成当地语言表达卡 */
+  async generateCardFromText(text: string): Promise<ScenarioResult | null> {
+    const apiKey = await getOpenRouterApiKey();
+    if (!apiKey) return null;
+
+    const url = OPENROUTER_API_URL;
+    const model = MODEL_ID;
+    const startTime = Date.now();
+
+    try {
+      const actualHeaders: Record<string, string> = {
+        Authorization: `Bearer ${apiKey}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://scenego.app',
+        'X-OpenRouter-Title': 'SceneGo',
+      };
+
+      const body = {
+        model,
+        messages: [
+          { role: 'system', content: CARD_SYSTEM_PROMPT },
+          { role: 'user', content: text },
+        ],
+        max_tokens: 512,
+      };
+
+      const logId = apiLogger.logRequest({
+        url,
+        model,
+        requestBody: `[Card From Text]: ${text}`,
+      });
+
+      const response = await fetch(url, {
+        method: 'POST',
+        headers: actualHeaders,
+        body: JSON.stringify(body),
+      });
+      const durationMs = Date.now() - startTime;
+      const respText = await response.text();
+      apiLogger.logResponse(logId, response.status, durationMs, respText);
+
+      if (!response.ok) return null;
+      const data = JSON.parse(respText);
+      const content = data?.choices?.[0]?.message?.content || '';
+      return parseVlmScenarioResult(content);
+    } catch (err: unknown) {
+      console.warn('[Card Generate Error]:', err);
+      return null;
+    }
+  }
 }
 
 /** 尝试从云端 VLM 原始返回文本中解析出 ScenarioResult JSON */
@@ -282,6 +352,12 @@ export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
         recommendedPhrases: Array.isArray(obj.recommendedPhrases)
           ? obj.recommendedPhrases
           : [],
+        // 表达卡字段（动态卡路径）：模型可能省略，此处可选透传
+        targetText: obj.targetText,
+        phonetic: obj.phonetic,
+        subText: obj.subText,
+        localTip: obj.localTip,
+        languageCode: obj.languageCode,
       };
     }
   } catch {
