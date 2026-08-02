@@ -22,6 +22,8 @@ interface SnapshotDialogModalProps {
   turns: ChatTurn[];
   onClose: () => void;
   onSubmit: (prompt: string, imageUri: string) => void;
+  /** 收藏当前解读到笔记 */
+  onCollect: (content: string) => void;
 }
 
 export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
@@ -31,6 +33,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   turns,
   onClose,
   onSubmit,
+  onCollect,
 }) => {
   const [userPrompt, setUserPrompt] = useState('');
   const [isFullImageVisible, setIsFullImageVisible] = useState(false);
@@ -60,6 +63,13 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
     setUserPrompt('');
   };
 
+  // 收藏：场景标题 + 最新解读文本
+  const handleCollect = () => {
+    if (!scenarioResult) return;
+    const latest = turns[turns.length - 1]?.content || scenarioResult.translatedText;
+    onCollect(`${scenarioResult.title}\n${latest}`);
+  };
+
   return (
     <Modal visible={visible} animationType="fade" transparent={true} onRequestClose={onClose}>
       <KeyboardAvoidingView
@@ -79,9 +89,14 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
                 {scenarioResult?.title || '快照与场景解读'}
               </Text>
             </View>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
-              <Text style={styles.closeBtnText}>✕</Text>
-            </TouchableOpacity>
+            <View style={styles.headerActions}>
+              <TouchableOpacity style={styles.collectBtn} onPress={handleCollect}>
+                <Text style={styles.collectBtnText}>收藏</Text>
+              </TouchableOpacity>
+              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+                <Text style={styles.closeBtnText}>✕</Text>
+              </TouchableOpacity>
+            </View>
           </View>
 
           <ScrollView style={styles.scrollBody} showsVerticalScrollIndicator={false}>
@@ -246,6 +261,22 @@ const styles = StyleSheet.create({
   },
   closeBtn: {
     padding: 6,
+  },
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  collectBtn: {
+    backgroundColor: '#27272a',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 8,
+  },
+  collectBtnText: {
+    color: '#38bdf8',
+    fontSize: 12,
+    fontWeight: '700',
   },
   closeBtnText: {
     color: '#a1a1aa',

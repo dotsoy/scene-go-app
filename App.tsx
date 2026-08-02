@@ -437,6 +437,7 @@ export default Sentry.wrap(function App() {
           turns={chatTurns}
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
+          onCollect={(content) => handleAddNote(content, 'CARD')}
         />
 
         <PluginSelectorModal
