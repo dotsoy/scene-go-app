@@ -97,6 +97,14 @@ export default Sentry.wrap(function App() {
   const cameraRef = useRef<unknown>(null);
   // 最新转录文本的 ref 副本：避免 async 回调读取到过期的闭包 state
   const liveTranscriptRef = useRef<string>('');
+  // 日志弹窗可见性的 ref 副本（async 管线内读取最新值）
+  const isLogsOpenRef = useRef(false);
+  // 待展示的快照弹窗标记：LOG dismiss 动画完成后再 present，避免 UIKit modal 队列冲突
+  const pendingSnapshotRef = useRef(false);
+
+  useEffect(() => {
+    isLogsOpenRef.current = isLogsOpen;
+  }, [isLogsOpen]);
 
   // 启动时探测本地模型：已下载的 Qwen/Whisper 自动注册并激活，无文件则静默跳过（不影响云端主链路）
   useEffect(() => {
@@ -184,7 +192,13 @@ export default Sentry.wrap(function App() {
 
       setActiveScenarioResult(result.scenario);
       setPendingSnapshotUri(photoUri);
-      setIsSnapshotModalOpen(true);
+      if (isLogsOpenRef.current) {
+        // LOG 弹窗开着：先关闭，待 dismiss 动画完成 (onDismiss) 后再弹快照
+        pendingSnapshotRef.current = true;
+        setIsLogsOpen(false);
+      } else {
+        setIsSnapshotModalOpen(true);
+      }
     } catch (err) {
       console.warn('Camera snapshot error:', err);
       setIsCameraActive(false);
@@ -358,6 +372,13 @@ export default Sentry.wrap(function App() {
         <ApiLogModal
           visible={isLogsOpen}
           onClose={() => setIsLogsOpen(false)}
+          onDismiss={() => {
+            // LOG dismiss 动画完成：若有待展示快照则在此刻 present
+            if (pendingSnapshotRef.current) {
+              pendingSnapshotRef.current = false;
+              setIsSnapshotModalOpen(true);
+            }
+          }}
         />
       </CameraBackground>
     </SafeAreaView>

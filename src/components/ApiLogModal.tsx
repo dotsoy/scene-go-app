@@ -13,6 +13,8 @@ import { apiLogger, ApiLogEntry } from '../utils/ApiLogger';
 interface ApiLogModalProps {
   visible: boolean;
   onClose: () => void;
+  /** iOS dismiss 动画完成后的回调（用于串行化后续 modal present，避免 UIKit modal 队列冲突） */
+  onDismiss?: () => void;
 }
 
 function truncateText(text?: string, maxLength: number = 2500): string {
@@ -21,7 +23,7 @@ function truncateText(text?: string, maxLength: number = 2500): string {
   return text.slice(0, maxLength) + `\n... [数据过长已自动截断 (${text.length} 字符)]`;
 }
 
-export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose }) => {
+export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose, onDismiss }) => {
   const [logs, setLogs] = useState<ApiLogEntry[]>([]);
   const [selectedLogId, setSelectedLogId] = useState<string | null>(null);
 
@@ -36,14 +38,18 @@ export const ApiLogModal: React.FC<ApiLogModalProps> = ({ visible, onClose }) =>
     };
   }, [visible]);
 
-  if (!visible) return null;
-
   const handleClose = () => {
     setSelectedLogId(null);
     onClose();
   };
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={handleClose}>
+    <Modal
+      visible={visible}
+      animationType="slide"
+      transparent
+      onRequestClose={handleClose}
+      onDismiss={onDismiss}
+    >
       <View style={styles.overlay}>
         <View style={styles.container}>
           {/* Header */}
