@@ -27,8 +27,8 @@ public class SceneGoSpeechRecognizer: Module {
 
     Events("onSpeechResult", "onSpeechError")
 
-    AsyncFunction("startListening") { (promise: Promise) in
-      self.startListening(locale: "zh-CN", promise: promise)
+    AsyncFunction("startListening") { (locale: String, promise: Promise) in
+      self.startListening(locale: locale, promise: promise)
     }.runOnQueue(.main)
 
     AsyncFunction("stopListening") { (promise: Promise) in
