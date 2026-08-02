@@ -42,8 +42,8 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
           : active
             ? styles.btnActive
             : styles.btnIdle,
-        // 激活/危险态光晕
-        (active || danger) && (danger ? styles.glowDanger : styles.glowActive),
+        // 仅激活态保留光晕（SNAP 动作按钮不发光，避免过重）
+        active && !danger && styles.glowActive,
       ]}
       onPress={onPress}
       android_ripple={undefined}
@@ -51,13 +51,8 @@ export const ControlBarBtn: React.FC<ControlBarBtnProps> = ({
       {({ pressed }) => (
         <>
           <View style={[styles.labelRow, pressed && styles.labelRowPressed]}>
-            {(active || danger) && (
-              <View
-                style={[
-                  styles.stateDot,
-                  danger ? styles.dotDanger : styles.dotActive,
-                ]}
-              />
+            {active && (
+              <View style={[styles.stateDot, danger ? styles.dotDanger : styles.dotActive]} />
             )}
             <Text
               style={[
@@ -103,9 +98,9 @@ const styles = StyleSheet.create({
   },
   btnLarge: {
     flex: 1,
-    height: 56,
-    borderRadius: 12,
-    paddingHorizontal: 16,
+    height: 44,
+    borderRadius: 10,
+    paddingHorizontal: 14,
   },
   btnPressed: {
     transform: [{ scale: 0.96 }],
@@ -132,13 +127,6 @@ const styles = StyleSheet.create({
     shadowOffset: { width: 0, height: 0 },
     elevation: 3,
   },
-  glowDanger: {
-    shadowColor: COLORS.accentRed,
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 0 },
-    elevation: 4,
-  },
   labelRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -164,8 +152,8 @@ const styles = StyleSheet.create({
     letterSpacing: 0.7,
   },
   labelLarge: {
-    fontSize: 17,
-    letterSpacing: 2.5,
+    fontSize: 15,
+    letterSpacing: 2,
   },
   labelIdle: {
     color: '#9ca3af',

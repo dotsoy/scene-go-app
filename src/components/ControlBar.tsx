@@ -2,7 +2,7 @@ import React from 'react';
 import { View, StyleSheet } from 'react-native';
 import { ControlBarBtn } from './ControlBarBtn';
 import { useDoubleTap } from '../utils/useDoubleTap';
-import { COLORS } from '../theme/tokens';
+import { COLORS, LAYOUT } from '../theme/tokens';
 
 interface ControlBarProps {
   isCameraActive: boolean;
@@ -109,7 +109,7 @@ const styles = StyleSheet.create({
     paddingBottom: 4,
   },
   barCamera: {
-    height: 88,
+    height: LAYOUT.mainBarHeight,
   },
   cameraSide: {
     flexDirection: 'row',
