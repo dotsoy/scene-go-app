@@ -21,12 +21,41 @@ RCT_EXPORT_MODULE(SceneGoSpeechRecognizer);
 - (instancetype)init {
     self = [super init];
     if (self) {
-        NSLocale *locale = [NSLocale localeWithLocaleIdentifier:@"zh-CN"];
-        _speechRecognizer = [[SFSpeechRecognizer alloc] initWithLocale:locale];
-        _speechRecognizer.delegate = self;
         _audioEngine = [[AVAudioEngine alloc] init];
+        // recognizer 在每次 startListening 时按传入 locale 构建（含可用性降级）
+        _speechRecognizer = [self buildRecognizerForLocale:@"zh-CN"];
     }
     return self;
+}
+
+/** 构建指定 locale 的识别器；不可用时自动降级到同语言前缀或 en-US */
+- (SFSpeechRecognizer *)buildRecognizerForLocale:(NSString *)localeId {
+    NSArray<NSLocale *> *supported = [SFSpeechRecognizer supportedLocales];
+    if (supported.count == 0) return nil;
+
+    // 精确匹配
+    for (NSLocale *loc in supported) {
+        if ([[loc localeIdentifier] isEqualToString:localeId]) {
+            return [[SFSpeechRecognizer alloc] initWithLocale:loc];
+        }
+    }
+    // 同语言前缀（如 zh-CN → zh-Hans / zh-TW）
+    NSString *langPrefix = [[localeId componentsSeparatedByString:@"-"] firstObject];
+    for (NSLocale *loc in supported) {
+        if ([[loc localeIdentifier] hasPrefix:langPrefix]) {
+            NSLog(@"[Speech] %@ 不可用，降级为 %@", localeId, loc.localeIdentifier);
+            return [[SFSpeechRecognizer alloc] initWithLocale:loc];
+        }
+    }
+    // 英文兑底
+    for (NSLocale *loc in supported) {
+        if ([[loc localeIdentifier] hasPrefix:@"en"]) {
+            NSLog(@"[Speech] %@ 不可用，降级为 %@", localeId, loc.localeIdentifier);
+            return [[SFSpeechRecognizer alloc] initWithLocale:loc];
+        }
+    }
+    NSLog(@"[Speech] %@ 不可用，使用 %@", localeId, supported.firstObject.localeIdentifier);
+    return [[SFSpeechRecognizer alloc] initWithLocale:supported.firstObject];
 }
 
 - (NSArray<NSString *> *)supportedEvents {
@@ -51,14 +80,23 @@ RCT_EXPORT_METHOD(startListening:(NSString *)localeStr
                 reject(@"auth_denied", @"Speech recognition permission denied", nil);
                 return;
             }
-            [self startAudioRecordingWithLocale:localeStr resolver:resolve rejecter:reject];
+
+            // 按传入 locale 构建识别器（内部处理可用性降级）
+            SFSpeechRecognizer *recognizer = [self buildRecognizerForLocale:localeStr.length > 0 ? localeStr : @"zh-CN"];
+            if (!recognizer) {
+                reject(@"locale_unavailable", @"No speech recognizer available for this device", nil);
+                return;
+            }
+            recognizer.delegate = self;
+            self.speechRecognizer = recognizer;
+            [self startAudioRecordingWithRecognizer:recognizer resolver:resolve rejecter:reject];
         });
     }];
 }
 
-- (void)startAudioRecordingWithLocale:(NSString *)localeStr
-                             resolver:(RCTPromiseResolveBlock)resolve
-                             rejecter:(RCTPromiseRejectBlock)reject
+- (void)startAudioRecordingWithRecognizer:(SFSpeechRecognizer *)recognizer
+                                 resolver:(RCTPromiseResolveBlock)resolve
+                                 rejecter:(RCTPromiseRejectBlock)reject
 {
     if (_recognitionTask) {
         [_recognitionTask cancel];
@@ -81,7 +119,7 @@ RCT_EXPORT_METHOD(startListening:(NSString *)localeStr
     _recognitionRequest.shouldReportPartialResults = YES;
 
     __weak typeof(self) weakSelf = self;
-    _recognitionTask = [_speechRecognizer recognitionTaskWithRequest:_recognitionRequest resultHandler:^(SFSpeechRecognitionResult * _Nullable result, NSError * _Nullable error) {
+    _recognitionTask = [recognizer recognitionTaskWithRequest:_recognitionRequest resultHandler:^(SFSpeechRecognitionResult * _Nullable result, NSError * _Nullable error) {
         typeof(self) strongSelf = weakSelf;
         if (!strongSelf) return;
 
@@ -92,6 +130,14 @@ RCT_EXPORT_METHOD(startListening:(NSString *)localeStr
                     @"transcript": transcript,
                     @"isFinal": @(result.isFinal)
                 }];
+            }
+        }
+
+        if (error) {
+            // 错误事件上报（权限受限/网络不可达/识别引擎故障等）
+            NSLog(@"[Speech] recognition error: %@", error.localizedDescription);
+            if (strongSelf.hasListeners) {
+                [strongSelf sendEventWithName:@"onSpeechError" body:@{ @"message": error.localizedDescription ?: @"unknown" }];
             }
         }
 

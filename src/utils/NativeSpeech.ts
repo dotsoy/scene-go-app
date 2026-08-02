@@ -11,6 +11,10 @@ export interface SpeechResultEvent {
   isFinal: boolean;
 }
 
+export interface SpeechErrorEvent {
+  message: string;
+}
+
 export const NativeSpeech = {
   isAvailable(): boolean {
     return !!SceneGoSpeechRecognizer;
@@ -19,6 +23,13 @@ export const NativeSpeech = {
   onSpeechResult(callback: (e: SpeechResultEvent) => void) {
     if (speechEmitter) {
       return speechEmitter.addListener('onSpeechResult', callback);
+    }
+    return { remove: () => {} };
+  },
+
+  onSpeechError(callback: (e: SpeechErrorEvent) => void) {
+    if (speechEmitter) {
+      return speechEmitter.addListener('onSpeechError', callback);
     }
     return { remove: () => {} };
   },

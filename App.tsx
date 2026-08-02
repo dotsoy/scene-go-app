@@ -128,14 +128,19 @@ export default Sentry.wrap(function App() {
 
   // 绑定原生 iOS SFSpeechRecognizer 听写监听
   useEffect(() => {
-    const sub = NativeSpeech.onSpeechResult((e) => {
+    const subResult = NativeSpeech.onSpeechResult((e) => {
       if (e.transcript) {
         liveTranscriptRef.current = e.transcript;
         setLiveTranscript(e.transcript);
       }
     });
+    const subError = NativeSpeech.onSpeechError((e) => {
+      setLiveTranscript(`⚠️ 语音识别异常: ${e.message}`);
+      liveTranscriptRef.current = '';
+    });
     return () => {
-      sub.remove();
+      subResult.remove();
+      subError.remove();
     };
   }, []);
 
@@ -274,7 +279,10 @@ export default Sentry.wrap(function App() {
       liveTranscriptRef.current = '';
       setIsMicActive(true);
       setLiveTranscript('正在开启原生听写，请说话...');
-      await NativeSpeech.start('zh-CN');
+      const started = await NativeSpeech.start('zh-CN');
+      if (!started) {
+        setLiveTranscript('⚠️ 语音识别启动失败：请检查麦克风权限，或在真机上测试（模拟器可能不支持中文语言包）');
+      }
     } else {
       setIsMicActive(false);
       await NativeSpeech.stop();
