@@ -100,12 +100,13 @@ const styles = StyleSheet.create({
   bar: {
     height: LAYOUT.mainBarHeight,
     backgroundColor: COLORS.bgBar,
-    borderTopWidth: 0.5,
-    borderTopColor: COLORS.borderSubtle,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: 'rgba(255,255,255,0.12)',
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: LAYOUT.screenPaddingH,
+    paddingHorizontal: 16,
+    paddingBottom: 6,
   },
   barCamera: {
     height: LAYOUT.cameraBarHeight,
