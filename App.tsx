@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
 import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
@@ -417,11 +417,22 @@ export default Sentry.wrap(function App() {
                 <Text style={styles.liveBadge}>
                   {isMicActive ? '实时语音转录中' : '语音识别提示'}
                 </Text>
-                {isMicActive && (
-                  <Animated.Text style={[styles.liveRecordingPulse, { opacity: pulseAnim }]}>
-                    REC
-                  </Animated.Text>
-                )}
+                <View style={styles.liveHeaderRight}>
+                  {isMicActive && (
+                    <Animated.Text style={[styles.liveRecordingPulse, { opacity: pulseAnim }]}>
+                      REC
+                    </Animated.Text>
+                  )}
+                  {/* MIC 关闭后的残留提示可手动关闭 */}
+                  {!isMicActive && (
+                    <TouchableOpacity
+                      onPress={() => setLiveTranscript('')}
+                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                    >
+                      <Text style={styles.liveCloseText}>关闭</Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
               </View>
               <Text style={styles.liveTranscriptText}>
                 {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
@@ -547,6 +558,16 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: 6,
+  },
+  liveHeaderRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  liveCloseText: {
+    color: '#71717a',
+    fontSize: 11,
+    fontWeight: '600',
   },
   liveBadge: {
     color: '#38bdf8',
