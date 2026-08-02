@@ -1,6 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, StyleSheet } from 'react-native';
+import { ControlBarBtn } from './ControlBarBtn';
 import { useDoubleTap } from '../utils/useDoubleTap';
+import { COLORS, LAYOUT } from '../theme/tokens';
 
 interface ControlBarProps {
   isCameraActive: boolean;
@@ -22,6 +24,11 @@ interface ControlBarProps {
   onOpenTools: () => void;
 }
 
+/**
+ * 底部控制栏（spec §4 01/02）：
+ * - 主界面：72pt，5 按钮 space-between
+ * - 相机态：100pt，SNAP 大按钮 + MIC/CARD，隐藏 NOTES/MORE
+ */
 export const ControlBar: React.FC<ControlBarProps> = ({
   isCameraActive,
   isMicActive,
@@ -36,120 +43,75 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onOpenNotes,
   onOpenTools,
 }) => {
+  // SNAP：双击 = 拍照+云端分析+关闭相机；单击 = 仅关闭相机
   const handleSnapPress = useDoubleTap(onCancelCamera, onCaptureFrame);
+  // MIC：双击 = 停止+生成卡；单击 = 仅停止
   const handleMicPress = useDoubleTap(onMicSingleTap, onMicDoubleTap);
-  return (
-    <View style={styles.barContainer}>
-      {/* 摄像头开关：双击 = 拍照+分析+关相机；单击 = 仅关闭不分析 */}
-      {isCameraActive ? (
-        <TouchableOpacity
-          style={[styles.btn, styles.btnActiveSnap]}
+  const micPress = isMicActive ? handleMicPress : onStartMic;
+
+  // 相机态：SNAP 大按钮 + 右侧 MIC/CARD，取景时隐藏 NOTES/MORE
+  if (isCameraActive) {
+    return (
+      <View style={[styles.bar, styles.barCamera]}>
+        <ControlBarBtn
+          large
+          danger
+          label="SNAP"
+          hint="双击分析 · 单击关闭"
           onPress={handleSnapPress}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.btnTextSnap} numberOfLines={1}>SNAP</Text>
-          <Text style={styles.btnHint} numberOfLines={1}>双击分析 · 单击关闭</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onToggleCamera} activeOpacity={0.75}>
-          <Text style={styles.btnText} numberOfLines={1}>CAM OFF</Text>
-        </TouchableOpacity>
-      )}
+        />
+        <View style={styles.cameraSide}>
+          <ControlBarBtn
+            label={isMicActive ? 'MIC ON' : 'MIC OFF'}
+            active={isMicActive}
+            onPress={micPress}
+          />
+          <ControlBarBtn
+            label={isCardVisible ? 'CARD ON' : 'CARD OFF'}
+            active={isCardVisible}
+            onPress={onToggleCard}
+          />
+        </View>
+      </View>
+    );
+  }
 
-      {/* 麦克风开关：双击 = 停止+理解意图生成卡；单击 = 仅关闭不操作 */}
-      {isMicActive ? (
-        <TouchableOpacity
-          style={[styles.btn, styles.btnActive]}
-          onPress={handleMicPress}
-          activeOpacity={0.75}
-        >
-          <Text style={[styles.btnText, styles.btnTextActive]} numberOfLines={1}>MIC</Text>
-          <Text style={styles.btnHint} numberOfLines={1}>双击生成卡 · 单击关闭</Text>
-        </TouchableOpacity>
-      ) : (
-        <TouchableOpacity
-          style={[styles.btn, styles.btnMuted]}
-          onPress={onStartMic}
-          activeOpacity={0.75}
-        >
-          <Text style={styles.btnText} numberOfLines={1}>MIC OFF</Text>
-        </TouchableOpacity>
-      )}
-
-      {/* FlashCard 开关 */}
-      <TouchableOpacity
-        style={[styles.btn, isCardVisible ? styles.btnActive : styles.btnMuted]}
+  return (
+    <View style={styles.bar}>
+      <ControlBarBtn label="CAM OFF" onPress={onToggleCamera} />
+      <ControlBarBtn
+        label={isMicActive ? 'MIC ON' : 'MIC OFF'}
+        active={isMicActive}
+        hint={isMicActive ? '双击生成卡 · 单击关闭' : undefined}
+        onPress={micPress}
+      />
+      <ControlBarBtn
+        label={isCardVisible ? 'CARD ON' : 'CARD OFF'}
+        active={isCardVisible}
         onPress={onToggleCard}
-        activeOpacity={0.75}
-      >
-        <Text style={[styles.btnText, isCardVisible && styles.btnTextActive]} numberOfLines={1}>
-          {isCardVisible ? 'CARD ON' : 'CARD OFF'}
-        </Text>
-      </TouchableOpacity>
-
-      {/* Notes 检索与纪录 */}
-      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenNotes} activeOpacity={0.75}>
-        <Text style={styles.btnText} numberOfLines={1}>NOTES</Text>
-      </TouchableOpacity>
-
-      {/* 工具箱入口 */}
-      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenTools} activeOpacity={0.75}>
-        <Text style={styles.btnText} numberOfLines={1}>MORE</Text>
-      </TouchableOpacity>
+      />
+      <ControlBarBtn label="NOTES" onPress={onOpenNotes} />
+      <ControlBarBtn label="MORE" onPress={onOpenTools} />
     </View>
   );
 };
 
 const styles = StyleSheet.create({
-  barContainer: {
-    position: 'absolute',
-    bottom: 0,
-    left: 0,
-    right: 0,
-    flexDirection: 'row',
-    justifyContent: 'space-evenly',
-    alignItems: 'center',
-    paddingVertical: 10,
-    paddingHorizontal: 4,
-    backgroundColor: 'rgba(10,10,30,0.85)',
+  bar: {
+    height: LAYOUT.mainBarHeight,
+    backgroundColor: COLORS.bgBar,
     borderTopWidth: 0.5,
-    borderTopColor: 'rgba(255,255,255,0.08)',
-  },
-  btn: {
-    paddingVertical: 8,
-    paddingHorizontal: 6,
-    borderRadius: 8,
-    minWidth: 46,
+    borderTopColor: COLORS.borderSubtle,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: LAYOUT.screenPaddingH,
   },
-  btnMuted: {
-    backgroundColor: 'rgba(255,255,255,0.06)',
+  barCamera: {
+    height: LAYOUT.cameraBarHeight,
   },
-  btnActive: {
-    backgroundColor: 'rgba(76,175,80,0.25)',
-  },
-  btnActiveSnap: {
-    backgroundColor: 'rgba(244,67,54,0.35)',
-  },
-  btnText: {
-    color: '#777',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  btnTextActive: {
-    color: '#81C784',
-  },
-  btnTextSnap: {
-    color: '#ef5350',
-    fontSize: 10,
-    fontWeight: '700',
-    letterSpacing: 0.5,
-  },
-  btnHint: {
-    color: '#9ca3af',
-    fontSize: 8,
-    fontWeight: '600',
-    marginTop: 2,
+  cameraSide: {
+    flexDirection: 'row',
+    gap: 8,
   },
 });
