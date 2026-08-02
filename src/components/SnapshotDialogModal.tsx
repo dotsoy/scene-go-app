@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Modal,
   View,
@@ -35,6 +35,13 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   const [userPrompt, setUserPrompt] = useState('');
   const [isFullImageVisible, setIsFullImageVisible] = useState(false);
   const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
+  // 恢复的旧会话图片可能已被系统清理（缓存失效），加载失败时降级为占位
+  const [imageFailed, setImageFailed] = useState(false);
+
+  useEffect(() => {
+    setImageFailed(false);
+    setIsFullImageVisible(false);
+  }, [visible, imageUri]);
 
   const handleSpeak = (textToSpeak: string) => {
     if (!textToSpeak) return;
@@ -79,7 +86,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
 
           <ScrollView style={styles.scrollBody} showsVerticalScrollIndicator={false}>
             {/* Image Preview */}
-            {imageUri && (
+            {imageUri && !imageFailed && (
               <TouchableOpacity
                 activeOpacity={0.9}
                 onPress={() => setIsFullImageVisible(!isFullImageVisible)}
@@ -89,11 +96,19 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
                   source={{ uri: imageUri }}
                   style={[styles.thumbnail, isFullImageVisible && styles.fullImage]}
                   resizeMode={isFullImageVisible ? 'contain' : 'cover'}
+                  onError={() => setImageFailed(true)}
                 />
                 <Text style={styles.imageHint}>
                   {isFullImageVisible ? '点击缩小' : '点击查看大图'}
                 </Text>
               </TouchableOpacity>
+            )}
+            {imageUri && imageFailed && (
+              <View style={styles.imageFallback}>
+                <Text style={styles.imageFallbackText}>
+                  原始图片已过期，对话内容仍可查看与追问
+                </Text>
+              </View>
             )}
 
             {/* 多轮对话流：首条为 AI 场景解读，其后为追问问答 */}
@@ -258,6 +273,21 @@ const styles = StyleSheet.create({
     fontSize: 10,
     marginTop: 4,
     marginBottom: 4,
+  },
+  imageFallback: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#09090b',
+    borderRadius: 12,
+    paddingVertical: 28,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.06)',
+    borderStyle: 'dashed',
+  },
+  imageFallbackText: {
+    color: '#71717a',
+    fontSize: 12,
   },
   sectionLabel: {
     color: '#a1a1aa',

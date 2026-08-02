@@ -10,8 +10,10 @@ import { QuickNotesModal, NoteItem } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
+import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { modelManager } from './src/utils/ModelManager';
+import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import * as Sentry from '@sentry/react-native';
 
 Sentry.init({
@@ -87,6 +89,8 @@ export default Sentry.wrap(function App() {
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
+  const [sessions, setSessions] = useState<SavedSession[]>([]);
 
   const [isSnapshotModalOpen, setIsSnapshotModalOpen] = useState<boolean>(false);
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
@@ -95,6 +99,10 @@ export default Sentry.wrap(function App() {
   // 快照多轮对话历史（首条为场景解读，后续为追问问答）
   const [chatTurns, setChatTurns] = useState<ChatTurn[]>([]);
   const chatTurnsRef = useRef<ChatTurn[]>([]);
+  // 当前会话 id：新快照时重建，追问时更新同一会话
+  const sessionIdRef = useRef<string | null>(null);
+  // 场景结果 ref 副本（持久化/追问时读取最新值）
+  const scenarioResultRef = useRef<ScenarioResult | null>(null);
 
   const [scenarioIndex, setScenarioIndex] = useState<number>(0);
   const cameraRef = useRef<unknown>(null);
@@ -131,7 +139,7 @@ export default Sentry.wrap(function App() {
     };
   }, []);
 
-  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流 */
+  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流并持久化 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
     setIsProcessing(true);
     try {
@@ -145,11 +153,57 @@ export default Sentry.wrap(function App() {
       ];
       chatTurnsRef.current = newTurns;
       setChatTurns(newTurns);
+      if (sessionIdRef.current) {
+        persistSession(sessionIdRef.current, imageUri, scenarioResultRef.current, newTurns);
+      }
     } catch (err) {
       console.warn('[AI Follow-up Error]:', err);
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  /** 持久化当前快照会话（显式传参，避免 async 闭包读到过期 state） */
+  const persistSession = (
+    id: string,
+    imageUri: string | null,
+    scenarioResult: ScenarioResult | null,
+    turns: ChatTurn[],
+  ) => {
+    sessionStore.save(sessionStore.build(id, imageUri, scenarioResult, turns));
+  };
+
+  /** 恢复历史会话：回填全部状态，待历史列表 dismiss 完成后打开快照弹窗 */
+  const restoreSession = (s: SavedSession) => {
+    sessionIdRef.current = s.id;
+    scenarioResultRef.current = s.scenarioResult;
+    chatTurnsRef.current = s.turns;
+    setActiveScenarioResult(s.scenarioResult);
+    setPendingSnapshotUri(s.imageUri);
+    setChatTurns(s.turns);
+    // 历史列表必然开着：先关，等 dismiss 动画完成再 present 快照
+    pendingSnapshotRef.current = true;
+    setIsHistoryOpen(false);
+  };
+
+  /** 待展示快照的延迟 present：任一 modal dismiss 完成后调用 */
+  const handleDeferredSnapshot = () => {
+    if (pendingSnapshotRef.current) {
+      pendingSnapshotRef.current = false;
+      setIsSnapshotModalOpen(true);
+    }
+  };
+
+  /** 打开会话记录列表 */
+  const handleOpenHistory = async () => {
+    setSessions(await sessionStore.getAll());
+    setIsHistoryOpen(true);
+  };
+
+  /** 删除历史会话 */
+  const handleDeleteSession = async (id: string) => {
+    await sessionStore.remove(id);
+    setSessions(await sessionStore.getAll());
   };
 
   const handleCaptureFrame = async () => {
@@ -185,12 +239,16 @@ export default Sentry.wrap(function App() {
 
       setActiveScenarioResult(result.scenario);
       setPendingSnapshotUri(photoUri);
-      // 新会话：首条消息为场景解读
+      scenarioResultRef.current = result.scenario;
+      // 新会话：首条消息为场景解读，并持久化
       const initialTurns: ChatTurn[] = [
         { role: 'assistant', content: result.scenario.translatedText },
       ];
+      const newSessionId = Date.now().toString();
+      sessionIdRef.current = newSessionId;
       chatTurnsRef.current = initialTurns;
       setChatTurns(initialTurns);
+      persistSession(newSessionId, photoUri, result.scenario, initialTurns);
       if (isLogsOpenRef.current) {
         // LOG 弹窗开着：先关闭，待 dismiss 动画完成 (onDismiss) 后再弹快照
         pendingSnapshotRef.current = true;
@@ -345,6 +403,7 @@ export default Sentry.wrap(function App() {
             onOpenNotes={() => setIsNotesOpen(true)}
             onOpenSettings={() => setIsSettingsOpen(true)}
             onOpenLogs={() => setIsLogsOpen(true)}
+            onOpenHistory={handleOpenHistory}
           />
         </View>
 
@@ -369,16 +428,19 @@ export default Sentry.wrap(function App() {
           onClose={() => setIsSettingsOpen(false)}
         />
 
+        <SessionHistoryModal
+          visible={isHistoryOpen}
+          sessions={sessions}
+          onClose={() => setIsHistoryOpen(false)}
+          onSelect={restoreSession}
+          onDelete={handleDeleteSession}
+          onDismiss={handleDeferredSnapshot}
+        />
+
         <ApiLogModal
           visible={isLogsOpen}
           onClose={() => setIsLogsOpen(false)}
-          onDismiss={() => {
-            // LOG dismiss 动画完成：若有待展示快照则在此刻 present
-            if (pendingSnapshotRef.current) {
-              pendingSnapshotRef.current = false;
-              setIsSnapshotModalOpen(true);
-            }
-          }}
+          onDismiss={handleDeferredSnapshot}
         />
       </CameraBackground>
     </SafeAreaView>

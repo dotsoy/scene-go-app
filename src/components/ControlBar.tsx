@@ -12,6 +12,7 @@ interface ControlBarProps {
   onOpenNotes: () => void;
   onOpenSettings: () => void;
   onOpenLogs: () => void;
+  onOpenHistory: () => void;
 }
 
 export const ControlBar: React.FC<ControlBarProps> = ({
@@ -25,6 +26,7 @@ export const ControlBar: React.FC<ControlBarProps> = ({
   onOpenNotes,
   onOpenSettings,
   onOpenLogs,
+  onOpenHistory,
 }) => {
   return (
     <View style={styles.barContainer}>
@@ -69,6 +71,11 @@ export const ControlBar: React.FC<ControlBarProps> = ({
       {/* API 实时日志监控 */}
       <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenLogs} activeOpacity={0.75}>
         <Text style={styles.btnText} numberOfLines={1}>📡 LOG</Text>
+      </TouchableOpacity>
+
+      {/* 历史对话记录 */}
+      <TouchableOpacity style={[styles.btn, styles.btnMuted]} onPress={onOpenHistory} activeOpacity={0.75}>
+        <Text style={styles.btnText} numberOfLines={1}>💬</Text>
       </TouchableOpacity>
 
       {/* 设置 / 引擎切换 */}
