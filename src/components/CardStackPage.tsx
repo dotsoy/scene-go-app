@@ -52,6 +52,7 @@ export const CardStackPage: React.FC<CardStackPageProps> = ({
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={false}
+        style={styles.chipsScroll}
         contentContainerStyle={styles.chips}
       >
         {CATEGORIES.map((c) => {
@@ -117,18 +118,26 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: COLORS.accentRed,
   },
+  chipsScroll: {
+    maxHeight: 44,
+  },
   chips: {
     paddingHorizontal: 20,
+    paddingVertical: 6,
     gap: 8,
+    alignItems: 'center',
   },
   chip: {
     backgroundColor: COLORS.bgCardLight,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 8,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
   chipSelected: {
-    backgroundColor: COLORS.accentBlue,
+    backgroundColor: 'rgba(79, 195, 247, 0.12)',
+    borderColor: COLORS.accentBlue,
   },
   chipText: {
     fontSize: 12,
@@ -137,7 +146,7 @@ const styles = StyleSheet.create({
     fontFamily: FONT.regular,
   },
   chipTextSelected: {
-    color: '#0a0a1e',
+    color: COLORS.accentBlue,
     fontWeight: '700',
   },
   list: {

@@ -65,7 +65,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({ notes, onAddNote, onDelete
         />
       </View>
       {/* 分类标签 */}
-      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsScroll} contentContainerStyle={styles.chips}>
         {CATEGORIES.map((c) => {
           const selected = c === filter;
           return (
@@ -146,16 +146,24 @@ const styles = StyleSheet.create({
   },
   searchIcon: { fontSize: 13 },
   searchInput: { flex: 1, color: COLORS.textPrimary, fontSize: 13, fontFamily: FONT.regular },
-  chips: { paddingHorizontal: 20, paddingVertical: 10, gap: 8 },
+  chipsScroll: {
+    maxHeight: 44,
+  },
+  chips: { paddingHorizontal: 20, paddingVertical: 6, gap: 8, alignItems: 'center' },
   chip: {
     backgroundColor: COLORS.bgCardLight,
-    borderRadius: 12,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderWidth: 1,
+    borderColor: 'transparent',
   },
-  chipSelected: { backgroundColor: COLORS.accentBlue },
+  chipSelected: {
+    backgroundColor: 'rgba(79, 195, 247, 0.12)',
+    borderColor: COLORS.accentBlue,
+  },
   chipText: { fontSize: 12, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONT.regular },
-  chipTextSelected: { color: '#0a0a1e', fontWeight: '700' },
+  chipTextSelected: { color: COLORS.accentBlue, fontWeight: '700' },
   list: { padding: 20, paddingTop: 8, gap: 10 },
   noteRow: {
     flexDirection: 'row',

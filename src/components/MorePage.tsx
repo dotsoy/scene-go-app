@@ -42,18 +42,23 @@ export const MorePage: React.FC<MorePageProps> = ({
         <Text style={styles.title}>更多</Text>
       </View>
       <View style={styles.list}>
-        {ENTRIES.map((e) => (
-          <TouchableOpacity key={e.key} style={styles.row} onPress={handlers[e.key]} activeOpacity={0.7}>
-            <View style={styles.iconBox}>
-              <Text style={styles.icon}>{e.icon}</Text>
-            </View>
-            <View style={styles.textBox}>
-              <Text style={styles.rowTitle}>{e.title}</Text>
-              <Text style={styles.rowDesc}>{e.desc}</Text>
-            </View>
-            <Text style={styles.arrow}>›</Text>
-          </TouchableOpacity>
-        ))}
+        <View style={styles.groupCard}>
+          {ENTRIES.map((e, index) => (
+            <React.Fragment key={e.key}>
+              {index > 0 && <View style={styles.divider} />}
+              <TouchableOpacity style={styles.row} onPress={handlers[e.key]} activeOpacity={0.7}>
+                <View style={styles.iconBox}>
+                  <Text style={styles.icon}>{e.icon}</Text>
+                </View>
+                <View style={styles.textBox}>
+                  <Text style={styles.rowTitle}>{e.title}</Text>
+                  <Text style={styles.rowDesc}>{e.desc}</Text>
+                </View>
+                <Text style={styles.arrow}>›</Text>
+              </TouchableOpacity>
+            </React.Fragment>
+          ))}
+        </View>
       </View>
     </View>
   );
@@ -69,14 +74,24 @@ const styles = StyleSheet.create({
     color: COLORS.textPrimary,
     fontFamily: FONT.regular,
   },
-  list: { padding: 20, paddingTop: 8, gap: 10 },
+  list: { padding: 20, paddingTop: 8 },
+  groupCard: {
+    backgroundColor: COLORS.bgCard,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+    overflow: 'hidden',
+  },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 10,
     padding: 14,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: COLORS.borderSubtle,
+    marginLeft: 62,
   },
   iconBox: {
     width: 36,
