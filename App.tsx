@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
 import { pluginManager, ScenarioResult } from './src/plugins';
@@ -468,7 +468,10 @@ export default function App() {
 
         <View style={styles.mainLayout}>
           {activeTab === 'chat' ? (
-            <>
+            <KeyboardAvoidingView
+              style={styles.chatTabWrapper}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
               {/* Top Header */}
               <View style={styles.topHeader}>
                 <Text style={styles.brandTitle}>SCENEGO</Text>
@@ -528,7 +531,7 @@ export default function App() {
                 />
                 <TabBar active={activeTab} onChange={setActiveTab} />
               </View>
-            </>
+            </KeyboardAvoidingView>
           ) : (
             <>
               {activeTab === 'stack' && (
@@ -754,6 +757,9 @@ const styles = StyleSheet.create({
     fontSize: 13,
     lineHeight: 18,
     fontWeight: '500',
+  },
+  chatTabWrapper: {
+    flex: 1,
   },
   topHeader: {
     flexDirection: 'row',
