@@ -5,9 +5,7 @@ import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { CameraPreviewBox } from './src/components/CameraPreviewBox';
-import { CaptureDock } from './src/components/CaptureDock';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
-import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { CountrySelectModal } from './src/components/CountrySelectModal';
@@ -297,10 +295,6 @@ export default function App() {
     return finalTranscript;
   };
 
-  /** 麦克风单击：停止转录，不做任何操作 */
-  const handleMicSingleTap = async () => {
-    await stopMic();
-  };
 
   /** 麦克风双击：停止转录 → speechController 意图处理（成卡 + 归档笔记） */
   const handleMicDoubleTap = async () => {
@@ -369,16 +363,7 @@ export default function App() {
     if (m.card) setFullscreenCard(m.card);
   };
 
-  const handleToggleCamera = () => {
-    if (!isCameraActive) {
-      setIsCameraReady(false);
-      setIsCameraActive(true);
-      cardStackStore.getState().setVisible(false);
-    } else {
-      setIsCameraReady(false);
-      setIsCameraActive(false);
-    }
-  };
+
 
   const currentCard = cards[cardIndex] ?? TAP_TALK_CARD;
 
