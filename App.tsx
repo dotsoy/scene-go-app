@@ -25,6 +25,7 @@ import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore
 import { loadUserProfile, saveUserProfile, UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
 import { modelManager } from './src/utils/ModelManager';
+import { initPack } from './src/packs/packManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
 import * as Sentry from '@sentry/react-native';
@@ -123,7 +124,9 @@ export default Sentry.wrap(function App() {
   const pendingSnapshotRef = useRef(false);
 
   // 启动时探测本地模型：已下载的 Qwen/Whisper 自动注册并激活，无文件则静默跳过（不影响云端主链路）
+  // 同时初始化场景包：应用缓存内容（离线可用），后台尝试远程下发（未配置时保持内嵌默认包）
   useEffect(() => {
+    initPack().catch((err) => console.warn('[ScenePack] 初始化失败:', err));
     modelManager.initializeExistingModels().then((loaded) => {
       if (loaded) {
         console.log('[Models] 本地模型已加载:', pluginManager.getActiveMatcherId());
