@@ -5,6 +5,7 @@ import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { COLORS, FONT } from '../theme/tokens';
 import { CardData } from '../core/types';
+import { AppIcon } from './AppIcon';
 
 export type { CardData } from '../core/types';
 
@@ -102,10 +103,12 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           {isSafety ? (
             <>
               <TouchableOpacity style={styles.aiBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
+                <AppIcon name="play" size={16} />
                 <Text style={styles.aiBtnText}>朗读求助句</Text>
               </TouchableOpacity>
               {tipActionLabel && onTipAction ? (
                 <TouchableOpacity style={styles.playBtn} onPress={onTipAction} activeOpacity={0.75}>
+                  <AppIcon name="ai" size={16} />
                   <Text style={styles.playBtnText}>{tipActionLabel}</Text>
                 </TouchableOpacity>
               ) : null}
@@ -113,10 +116,12 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           ) : (
             <>
               <TouchableOpacity style={styles.playBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
-                <Text style={styles.playBtnText}>▶ PLAY AUDIO</Text>
+                <AppIcon name="play" size={16} />
+                <Text style={styles.playBtnText}>PLAY AUDIO</Text>
               </TouchableOpacity>
               {tipActionLabel && onTipAction ? (
                 <TouchableOpacity style={styles.aiBtn} onPress={onTipAction} activeOpacity={0.75}>
+                  <AppIcon name="ai" size={16} />
                   <Text style={styles.aiBtnText}>{tipActionLabel}</Text>
                 </TouchableOpacity>
               ) : null}

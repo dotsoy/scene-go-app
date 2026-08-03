@@ -3,8 +3,9 @@
  * 三模态输入统一入口；🎙️ 录音态变红；发送触发打字/追问链路。
  */
 import React, { useState } from 'react';
-import { View, Text, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, TextInput, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, FONT, LAYOUT } from '../theme/tokens';
+import { AppIcon } from './AppIcon';
 
 interface ChatInputBarProps {
   /** 录音态（🎙️ 变红） */
@@ -32,14 +33,14 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.btn} onPress={onCamera} activeOpacity={0.7}>
-        <Text style={styles.btnIcon}>📷</Text>
+        <AppIcon name="camera" size={18} />
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.btn, isRecording && styles.btnRecording]}
         onPress={onMicToggle}
         activeOpacity={0.7}
       >
-        <Text style={[styles.btnIcon, isRecording && styles.btnIconRecording]}>🎙️</Text>
+        <AppIcon name="mic" size={18} />
       </TouchableOpacity>
       <TextInput
         style={styles.input}
@@ -52,7 +53,7 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         multiline={false}
       />
       <TouchableOpacity style={[styles.btn, styles.btnSend]} onPress={handleSend} activeOpacity={0.7}>
-        <Text style={styles.btnSendIcon}>↑</Text>
+        <AppIcon name="send" size={18} />
       </TouchableOpacity>
     </View>
   );

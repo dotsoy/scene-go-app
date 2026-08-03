@@ -6,14 +6,15 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, FONT, LAYOUT } from '../theme/tokens';
+import { AppIcon, AppIconName } from './AppIcon';
 
 export type TabKey = 'stack' | 'chat' | 'notes' | 'more';
 
-const TABS: { key: TabKey; label: string; icon: string }[] = [
-  { key: 'stack', label: '卡栈', icon: '🎴' },
-  { key: 'chat', label: '对话', icon: '💬' },
-  { key: 'notes', label: '笔记', icon: '📝' },
-  { key: 'more', label: '更多', icon: '⚙️' },
+const TABS: { key: TabKey; label: string; icon: AppIconName; activeIcon: AppIconName }[] = [
+  { key: 'stack', label: '卡栈', icon: 'tabStack', activeIcon: 'tabStackActive' },
+  { key: 'chat', label: '对话', icon: 'tabChat', activeIcon: 'tabChatActive' },
+  { key: 'notes', label: '笔记', icon: 'tabNotes', activeIcon: 'tabNotesActive' },
+  { key: 'more', label: '更多', icon: 'tabMore', activeIcon: 'tabMoreActive' },
 ];
 
 interface TabBarProps {
@@ -34,7 +35,7 @@ export const TabBar: React.FC<TabBarProps> = ({ active, onChange }) => (
             activeOpacity={0.7}
           >
             <View style={[styles.indicator, selected && styles.indicatorActive]} />
-            <Text style={styles.icon}>{t.icon}</Text>
+            <AppIcon name={selected ? t.activeIcon : t.icon} size={20} />
             <Text style={[styles.label, selected && styles.labelActive]}>{t.label}</Text>
           </TouchableOpacity>
         );
