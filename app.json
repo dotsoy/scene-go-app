@@ -16,7 +16,7 @@
       "infoPlist": {
         "NSCameraUsageDescription": "SceneGo 需要使用摄像头捕获异国现实场景与菜单点餐。",
         "NSMicrophoneUsageDescription": "SceneGo 需要使用麦克风进行双向语音同传与 Notes 快捷录音。",
-        "NSLocationWhenInUseUsageDescription": "SceneGo 需要使用地理位置自动匹配当前所在的异国出行场景。",
+        "NSLocationWhenInUseUsageDescription": "SceneGo 需要使用您的位置识别所在国家，以生成对应的安全信息与当地语言表达卡。",
         "NSSpeechRecognitionUsageDescription": "SceneGo 需要使用语音识别进行实时听写转录与语音随记。"
       },
       "bundleIdentifier": "com.ninetieth.scenego"
