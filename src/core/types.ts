@@ -22,6 +22,8 @@ export interface CardData {
   tips?: string[];
   /** 来源快照会话 id：卡面提供「AI 解读」入口 */
   sessionId?: string;
+  /** 安全卡专属：一键拨打号码（警察/救护/火警/旅游警察） */
+  dials?: { num: string; label: string }[];
 }
 
 /**

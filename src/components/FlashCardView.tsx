@@ -1,5 +1,5 @@
 import React, { useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent, Linking } from 'react-native';
 import * as Speech from 'expo-speech';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
@@ -55,10 +55,14 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
   };
 
   const formattedProgress = `${(currentIndex + 1).toString().padStart(2, '0')} / ${totalCards.toString().padStart(2, '0')}`;
+  const isSafety = card.id.startsWith('safety-');
+  const handleDial = (num: string) => {
+    Linking.openURL(`tel:${num}`).catch(() => {});
+  };
 
   return (
     <View ref={cardRef} collapsable={false} style={styles.cardContainer}>
-      {/* TopRow：关闭 + 分类 + 位置 + 进度 */}
+      {/* TopRow：关闭 + 分类 + 位置 + 进度/SAFETY */}
       <View style={styles.topRow}>
         {onClose ? (
           <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={8} activeOpacity={0.7}>
@@ -66,15 +70,23 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           </TouchableOpacity>
         ) : null}
         <View style={styles.categoryPill}>
-          <Text style={styles.categoryText}>{card.categoryTag.toUpperCase()}</Text>
+          <Text style={[styles.categoryText, isSafety && styles.categoryTextSafety]}>
+            {card.categoryTag.toUpperCase()}
+          </Text>
         </View>
         <Text style={styles.locationText} numberOfLines={1}>
           {card.locationName}
         </Text>
         <View style={styles.topSpacer} />
-        <View style={styles.progressPill}>
-          <Text style={styles.progressText}>{formattedProgress}</Text>
-        </View>
+        {isSafety ? (
+          <View style={styles.safetyPill}>
+            <Text style={styles.safetyText}>SAFETY</Text>
+          </View>
+        ) : (
+          <View style={styles.progressPill}>
+            <Text style={styles.progressText}>{formattedProgress}</Text>
+          </View>
+        )}
       </View>
 
       <View style={styles.bigWrap}>
@@ -85,21 +97,53 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           {card.subText ? <Text style={styles.supplementText}>{card.subText}</Text> : null}
         </View>
 
-        {/* 操作行：PLAY AUDIO + AI 解读 + NEXT CARD */}
+        {/* 操作行：安全卡（朗读求助句 + 安全信息）/ 普通卡（PLAY AUDIO + AI 解读 + NEXT） */}
         <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.playBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
-            <Text style={styles.playBtnText}>▶ PLAY AUDIO</Text>
-          </TouchableOpacity>
-          {tipActionLabel && onTipAction ? (
-            <TouchableOpacity style={styles.aiBtn} onPress={onTipAction} activeOpacity={0.75}>
-              <Text style={styles.aiBtnText}>{tipActionLabel}</Text>
-            </TouchableOpacity>
-          ) : null}
-          <View style={styles.actionSpacer} />
-          <TouchableOpacity style={styles.nextBtn} onPress={onNextCard} activeOpacity={0.7}>
-            <Text style={styles.nextBtnText}>NEXT CARD →</Text>
-          </TouchableOpacity>
+          {isSafety ? (
+            <>
+              <TouchableOpacity style={styles.aiBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
+                <Text style={styles.aiBtnText}>朗读求助句</Text>
+              </TouchableOpacity>
+              {tipActionLabel && onTipAction ? (
+                <TouchableOpacity style={styles.playBtn} onPress={onTipAction} activeOpacity={0.75}>
+                  <Text style={styles.playBtnText}>{tipActionLabel}</Text>
+                </TouchableOpacity>
+              ) : null}
+            </>
+          ) : (
+            <>
+              <TouchableOpacity style={styles.playBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
+                <Text style={styles.playBtnText}>▶ PLAY AUDIO</Text>
+              </TouchableOpacity>
+              {tipActionLabel && onTipAction ? (
+                <TouchableOpacity style={styles.aiBtn} onPress={onTipAction} activeOpacity={0.75}>
+                  <Text style={styles.aiBtnText}>{tipActionLabel}</Text>
+                </TouchableOpacity>
+              ) : null}
+              <View style={styles.actionSpacer} />
+              <TouchableOpacity style={styles.nextBtn} onPress={onNextCard} activeOpacity={0.7}>
+                <Text style={styles.nextBtnText}>NEXT CARD →</Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
+
+        {/* 安全卡：紧急拨打行 */}
+        {isSafety && card.dials && card.dials.length > 0 ? (
+          <View style={styles.dialWrap}>
+            {card.dials.map((d) => (
+              <TouchableOpacity
+                key={d.num + d.label}
+                style={styles.dialBtn}
+                onPress={() => handleDial(d.num)}
+                activeOpacity={0.75}
+              >
+                <Text style={styles.dialNum}>{d.num}</Text>
+                <Text style={styles.dialLabel}>{d.label}</Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        ) : null}
 
         {/* LOCAL PROTOCOL */}
         <View style={styles.protoWrap}>
@@ -120,7 +164,11 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
         </View>
 
         <View style={styles.bottomSpacer} />
-        <Text style={styles.swipeHint}>点击 ✕ 返回 · 下滑关闭</Text>
+        {isSafety ? (
+          <Text style={styles.swipeHint}>点击「安全信息」查看完整安全详情</Text>
+        ) : (
+          <Text style={styles.swipeHint}>点击 ✕ 返回 · 下滑关闭</Text>
+        )}
       </View>
     </View>
   );
@@ -172,6 +220,43 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 11,
     letterSpacing: 1,
+  },
+  categoryTextSafety: {
+    color: COLORS.accentGreen,
+  },
+  safetyPill: {
+    backgroundColor: COLORS.greenBg,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+  },
+  safetyText: {
+    fontFamily: FONT.monoBold,
+    color: COLORS.accentGreen,
+    fontSize: 11,
+    letterSpacing: 1,
+  },
+  dialWrap: {
+    flexDirection: 'row',
+    gap: 8,
+  },
+  dialBtn: {
+    flex: 1,
+    backgroundColor: COLORS.greenBg,
+    borderRadius: 10,
+    padding: 10,
+    gap: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  dialNum: {
+    fontFamily: FONT.monoBold,
+    color: COLORS.accentGreen,
+    fontSize: 16,
+  },
+  dialLabel: {
+    fontSize: 10,
+    color: COLORS.textSecondary,
   },
   locationText: {
     fontFamily: FONT.regular,

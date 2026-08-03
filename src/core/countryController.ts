@@ -21,6 +21,12 @@ export const countryController = {
   /** 当前位置预设安全卡（卡栈第一张） */
   buildSafetyCard(country: SavedCountry, city?: string): CardData {
     const s = getCountrySafety(country.code)!;
+    const dials = [
+      { num: s.emergency.police, label: '警察' },
+      { num: s.emergency.ambulance, label: '救护车' },
+      { num: s.emergency.fire, label: '火警' },
+      ...(s.emergency.touristPolice ? [{ num: s.emergency.touristPolice, label: '旅游警察' }] : []),
+    ];
     return {
       id: `safety-${country.code}`,
       categoryTag: '本地安全指南',
@@ -31,6 +37,7 @@ export const countryController = {
       subText: `紧急电话：警察 ${s.emergency.police} · 急救 ${s.emergency.ambulance} · 火警 ${s.emergency.fire}${s.emergency.touristPolice ? ` · 旅游警察 ${s.emergency.touristPolice}` : ''}`,
       localTip: `使领馆领保 ${s.embassy} · ${s.tipping}`,
       languageCode: s.langCode,
+      dials,
     };
   },
 
