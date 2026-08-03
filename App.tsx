@@ -19,6 +19,7 @@ import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { scenarioToCard } from './src/utils/cardBuilder';
+import { parseVlmScenarioResult } from './src/plugins/ocr/CloudVlmOcrPlugin';
 import { getLocationContext, getPlaceContext, PlaceContext } from './src/utils/locationContext';
 import { compressImage } from './src/utils/imageCompress';
 import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore';
@@ -146,17 +147,29 @@ export default function App() {
     };
   }, []);
 
-  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流并持久化 */
+  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流并持久化；表达需求自动生成表达卡 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
     setProcessingLabel('正在回答...');
     try {
       const cloudVlm = pluginManager.getCloudVlmPlugin();
       const reply = await cloudVlm.askFollowUp(imageUri, userPrompt, chatTurnsRef.current);
 
+      // 追问中表达沟通需求：VLM 按约定返回表达卡 JSON，解析命中 targetText 即入卡栈
+      const parsed = parseVlmScenarioResult(reply);
+      let assistantText = reply;
+      if (parsed && parsed.targetText) {
+        const locationCtx = await getLocationContext();
+        addExpressionCard({
+          ...scenarioToCard(parsed, locationCtx ?? '当前位置'),
+          sessionId: sessionIdRef.current ?? undefined,
+        });
+        assistantText = `${reply}\n\n✅ 已为你生成表达卡「${parsed.title || '场景表达'}」，关闭对话即可查看。`;
+      }
+
       const newTurns = [
         ...chatTurnsRef.current,
         { role: 'user' as const, content: userPrompt },
-        { role: 'assistant' as const, content: reply },
+        { role: 'assistant' as const, content: assistantText },
       ];
       chatTurnsRef.current = newTurns;
       setChatTurns(newTurns);
