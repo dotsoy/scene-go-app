@@ -4,6 +4,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { COLORS, FONT } from '../theme/tokens';
+import { AppIcon, AppIconName } from './AppIcon';
 
 interface MorePageProps {
   onOpenSafety: () => void;
@@ -13,12 +14,12 @@ interface MorePageProps {
   onSwitchCountry: () => void;
 }
 
-const ENTRIES: { key: string; icon: string; title: string; desc: string }[] = [
-  { key: 'safety', icon: '🛡️', title: '安全指南', desc: '当前国家紧急电话 / 求助句 / 骗局提示' },
-  { key: 'history', icon: '🕘', title: '会话历史', desc: '恢复历史快照的多轮追问' },
-  { key: 'logs', icon: '🧾', title: 'API 日志', desc: '接口请求与响应日志' },
-  { key: 'settings', icon: '⚙️', title: '识别引擎设置', desc: '切换引擎、配置 API Key' },
-  { key: 'country', icon: '🌏', title: '切换国家', desc: '重新选择目的地国家' },
+const ENTRIES: { key: string; iconName: AppIconName; title: string; desc: string }[] = [
+  { key: 'safety', iconName: 'shield', title: '安全指南', desc: '当前国家紧急电话 / 求助句 / 骗局提示' },
+  { key: 'history', iconName: 'history', title: '会话历史', desc: '恢复历史快照的多轮追问' },
+  { key: 'logs', iconName: 'logs', title: 'API 日志', desc: '接口请求与响应日志' },
+  { key: 'settings', iconName: 'settings', title: '识别引擎设置', desc: '切换引擎、配置 API Key' },
+  { key: 'country', iconName: 'country', title: '切换国家', desc: '重新选择目的地国家' },
 ];
 
 export const MorePage: React.FC<MorePageProps> = ({
@@ -48,7 +49,7 @@ export const MorePage: React.FC<MorePageProps> = ({
               {index > 0 && <View style={styles.divider} />}
               <TouchableOpacity style={styles.row} onPress={handlers[e.key]} activeOpacity={0.7}>
                 <View style={styles.iconBox}>
-                  <Text style={styles.icon}>{e.icon}</Text>
+                  <AppIcon name={e.iconName} size={18} />
                 </View>
                 <View style={styles.textBox}>
                   <Text style={styles.rowTitle}>{e.title}</Text>
