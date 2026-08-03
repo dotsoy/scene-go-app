@@ -254,8 +254,8 @@ const styles = StyleSheet.create({
   targetText: {
     fontFamily: FONT.extrabold,
     color: '#ffffff',
-    fontSize: 22,
-    lineHeight: 31,
+    fontSize: 44,
+    lineHeight: 57,
     letterSpacing: 0.5,
   },
   phoneticText: {

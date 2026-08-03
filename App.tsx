@@ -588,6 +588,7 @@ export default function App() {
                 <Text style={styles.cameraCancelText}>取消</Text>
               </TouchableOpacity>
             </View>
+            <Text style={styles.cameraHint}>对准菜单 / 标牌 / 售票机</Text>
             <CameraPreviewBox cameraRef={cameraRef} onCameraReady={() => setIsCameraReady(true)} />
             <TouchableOpacity style={styles.snapButton} onPress={handleCaptureFrame} activeOpacity={0.85}>
               <Text style={styles.snapText}>SNAP</Text>
@@ -890,6 +891,12 @@ const styles = StyleSheet.create({
   cameraCancelText: {
     color: COLORS.textSecondary,
     fontSize: 13,
+  },
+  cameraHint: {
+    color: '#4a4a52',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingBottom: 12,
   },
   snapButton: {
     marginHorizontal: 20,
