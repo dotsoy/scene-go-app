@@ -93,6 +93,7 @@
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
 				D65327D7A22EEC0BE12398D9 /* Pods */,
 				D7E4C46ADA2E9064B798F356 /* ExpoModulesProviders */,
+				87CC4E88302035970069AACC /* Recovered References */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -105,6 +106,14 @@
 				13B07F961A680F5B00A75B9A /* SceneGo.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		87CC4E88302035970069AACC /* Recovered References */ = {
+			isa = PBXGroup;
+			children = (
+				A1B2C3D4E5F6789012345678 /* SceneGoVisionClassifier.m */,
+			);
+			name = "Recovered References";
 			sourceTree = "<group>";
 		};
 		92DBD88DE9BF7D494EA9DA96 /* SceneGo */ = {
@@ -177,7 +186,6 @@
 				TargetAttributes = {
 					13B07F861A680F5B00A75B9A = {
 						LastSwiftMigration = 1250;
-						DevelopmentTeam = "N8L286CL2R";
 						ProvisioningStyle = Automatic;
 					};
 				};
@@ -372,6 +380,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N8L286CL2R;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -397,7 +406,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-				DEVELOPMENT_TEAM = "N8L286CL2R";
 			};
 			name = Debug;
 		};
@@ -411,6 +419,7 @@
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = N8L286CL2R;
 				INFOPLIST_FILE = SceneGo/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 13.4;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -430,7 +439,6 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
-				DEVELOPMENT_TEAM = "N8L286CL2R";
 			};
 			name = Release;
 		};
