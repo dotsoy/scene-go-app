@@ -22,18 +22,17 @@ const ICONS = {
   tabStack: require('../../assets/tab-stack.png'),
   tabStackActive: require('../../assets/tab-stack-active.png'),
   tabChat: require('../../assets/tab-chat.png'),
-  // tab-chat-active 待补充导出，暂用 tab-chat
-  tabChatActive: require('../../assets/tab-chat.png'),
+  tabChatActive: require('../../assets/tab-chat-active.png'),
   tabNotes: require('../../assets/tab-notes.png'),
   tabNotesActive: require('../../assets/tab-notes-active.png'),
   tabMore: require('../../assets/tab-more.png'),
   tabMoreActive: require('../../assets/tab-more-active.png'),
-  // 更多页入口图标占位（映射现有单色 PNG，导出专用图后直接替换对应 require）
-  shield: require('../../assets/icon-gps.png'),
-  history: require('../../assets/tab-chat.png'),
-  logs: require('../../assets/icon-ai.png'),
-  settings: require('../../assets/tab-more.png'),
-  country: require('../../assets/icon-switch.png'),
+  // 更多页入口专用 PNG 图标
+  moreSafety: require('../../assets/icon-more-safety.png'),
+  moreHistory: require('../../assets/icon-more-history.png'),
+  moreLogs: require('../../assets/icon-more-logs.png'),
+  moreSettings: require('../../assets/icon-ai.png'),
+  moreCountry: require('../../assets/icon-more-country.png'),
 } as const;
 
 export type AppIconName = keyof typeof ICONS;

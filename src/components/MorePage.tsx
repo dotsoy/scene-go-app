@@ -15,11 +15,11 @@ interface MorePageProps {
 }
 
 const ENTRIES: { key: string; iconName: AppIconName; title: string; desc: string }[] = [
-  { key: 'safety', iconName: 'shield', title: '安全指南', desc: '当前国家紧急电话 / 求助句 / 骗局提示' },
-  { key: 'history', iconName: 'history', title: '会话历史', desc: '恢复历史快照的多轮追问' },
-  { key: 'logs', iconName: 'logs', title: 'API 日志', desc: '接口请求与响应日志' },
-  { key: 'settings', iconName: 'settings', title: '识别引擎设置', desc: '切换引擎、配置 API Key' },
-  { key: 'country', iconName: 'country', title: '切换国家', desc: '重新选择目的地国家' },
+  { key: 'safety', iconName: 'moreSafety', title: '安全指南', desc: '当前国家紧急电话 / 求助句 / 骗局提示' },
+  { key: 'history', iconName: 'moreHistory', title: '会话历史', desc: '恢复历史快照的多轮追问' },
+  { key: 'logs', iconName: 'moreLogs', title: 'API 日志', desc: '接口请求与响应日志' },
+  { key: 'settings', iconName: 'moreSettings', title: '识别引擎设置', desc: '切换引擎、配置 API Key' },
+  { key: 'country', iconName: 'moreCountry', title: '切换国家', desc: '重新选择目的地国家' },
 ];
 
 export const MorePage: React.FC<MorePageProps> = ({
