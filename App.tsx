@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
 import { pluginManager, ScenarioResult } from './src/plugins';
@@ -61,6 +61,22 @@ export default function App() {
   // V2：点表达卡 → 全屏大字卡覆盖层
   const [fullscreenCard, setFullscreenCard] = useState<CardData | null>(null);
   const isCardVisible = useStore(cardStackStore, (s) => s.visible);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setIsKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setIsKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
@@ -522,14 +538,15 @@ export default function App() {
               />
 
               {/* V2 输入栏 + Tab 栏（贴底，Safe 区在 bottomBar 内） */}
-              <View style={styles.bottomBar}>
+              {/* V2 输入栏 + Tab 栏（键盘弹起时收起 TabBar 贴合键盘上沿） */}
+              <View style={[styles.bottomBar, isKeyboardVisible && styles.bottomBarKeyboard]}>
                 <ChatInputBar
                   isRecording={isMicActive}
                   onCamera={() => setIsCameraActive(true)}
                   onMicToggle={handleMicToggle}
                   onSend={handleSend}
                 />
-                <TabBar active={activeTab} onChange={setActiveTab} />
+                {!isKeyboardVisible && <TabBar active={activeTab} onChange={setActiveTab} />}
               </View>
             </KeyboardAvoidingView>
           ) : (
@@ -849,6 +866,9 @@ const styles = StyleSheet.create({
   bottomBar: {
     paddingBottom: LAYOUT.bottomSafeArea,
     backgroundColor: COLORS.bgBar,
+  },
+  bottomBarKeyboard: {
+    paddingBottom: 0,
   },
   tabPlaceholder: {
     flex: 1,
