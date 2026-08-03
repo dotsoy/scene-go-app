@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
 import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
@@ -301,6 +301,15 @@ export default Sentry.wrap(function App() {
 
   /** 启动麦克风（MIC OFF 态点按） */
   const handleStartMic = async () => {
+    // Android 无原生听写模块：明确降级提示，避免启动失败的黑盒体验
+    if (Platform.OS === 'android') {
+      micActiveRef.current = false;
+      Alert.alert(
+        '语音转写暂不可用',
+        '当前设备为 Android：实时语音转写模块仅支持 iOS。\n请用 CAM 拍照识别场景，或使用下方文字表达（Tap&Talk）。'
+      );
+      return;
+    }
     // 期望状态先行，杜绝授权异步窗口内的重复触发
     micActiveRef.current = true;
     liveTranscriptRef.current = '';

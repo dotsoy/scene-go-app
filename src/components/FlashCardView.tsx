@@ -1,6 +1,8 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, GestureResponderEvent } from 'react-native';
 import * as Speech from 'expo-speech';
+import { captureRef } from 'react-native-view-shot';
+import * as Sharing from 'expo-sharing';
 import { COLORS, FONT } from '../theme/tokens';
 
 export interface CardData {
@@ -50,10 +52,26 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
     });
   };
 
+  // 整卡截图分享：截图对象为卡片容器（含大字展示 + 本地提示），生成 PNG 后调系统分享
+  const cardRef = useRef<View>(null);
+  const handleShare = async (e: GestureResponderEvent) => {
+    e.stopPropagation();
+    try {
+      const uri = await captureRef(cardRef, { format: 'png', quality: 0.9 });
+      await Sharing.shareAsync(uri, {
+        mimeType: 'image/png',
+        dialogTitle: `分享表达卡：${card.title}`,
+        UTI: 'public.png',
+      });
+    } catch (err) {
+      console.warn('[Share] 表达卡分享失败:', err);
+    }
+  };
+
   const formattedProgress = `${(currentIndex + 1).toString().padStart(2, '0')} / ${totalCards.toString().padStart(2, '0')}`;
 
   return (
-    <View style={styles.cardContainer}>
+    <View ref={cardRef} collapsable={false} style={styles.cardContainer}>
       {/* Top Header: 分类名称 + 进度位置指示 */}
       <View style={styles.topRow}>
         <View style={styles.leftPillGroup}>
@@ -63,9 +81,14 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           <Text style={styles.locationText}>{card.locationName.toUpperCase()}</Text>
         </View>
 
-        {/* 顶部进度批次展示 (01 / 04) */}
-        <View style={styles.progressPill}>
-          <Text style={styles.progressText}>{formattedProgress}</Text>
+        {/* 顶部进度批次展示 (01 / 04) + 分享按钮 */}
+        <View style={styles.topRightGroup}>
+          <TouchableOpacity style={styles.sharePill} onPress={handleShare} activeOpacity={0.7} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
+            <Text style={styles.shareText}>SHARE</Text>
+          </TouchableOpacity>
+          <View style={styles.progressPill}>
+            <Text style={styles.progressText}>{formattedProgress}</Text>
+          </View>
         </View>
       </View>
 
@@ -163,6 +186,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 14,
+  },
+  topRightGroup: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  sharePill: {
+    backgroundColor: 'transparent',
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: COLORS.borderLight,
+  },
+  shareText: {
+    fontFamily: FONT.monoBold,
+    color: COLORS.textTertiary,
+    fontSize: 10,
+    letterSpacing: 0.8,
   },
   leftPillGroup: {
     flexDirection: 'row',
