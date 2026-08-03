@@ -45,16 +45,7 @@
       }
     },
     "plugins": [
-      [
-        "@sentry/react-native/expo",
-        {
-          "url": "https://sentry.io/",
-          "project": "scenego",
-          "organization": "personal-4ty"
-        }
-      ],
       "expo-secure-store",
-      "./plugins/withSentryAlwaysOutOfDate",
       "./plugins/withResetAutoSigning",
       "expo-font"
     ]

@@ -28,17 +28,8 @@ import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
-import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
 import { COLORS, FONT } from './src/theme/tokens';
-
-Sentry.init({
-  dsn: 'https://71913c9b41554c4dd80d559db168205a@o4511835504574464.ingest.us.sentry.io/4511835559428096',
-  sendDefaultPii: true,
-  enableAutoSessionTracking: true,
-  tracesSampleRate: 1.0,
-  debug: __DEV__,
-});
 
 // Tap&Talk 兜底卡：始终存在于卡栈末尾，动态卡缺失时的默认表达入口
 const TAP_TALK_CARD: CardData = {
@@ -53,7 +44,7 @@ const TAP_TALK_CARD: CardData = {
   languageCode: 'zh-CN',
 };
 
-export default Sentry.wrap(function App() {
+export default function App() {
   // 字体加载：未就绪前保持启动画面（注意：必须放在所有 hooks 之后提前返回，避免 hooks 数量跳变崩溃）
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -720,7 +711,7 @@ export default Sentry.wrap(function App() {
       </SafeAreaView>
     </CameraBackground>
   );
-});
+}
 
 const styles = StyleSheet.create({
   safeArea: {

@@ -48,7 +48,6 @@ flowchart TD
 | 会话历史 / 快速笔记 | AsyncStorage | SessionStore / NoteStore |
 | 场景包缓存 | AsyncStorage | `@scenego/scene-pack`；加载优先级：远程 → 缓存 → 内嵌 DEFAULT_PACK |
 | API Key | iOS Keychain | SecureConfig，可应用内配置 |
-| 崩溃信息 | Sentry | 不含照片/语音 |
 
 ## 4. 云端角色（边界）
 

@@ -32,12 +32,7 @@ yarn-error.log*
 .env.local
 .env.*.local
 
-
 # iOS build artifacts
 ios/Pods/
 ios/build/
 *.xcworkspace
-
-.env.local
-sentry.properties
-ios/sentry.properties

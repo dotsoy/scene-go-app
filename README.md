@@ -16,7 +16,6 @@ Built with Expo / React Native. Client-only: no backend required.
   - Cloud OCR: OpenRouter vision models (`openrouter/free`)
   - Local matcher: keyword dictionary with Chinese/English/Thai/Japanese coverage
   - Optional on-device: Qwen2.5-0.5B (llama.rn) and Whisper-Tiny (whisper.rn)
-- **Crash reporting** — Sentry with source maps and dSYM upload.
 
 ## Architecture
 
@@ -63,9 +62,6 @@ Create a `.env` file (`.env.example` committed as a template):
 ```env
 # OpenRouter API key for cloud vision recognition
 EXPO_PUBLIC_OPENROUTER_API_KEY=sk-or-v1-...
-
-# Sentry (optional): auth token for source map / dSYM upload
-SENTRY_AUTH_TOKEN=...
 ```
 
 The API key is also configurable in-app (Settings → 识别引擎设置), stored in the iOS Keychain.
@@ -74,7 +70,7 @@ The API key is also configurable in-app (Settings → 识别引擎设置), store
 
 ```text
 scenego/
-├── App.tsx                     # Entry: Sentry init, app state, modals
+├── App.tsx                     # Entry: app state, modals
 ├── app.json                    # Expo config, permissions, plugins
 ├── modules/
 │   └── scenego-speech/         # Expo Local Module (Swift)
@@ -103,7 +99,7 @@ scenego/
 
 - Expo SDK 51 / React Native 0.74 (TypeScript)
 - expo-modules-core (Swift local module), expo-camera, expo-speech, expo-clipboard, expo-secure-store
-- AsyncStorage (sessions & notes), Sentry React Native
+- AsyncStorage (sessions & notes)
 - OpenRouter chat completions API for vision
 
 ## Contributing

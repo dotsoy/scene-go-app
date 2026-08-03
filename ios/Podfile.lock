@@ -1477,36 +1477,12 @@ PODS:
     - React-utils (= 0.74.5)
   - RNCAsyncStorage (1.23.1):
     - React-Core
-  - RNSentry (5.36.0):
-    - DoubleConversion
-    - glog
-    - hermes-engine
-    - RCT-Folly (= 2024.01.01.00)
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Codegen
-    - React-Core
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-hermes
-    - React-ImageManager
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-rendererdebug
-    - React-utils
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - Sentry/HybridSDK (= 8.41.0)
-    - Yoga
   - SceneGoSpeech (1.0.0):
     - ExpoModulesCore
   - SDWebImage/Core (5.21.7)
   - SDWebImageWebPCoder (0.15.0):
     - libwebp (~> 1.0)
     - SDWebImage/Core (~> 5.17)
-  - Sentry/HybridSDK (8.41.0)
   - SocketRocket (0.7.0)
   - whisper-rn (0.7.2):
     - DoubleConversion
@@ -1622,7 +1598,6 @@ DEPENDENCIES:
   - React-utils (from `../node_modules/react-native/ReactCommon/react/utils`)
   - ReactCommon/turbomodule/core (from `../node_modules/react-native/ReactCommon`)
   - "RNCAsyncStorage (from `../node_modules/@react-native-async-storage/async-storage`)"
-  - "RNSentry (from `../node_modules/@sentry/react-native`)"
   - SceneGoSpeech (from `../modules/scenego-speech/ios`)
   - whisper-rn (from `../node_modules/whisper.rn`)
   - Yoga (from `../node_modules/react-native/ReactCommon/yoga`)
@@ -1632,7 +1607,6 @@ SPEC REPOS:
     - libwebp
     - SDWebImage
     - SDWebImageWebPCoder
-    - Sentry
     - SocketRocket
     - ZXingObjC
 
@@ -1800,8 +1774,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/react-native/ReactCommon"
   RNCAsyncStorage:
     :path: "../node_modules/@react-native-async-storage/async-storage"
-  RNSentry:
-    :path: "../node_modules/@sentry/react-native"
   SceneGoSpeech:
     :path: "../modules/scenego-speech/ios"
   whisper-rn:
@@ -1892,16 +1864,14 @@ SPEC CHECKSUMS:
   React-utils: 9fa4e5d0b5e6c6c85c958f19d6ef854337886417
   ReactCommon: 9f285823dbe955099978d9bff65a7653ca029256
   RNCAsyncStorage: aa75595c1aefa18f868452091fa0c411a516ce11
-  RNSentry: fd304fd50df1f73b2442f3fcd8bab989d228a1b0
   SceneGoSpeech: ef8c9f6a9436d454bf8fc5482d3bca5b70405868
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageWebPCoder: 0e06e365080397465cc73a7a9b472d8a3bd0f377
-  Sentry: 54d0fe6c0df448497c8ed4cce66ccf7027e1823e
   SocketRocket: abac6f5de4d4d62d24e11868d7a2f427e0ef940d
   whisper-rn: 6870c663a6ef88da6f3538ff572637f70ecb4d2c
   Yoga: 950bbfd7e6f04790fdb51149ed51df41f329fcc8
   ZXingObjC: 8898711ab495761b2dbbdec76d90164a6d7e14c5
 
-PODFILE CHECKSUM: 4e4937171189db8dc0bfcc54758616a58dafb4c3
+PODFILE CHECKSUM: 7758b7dd25d81d9879b37d48ee6980ea623b8781
 
 COCOAPODS: 1.17.0
