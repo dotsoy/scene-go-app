@@ -87,8 +87,8 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   icon: { fontSize: 18 },
-  textBox: { flex: 1 },
+  textBox: { flex: 1, gap: 3 },
   rowTitle: { fontSize: 15, fontWeight: '600', color: COLORS.textPrimary, fontFamily: FONT.regular },
   rowDesc: { fontSize: 12, color: COLORS.textTertiary, marginTop: 2, fontFamily: FONT.regular },
-  arrow: { fontSize: 18, color: COLORS.textTertiary },
+  arrow: { fontSize: 16, color: COLORS.textMuted },
 });

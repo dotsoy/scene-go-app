@@ -74,7 +74,14 @@ export const NotesPage: React.FC<NotesPageProps> = ({ notes, onAddNote, onDelete
               style={[styles.chip, selected && styles.chipSelected]}
               onPress={() => setFilter(c)}
             >
-              <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{c}</Text>
+              <Text
+                style={[
+                  styles.chipText,
+                  selected ? styles.chipTextSelected : { color: CATEGORY_COLORS[c] ?? COLORS.textSecondary },
+                ]}
+              >
+                {c}
+              </Text>
             </TouchableOpacity>
           );
         })}
@@ -173,7 +180,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 40,
     borderRadius: 10,
-    backgroundColor: COLORS.bgCardLight,
+    backgroundColor: COLORS.bgCard,
     paddingHorizontal: 12,
     color: COLORS.textPrimary,
     fontSize: 13,
