@@ -20,6 +20,9 @@ import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModa
 import { ChatPage } from './src/components/ChatPage';
 import { ChatInputBar } from './src/components/ChatInputBar';
 import { TabBar, TabKey } from './src/components/TabBar';
+import { CardStackPage } from './src/components/CardStackPage';
+import { NotesPage } from './src/components/NotesPage';
+import { MorePage } from './src/components/MorePage';
 import { ChatMessage } from './src/core/types';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { PlaceContext } from './src/utils/locationContext';
@@ -543,9 +546,26 @@ export default function App() {
             </>
           ) : (
             <>
-              <View style={styles.tabPlaceholder}>
-                <Text style={styles.tabPlaceholderText}>Tab「{activeTab}」开发中</Text>
-              </View>
+              {activeTab === 'stack' && (
+                <CardStackPage
+                  cards={cards}
+                  onCardPress={(card) => setFullscreenCard(card)}
+                  onDelete={(id) => cardStackStore.getState().remove(id)}
+                  onClear={() => cardStackStore.getState().clear()}
+                />
+              )}
+              {activeTab === 'notes' && (
+                <NotesPage notes={notes} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} />
+              )}
+              {activeTab === 'more' && (
+                <MorePage
+                  onOpenSafety={() => setIsSafetyDetailOpen(true)}
+                  onOpenHistory={handleOpenHistory}
+                  onOpenLogs={() => setIsLogsOpen(true)}
+                  onOpenSettings={() => setIsSettingsOpen(true)}
+                  onSwitchCountry={() => setIsCountrySelectOpen(true)}
+                />
+              )}
               <View style={styles.bottomBar}>
                 <TabBar active={activeTab} onChange={setActiveTab} />
               </View>

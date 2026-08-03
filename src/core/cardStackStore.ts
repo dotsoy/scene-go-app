@@ -28,6 +28,8 @@ export interface CardStackState {
   next: () => void;
   prev: () => void;
   setVisible: (visible: boolean) => void;
+  /** V2：清空全部表达卡（保留 Tap&Talk 兜底卡） */
+  clear: () => void;
 }
 
 export const cardStackStore = createStore<CardStackState>()((set) => ({
@@ -49,4 +51,5 @@ export const cardStackStore = createStore<CardStackState>()((set) => ({
   next: () => set((s) => ({ index: (s.index + 1) % Math.max(1, s.cards.length) })),
   prev: () => set((s) => ({ index: (s.index - 1 + s.cards.length) % s.cards.length })),
   setVisible: (visible) => set({ visible }),
+  clear: () => set({ cards: [TAP_TALK_CARD], index: 0, visible: true }),
 }));
