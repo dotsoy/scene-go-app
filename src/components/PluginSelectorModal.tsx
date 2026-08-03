@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { pluginManager } from '../plugins';
+import { ComplianceModal } from './ComplianceModal';
 import {
   getOpenRouterApiKey,
   setOpenRouterApiKey,
@@ -29,6 +30,7 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
   const [activeOcrId, setActiveOcrId] = useState(pluginManager.getActiveOcrId());
   const [apiKeyInput, setApiKeyInput] = useState('');
   const [hasApiKey, setHasApiKey] = useState(false);
+  const [isComplianceOpen, setIsComplianceOpen] = useState(false);
 
   useEffect(() => {
     if (visible) {
@@ -157,8 +159,20 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
               API Key 状态：{hasApiKey ? '已配置' : '未配置'}
             </Text>
           </View>
+
+          {/* 合规文档入口 */}
+          <TouchableOpacity
+            style={styles.complianceEntry}
+            onPress={() => setIsComplianceOpen(true)}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.complianceEntryText}>隐私政策 · 用户协议 · 数据清单</Text>
+            <Text style={styles.complianceEntryArrow}>›</Text>
+          </TouchableOpacity>
         </View>
       </View>
+
+      <ComplianceModal visible={isComplianceOpen} onClose={() => setIsComplianceOpen(false)} />
     </Modal>
   );
 };
@@ -305,5 +319,26 @@ const styles = StyleSheet.create({
   statusText: {
     color: '#999',
     fontSize: 13,
+  },
+  complianceEntry: {
+    marginTop: 16,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingVertical: 12,
+    paddingHorizontal: 14,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: COLORS.borderSubtle,
+  },
+  complianceEntryText: {
+    fontFamily: FONT.semibold,
+    color: COLORS.textSecondary,
+    fontSize: 13,
+  },
+  complianceEntryArrow: {
+    fontFamily: FONT.bold,
+    color: COLORS.textTertiary,
+    fontSize: 16,
   },
 });

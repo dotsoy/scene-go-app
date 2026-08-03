@@ -80,16 +80,6 @@ target 'SceneGo' do
       end
     end
 
-    # Patch Sentry Cocoa Pod std::vector<const T> libc++ C++20 compatibility issue for Xcode 16/17
-    sentry_header = File.join(__dir__, 'Pods/Sentry/Sources/Sentry/include/SentryThreadMetadataCache.hpp')
-    if File.exist?(sentry_header)
-      File.chmod(0644, sentry_header)
-      content = File.read(sentry_header)
-      if content.include?('std::vector<const ThreadHandleMetadataPair>')
-        File.write(sentry_header, content.sub('std::vector<const ThreadHandleMetadataPair>', 'std::vector<ThreadHandleMetadataPair>'))
-      end
-    end
-
     # Patch expo-device UIDevice.swift: TARGET_OS_SIMULATOR 宏在 Xcode 16+ Swift 中不可见，改用 targetEnvironment 条件编译
     uid_device_swift = File.join(__dir__, '../node_modules/expo-device/ios/UIDevice.swift')
     if File.exist?(uid_device_swift)

@@ -1,5 +1,7 @@
 # SceneGo — Expo (React Native) 项目管理与技术落地规划
 
+> **重要更新（2026-08-03）**：产品决策改为**用户主动触发生成表达卡**（不做自动触发/地理围栏/传感器感知）。技术选型表已按实际实现修订；下方 Sprint 甘特图与任务拆解为初版规划（2026-07），Sprint 2「智能场景感知引擎」已取消。
+
 ## 1. 技术选型与 Expo 模块生态 (Expo Ecosystem Setup)
 
 SceneGo 采用 **Expo (React Native)** 作为跨端移动前端开发框架，兼顾 iOS / Android 的高帧率动画与低功耗端侧感知能力。
@@ -8,13 +10,15 @@ SceneGo 采用 **Expo (React Native)** 作为跨端移动前端开发框架，�
 
 | 功能模块 | Expo / RN 依赖库 | 作用与技术实施细则 |
 | :--- | :--- | :--- |
-| **路由与导航** | `expo-router` | 基于文件系统的极速路由，支持全屏 Modal (大字卡闪示) 与 Stack 切换 |
-| **地理围栏与位置** | `expo-location` | 提供后台位置跟踪 (`startLocationUpdatesAsync`) 与低功耗 Geofence 监听 |
-| **运动传感器** | `expo-sensors` | 读取 Accelerometer / Gyroscope 辅助判断静止、步行、乘车状态 |
+| **页面与导航** | 自定义状态驱动 Modal 栈（`App.tsx`） | 单页应用 + 全屏 Modal（大字卡/相机取景/弹窗），无路由库依赖 |
+| **位置上下文（一次性）** | `expo-location` | 前台单次定位 + 逆地理编码（`getPlaceContext`，5 分钟缓存），用于国家/语言/安全卡；不监听、不自动触发 |
 | **大字卡高亮闪示** | `expo-keep-awake` | 调出 Flash Card 大字卡时强行保持屏幕常亮与最高亮度提升 |
 | **本地语音发音** | `expo-speech` | 支持系统级离线 TTS 朗读当地语言（泰语、日语、英语等） |
-| **离线数据库** | `expo-sqlite` | 存储离线场景词库、小费规则图谱与闪示卡模版（无网可用） |
-| **高性能 UI / 动画** | `react-native-reanimated` | 0.1s 极速切出高对比度大字闪示卡弹窗，支持流畅滑动手势 |
+| **相机输入** | `expo-camera` | 取景与拍照（双击 SNAP 成卡），模拟器自动降级测试快照 |
+| **图片压缩** | `expo-image-manipulator` | 上传前压缩（最长边 1280px / JPEG 0.7） |
+| **文本识别** | `react-native-text-recognition` | 端侧 OCR 备选路径 |
+| **端侧模型（可选）** | `llama.rn` / `whisper.rn` | 本地 Qwen2.5-0.5B 匹配 / Whisper-Tiny 转写，离线兜底 |
+| **本地存储** | AsyncStorage + `expo-secure-store` | 会话/笔记/场景包缓存；API Key 存 iOS Keychain |
 | **构建与热更新** | `eas-build` / `eas-update` | 使用 EAS CI/CD 流水线实现云端打包与场景卡/防坑规则 OTA 热更新 |
 
 ---
@@ -48,12 +52,9 @@ gantt
     *   配置 Zustand / Redux Toolkit 状态管理（当前场景、全屏闪示状态、用户语言偏好）。
 *   **交付物**：可运行的 App 框架与静态大字闪示卡 Demo。
 
-#### 🔷 Sprint 2: 智能场景感知引擎 (Sensing & Geofencing)
-*   **任务**：
-    *   集成 `expo-location`，实现后台低功耗地理围栏监听 (Bangkok / Tokyo 热门机场/车站围栏)。
-    *   结合 `expo-sensors` 的速度与加速度判断逻辑（静止/步行/车速识别）。
-    *   编写场景推理适配器：识别当前是在机场打车、餐厅点餐还是退税柜台。
-*   **交付物**：移动端可精准触发 `AIRPORT_TAXI` / `DINING_ORDER` 等场景事件流。
+#### 🔷 Sprint 2: 智能场景感知引擎 (Sensing & Geofencing) —— 已取消
+*   **取消原因（2026-08-03 产品决策）**：不做自动触发生成卡片。自动感知依赖 geofence 精度、后台耗电且 AI 成本不可预期；用户主动触发更可控、更精准、成本可预期。
+*   **实际替代**：主动触发管线（CAM 双击拍照 / MIC 语音 / 文字 → 本地词库匹配 + VLM 动态卡生成）已随 Sprint 3 交付。
 
 #### 🔷 Sprint 3: 闪示卡与多语言表达系统 (Flash Card & Template Engine)
 *   **任务**：
@@ -73,7 +74,7 @@ gantt
 *   **任务**：
     *   使用 `eas-build` 构建 iOS (.ipa) 与 Android (.aab) 安装包。
     *   配置 `eas-update` 接入 OTA 热更新，支持无缝推送新的场景卡与避坑规则。
-    *   进行真实手机续航与耗电量测试（确保后台 Geofence 不异常耗电）。
+    *   进行真机耗电与发热测试（相机取景、语音转写、定位场景）。
     *   App Store & Google Play 开发者账号配置与提交审核。
 *   **交付物**：正式发布 MVP 版本。
 
@@ -81,9 +82,9 @@ gantt
 
 ## 3. 研发质量保证与风险控制 (Quality & Risk Control)
 
-1.  **后台功耗风险控制 (Battery & Background Throttling)**：
-    *   *策略*：iOS/Android 对后台 GPS 非常敏感。避免使用持续高精度 GPS，优先使用基于 Cell ID / WiFi 的 Geofence 监听；只有进入目标围栏后才开启最高精度定位。
+1.  **AI 网络依赖与成本控制 (Network & AI Cost)**：
+    *   *策略*：核心表达离线可用（内嵌场景包词库 + 端侧模型兜底）；AI 调用走可配网关（P0-1 代理：配额/熔断），未配置 Key 时纯本地匹配不中断。
 2.  **离线体验保证 (Zero-Network Policy)**：
     *   *策略*：离线场景词库与大字卡模版通过 `expo-sqlite` 预置于 App 包内，所有核心渲染逻辑 100% 不依赖网络 API。
-3.  **场景触发误报防范 (False Positive Prevention)**：
-    *   *策略*：增加运动状态与时间窗条件校验（例如：仅当在机场且速度 $<5\text{km/h}$ 停留时间 $>60$ 秒才触发打车卡），避免快速通过时不必要切屏。
+3.  **场景误归类防范 (Misclassification Prevention)**：
+    *   *策略*：双引擎互检（本地词库 + VLM），未命中兜底通用卡；卡面提供「AI 解读」多轮追问人工纠错；后续埋点（P1-8）度量场景识别精准率（OMTM）。

@@ -1,13 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
-import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
+import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { CameraPreviewBox } from './src/components/CameraPreviewBox';
-import { CaptureDock } from './src/components/CaptureDock';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
-import { ControlBar } from './src/components/ControlBar';
 import { QuickNotesModal } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { CountrySelectModal } from './src/components/CountrySelectModal';
@@ -17,42 +15,34 @@ import { PluginSelectorModal } from './src/components/PluginSelectorModal';
 import { ApiLogModal } from './src/components/ApiLogModal';
 import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
+import { ChatPage } from './src/components/ChatPage';
+import { ChatInputBar } from './src/components/ChatInputBar';
+import { TabBar, TabKey } from './src/components/TabBar';
+import { CardStackPage } from './src/components/CardStackPage';
+import { NotesPage } from './src/components/NotesPage';
+import { MorePage } from './src/components/MorePage';
+import { ChatMessage } from './src/core/types';
 import { NativeSpeech } from './src/utils/NativeSpeech';
-import { scenarioToCard } from './src/utils/cardBuilder';
-import { getLocationContext, getPlaceContext, PlaceContext } from './src/utils/locationContext';
-import { compressImage } from './src/utils/imageCompress';
-import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore';
-import { loadUserProfile, saveUserProfile, UserProfile } from './src/utils/userProfile';
+import { PlaceContext } from './src/utils/locationContext';
+import { SavedCountry } from './src/utils/countryStore';
+import { UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
 import { modelManager } from './src/utils/ModelManager';
+import { initPack } from './src/packs/packManager';
+import { useStore } from 'zustand';
+import { cardStackStore, TAP_TALK_CARD } from './src/core/cardStackStore';
+import { chatSessionStore, messagesToTurns } from './src/core/chatSession';
+import { expressionEngine } from './src/core/expressionEngine';
+import { speechController } from './src/core/speechController';
+import { countryController } from './src/core/countryController';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
-import * as Sentry from '@sentry/react-native';
 import { useFonts } from 'expo-font';
-import { COLORS, FONT } from './src/theme/tokens';
+import { COLORS, FONT, LAYOUT } from './src/theme/tokens';
 
-Sentry.init({
-  dsn: 'https://71913c9b41554c4dd80d559db168205a@o4511835504574464.ingest.us.sentry.io/4511835559428096',
-  sendDefaultPii: true,
-  enableAutoSessionTracking: true,
-  tracesSampleRate: 1.0,
-  debug: __DEV__,
-});
+// Tap&Talk 兜底卡定义已移至 src/core/cardStackStore（TAP_TALK_CARD）
 
-// Tap&Talk 兜底卡：始终存在于卡栈末尾，动态卡缺失时的默认表达入口
-const TAP_TALK_CARD: CardData = {
-  id: 'tap-talk',
-  categoryTag: '通用 / 双向语音',
-  locationName: '当前位置',
-  title: 'Tap & Talk 通用表达',
-  targetText: '按住麦克风说话，说出需求即可生成当地语言表达卡',
-  phonetic: '',
-  subText: '或拍摄眼前场景，一键生成表达卡递给当地人',
-  localTip: '说清诉求（如：我要打车 / 我对花生过敏），卡片会按当地语言生成。',
-  languageCode: 'zh-CN',
-};
-
-export default Sentry.wrap(function App() {
+export default function App() {
   // 字体加载：未就绪前保持启动画面（注意：必须放在所有 hooks 之后提前返回，避免 hooks 数量跳变崩溃）
   const [fontsLoaded] = useFonts({
     'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -66,7 +56,27 @@ export default Sentry.wrap(function App() {
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
   const [liveTranscript, setLiveTranscript] = useState<string>('');
-  const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
+  // V2：底部四 Tab（默认对话）
+  const [activeTab, setActiveTab] = useState<TabKey>('chat');
+  // V2：点表达卡 → 全屏大字卡覆盖层
+  const [fullscreenCard, setFullscreenCard] = useState<CardData | null>(null);
+  const isCardVisible = useStore(cardStackStore, (s) => s.visible);
+  const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
+
+  useEffect(() => {
+    const showSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillShow' : 'keyboardDidShow',
+      () => setIsKeyboardVisible(true)
+    );
+    const hideSub = Keyboard.addListener(
+      Platform.OS === 'ios' ? 'keyboardWillHide' : 'keyboardDidHide',
+      () => setIsKeyboardVisible(false)
+    );
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, []);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
@@ -78,17 +88,14 @@ export default Sentry.wrap(function App() {
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
   const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
   const [processingLabel, setProcessingLabel] = useState<string | null>(null);
-  // 快照多轮对话历史（首条为场景解读，后续为追问问答）
-  const [chatTurns, setChatTurns] = useState<ChatTurn[]>([]);
-  const chatTurnsRef = useRef<ChatTurn[]>([]);
-  // 当前会话 id：新快照时重建，追问时更新同一会话
-  const sessionIdRef = useRef<string | null>(null);
-  // 场景结果 ref 副本（持久化/追问时读取最新值）
-  const scenarioResultRef = useRef<ScenarioResult | null>(null);
+  // 快照对话流（首条为场景解读，后续为追问问答）——状态由 chatSessionStore 管理（V2 ChatMessage[]）
+  const chatMessages = useStore(chatSessionStore, (s) => s.messages);
+  const sessionId = useStore(chatSessionStore, (s) => s.sessionId);
+  const scenarioResult = useStore(chatSessionStore, (s) => s.scenario);
 
-  // 表达卡栈：动态生成卡在前，Tap&Talk 兑底卡恒在末尾；cardIndex 指向当前展示卡
-  const [cards, setCards] = useState<CardData[]>([TAP_TALK_CARD]);
-  const [cardIndex, setCardIndex] = useState<number>(0);
+  // 表达卡栈（动态卡在前，Tap&Talk 兜底卡恒在末尾）——状态由 cardStackStore 管理
+  const cards = useStore(cardStackStore, (s) => s.cards);
+  const cardIndex = useStore(cardStackStore, (s) => s.index);
   // 当前国家/地区（缓存的用户选择）与 GPS 检测位置；用户档案（国籍+语言）
   const [currentCountry, setCurrentCountry] = useState<SavedCountry | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -123,7 +130,9 @@ export default Sentry.wrap(function App() {
   const pendingSnapshotRef = useRef(false);
 
   // 启动时探测本地模型：已下载的 Qwen/Whisper 自动注册并激活，无文件则静默跳过（不影响云端主链路）
+  // 同时初始化场景包：应用缓存内容（离线可用），后台尝试远程下发（未配置时保持内嵌默认包）
   useEffect(() => {
+    initPack().catch((err) => console.warn('[ScenePack] 初始化失败:', err));
     modelManager.initializeExistingModels().then((loaded) => {
       if (loaded) {
         console.log('[Models] 本地模型已加载:', pluginManager.getActiveMatcherId());
@@ -152,22 +161,21 @@ export default Sentry.wrap(function App() {
     };
   }, []);
 
-  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流并持久化 */
+  /** 云端 VLM 多轮追问（业务在 expressionEngine + chatSessionStore）：回答追加对话流；表达需求自动成卡 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
     setProcessingLabel('正在回答...');
     try {
-      const cloudVlm = pluginManager.getCloudVlmPlugin();
-      const reply = await cloudVlm.askFollowUp(imageUri, userPrompt, chatTurnsRef.current);
-
-      const newTurns = [
-        ...chatTurnsRef.current,
-        { role: 'user' as const, content: userPrompt },
-        { role: 'assistant' as const, content: reply },
-      ];
-      chatTurnsRef.current = newTurns;
-      setChatTurns(newTurns);
-      if (sessionIdRef.current) {
-        persistSession(sessionIdRef.current, imageUri, scenarioResultRef.current, newTurns);
+      const result = await expressionEngine.askFollowUp(
+        imageUri,
+        userPrompt,
+        messagesToTurns(chatSessionStore.getState().messages),
+      );
+      chatSessionStore.getState().appendFollowUp(userPrompt, result.text, result.card);
+      if (result.card) {
+        cardStackStore.getState().add({
+          ...result.card,
+          sessionId: chatSessionStore.getState().sessionId ?? undefined,
+        });
       }
     } catch (err) {
       console.warn('[AI Follow-up Error]:', err);
@@ -176,24 +184,11 @@ export default Sentry.wrap(function App() {
     }
   };
 
-  /** 持久化当前快照会话（显式传参，避免 async 闭包读到过期 state） */
-  const persistSession = (
-    id: string,
-    imageUri: string | null,
-    scenarioResult: ScenarioResult | null,
-    turns: ChatTurn[],
-  ) => {
-    sessionStore.save(sessionStore.build(id, imageUri, scenarioResult, turns));
-  };
-
-  /** 恢复历史会话：回填全部状态，待历史列表 dismiss 完成后打开快照弹窗 */
+  /** 恢复历史会话（业务状态由 chatSessionStore 回填）：待历史列表 dismiss 完成后打开快照弹窗 */
   const restoreSession = (s: SavedSession) => {
-    sessionIdRef.current = s.id;
-    scenarioResultRef.current = s.scenarioResult;
-    chatTurnsRef.current = s.turns;
+    chatSessionStore.getState().restore(s);
     setActiveScenarioResult(s.scenarioResult);
     setPendingSnapshotUri(s.imageUri);
-    setChatTurns(s.turns);
     // 历史列表必然开着：先关，等 dismiss 动画完成再 present 快照
     pendingSnapshotRef.current = true;
     setIsHistoryOpen(false);
@@ -226,7 +221,7 @@ export default Sentry.wrap(function App() {
     setSessions(await sessionStore.getAll());
   };
 
-  /** CAM 双击：拍照 → 提取信息 → 直接生成表达卡（卡片优先，解读降级为卡面入口） */
+  /** CAM 双击：拍照（设备层）→ expressionEngine 识别 → 新会话 + 表达卡入栈 */
   const handleCaptureFrame = async () => {
     if (!isCameraActive) return;
     setProcessingLabel('正在提取信息并生成卡片...');
@@ -241,10 +236,6 @@ export default Sentry.wrap(function App() {
         } catch (camErr) {
           console.log('[Camera] 真实摄像头捕获失败 (模拟器环境)，启用模拟快照降级:', camErr);
         }
-        // 上传前压缩（最长边 1280px + JPEG 0.7），弱网体验优化
-        if (photoUri) {
-          photoUri = await compressImage(photoUri);
-        }
       }
 
       // 模拟器/测试环境降级保底：若无法取得真实硬件快照，生成测试快照数据
@@ -256,30 +247,16 @@ export default Sentry.wrap(function App() {
       setIsCameraActive(false);
       setIsCameraReady(false);
 
-      // 触发插件管线: 场景识别 + 语义匹配（携带位置上下文）
+      // 识别管线（压缩/OCR/匹配/成卡）在 expressionEngine
       console.log('[Plugins] 启动插件管线，处理图像快照...');
-      const locationCtx = await getLocationContext();
-      const result = await pluginManager.processImageSnapshot(photoUri, locationCtx ?? undefined);
-      console.log('[Plugin OCR 结果]:', result.ocr.rawText.slice(0, 100));
-      console.log('[Plugin 场景匹配结果]:', result.scenario.title);
+      const { scenario, card } = await expressionEngine.processImage(photoUri);
+      console.log('[Plugin 场景匹配结果]:', scenario.title);
 
-      setActiveScenarioResult(result.scenario);
+      setActiveScenarioResult(scenario);
       setPendingSnapshotUri(photoUri);
-      scenarioResultRef.current = result.scenario;
-      // 新会话：首条消息为场景解读，并持久化
-      const initialTurns: ChatTurn[] = [
-        { role: 'assistant', content: result.scenario.translatedText },
-      ];
-      const newSessionId = Date.now().toString();
-      sessionIdRef.current = newSessionId;
-      chatTurnsRef.current = initialTurns;
-      setChatTurns(initialTurns);
-      persistSession(newSessionId, photoUri, result.scenario, initialTurns);
-      // 直接成卡：场景解读 → 表达卡，置顶卡栈（解读不再自动弹窗，走卡面「AI 解读」入口）
-      addExpressionCard({
-        ...scenarioToCard(result.scenario, locationCtx ?? '当前位置'),
-        sessionId: newSessionId,
-      });
+      // 新会话：首条消息为场景解读并持久化；表达卡入栈（带会话 id，卡面可进追问）
+      const newSessionId = chatSessionStore.getState().start(photoUri, scenario);
+      cardStackStore.getState().add({ ...card, sessionId: newSessionId });
     } catch (err) {
       console.warn('Camera snapshot error:', err);
       setIsCameraActive(false);
@@ -291,7 +268,7 @@ export default Sentry.wrap(function App() {
 
   /** 卡面「AI 解读」入口：仅最新快照会话可进（状态已在内存） */
   const handleOpenSnapshotFromCard = () => {
-    if (!currentCard.sessionId || currentCard.sessionId !== sessionIdRef.current) return;
+    if (!currentCard.sessionId || currentCard.sessionId !== sessionId) return;
     setIsSnapshotModalOpen(true);
   };
 
@@ -299,14 +276,20 @@ export default Sentry.wrap(function App() {
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
-  /** 启动麦克风（MIC OFF 态点按） */
+  /** 启动麦克风（MIC OFF 态点按）——听写能力在 speechController */
   const handleStartMic = async () => {
+    // Android 无原生听写模块：明确降级提示，避免启动失败的黑盒体验
+    if (!speechController.isSupported()) {
+      micActiveRef.current = false;
+      Alert.alert('语音转写暂不可用', speechController.unsupportedReason());
+      return;
+    }
     // 期望状态先行，杜绝授权异步窗口内的重复触发
     micActiveRef.current = true;
     liveTranscriptRef.current = '';
     setIsMicActive(true);
     setLiveTranscript('正在开启原生听写，请说话...');
-    const started = await NativeSpeech.start('zh-CN');
+    const started = await speechController.start();
     if (!started.ok) {
       // 启动失败：若用户已快速关回（micActiveRef 已 false）则静默，否则回滚并展示真实原因
       if (micActiveRef.current) {
@@ -321,30 +304,22 @@ export default Sentry.wrap(function App() {
   const stopMic = async (): Promise<string> => {
     micActiveRef.current = false;
     setIsMicActive(false);
-    await NativeSpeech.stop();
+    await speechController.stop();
     const finalTranscript = liveTranscriptRef.current;
     liveTranscriptRef.current = '';
     setLiveTranscript('');
     return finalTranscript;
   };
 
-  /** 麦克风单击：停止转录，不做任何操作 */
-  const handleMicSingleTap = async () => {
-    await stopMic();
-  };
 
-  /** 麦克风双击：停止转录，理解意图生成表达卡（双击即显式意图信号） */
+  /** 麦克风双击：停止转录 → speechController 意图处理（成卡 + 归档笔记） */
   const handleMicDoubleTap = async () => {
     const transcript = await stopMic();
     if (!transcript || transcript.includes('正在开启')) return;
-    handleAddNote(transcript, 'VOICE');
     setProcessingLabel('正在理解意图并生成表达卡...');
     try {
-      const locationCtx = await getLocationContext();
-      const result = await pluginManager.generateCardFromText(transcript, locationCtx ?? undefined);
-      if (result && result.targetText) {
-        addExpressionCard(scenarioToCard(result, '当前位置'));
-      }
+      await speechController.handleTranscript(transcript);
+      setNotes(await noteStore.getAll());
     } catch (err) {
       console.warn('[Voice Card Error]:', err);
     } finally {
@@ -352,16 +327,59 @@ export default Sentry.wrap(function App() {
     }
   };
 
-  const handleToggleCamera = () => {
-    if (!isCameraActive) {
-      setIsCameraReady(false);
-      setIsCameraActive(true);
-      setIsCardVisible(false);
+  /** V2 🎙️ 单击切换：开始 / 停止（停止后自动成卡 + 归档） */
+  const handleMicToggle = async () => {
+    if (isMicActive) {
+      await stopMicAndProcess();
     } else {
-      setIsCameraReady(false);
-      setIsCameraActive(false);
+      await handleStartMic();
     }
   };
+
+  /** 停止听写并处理转录（成卡 + 归档笔记） */
+  const stopMicAndProcess = async () => {
+    const transcript = await stopMic();
+    if (!transcript || transcript.includes('正在开启')) return;
+    setProcessingLabel('正在理解意图并生成表达卡...');
+    try {
+      await speechController.handleTranscript(transcript);
+      setNotes(await noteStore.getAll());
+    } catch (err) {
+      console.warn('[Voice Card Error]:', err);
+    } finally {
+      setProcessingLabel(null);
+    }
+  };
+
+  /** V2 输入框发送：有快照会话 → 追问；否则文本直接生成表达卡 */
+  const handleSend = async (text: string) => {
+    const s = chatSessionStore.getState();
+    if (s.sessionId && s.imageUri) {
+      await sendSnapshotAndPromptToAI(s.imageUri, text);
+      return;
+    }
+    setProcessingLabel('正在生成表达卡...');
+    try {
+      const card = await expressionEngine.generateCard(text);
+      const id = chatSessionStore.getState().sessionId;
+      if (card) {
+        const withSession = { ...card, sessionId: id ?? undefined };
+        cardStackStore.getState().add(withSession);
+        chatSessionStore.getState().appendCard(withSession);
+      } else {
+        chatSessionStore.getState().appendSystem('未识别到明确表达需求，请说得更具体（如：我要打车 / 我对花生过敏）。');
+      }
+    } finally {
+      setProcessingLabel(null);
+    }
+  };
+
+  /** V2 点表达卡消息 → 全屏大字卡覆盖层 */
+  const handleCardPress = (m: ChatMessage & { kind: 'card' }) => {
+    if (m.card) setFullscreenCard(m.card);
+  };
+
+
 
   const currentCard = cards[cardIndex] ?? TAP_TALK_CARD;
 
@@ -373,59 +391,33 @@ export default Sentry.wrap(function App() {
   }, []);
 
   const handleNextScenario = () => {
-    setCardIndex((prev) => (prev + 1) % cards.length);
+    cardStackStore.getState().next();
   };
 
-  /** 新表达卡入栈：去重后置顶展示，并确保卡面可见 */
-  const addExpressionCard = (card: CardData) => {
-    setCards((prev) => [card, ...prev.filter((c) => c.id !== card.id)]);
-    setCardIndex(0);
-    setIsCardVisible(true);
-  };
-
-  /** 当前位置预设安全卡（卡栈第一张） */
-  const buildSafetyCard = (country: SavedCountry): CardData => {
-    const s = getCountrySafety(country.code)!;
-    const city = detectedPlace?.city ?? '';
-    return {
-      id: `safety-${country.code}`,
-      categoryTag: '本地安全指南',
-      locationName: `${country.nameZh}${city ? ' · ' + city : ''}`,
-      title: `${country.nameZh}安全与实用信息`,
-      targetText: s.sos.local,
-      phonetic: s.sos.phonetic,
-      subText: `紧急电话：警察 ${s.emergency.police} · 急救 ${s.emergency.ambulance} · 火警 ${s.emergency.fire}${s.emergency.touristPolice ? ` · 旅游警察 ${s.emergency.touristPolice}` : ''}`,
-      localTip: `使领馆领保 ${s.embassy} · ${s.tipping}`,
-      languageCode: s.langCode,
-    };
-  };
-
+  /** 当前位置预设安全卡（countryController 提供） */
   const ensureSafetyCard = (country: SavedCountry) => {
-    if (!getCountrySafety(country.code)) return;
-    addExpressionCard(buildSafetyCard(country));
+    countryController.ensureSafetyCard(country, detectedPlace?.city);
   };
 
-  /** 确认国家选择（首次启动/手动切换）：保存档案 + 缓存国家 + 生成安全卡 */
-  const handleCountryConfirm = (code: string, profile: UserProfile) => {
-    const s = getCountrySafety(code);
+  /** 确认国家选择（首次启动/手动切换）：保存档案 + 缓存国家 + 生成安全卡（业务在 countryController） */
+  const handleCountryConfirm = async (code: string, profile: UserProfile) => {
     setUserProfile(profile);
-    saveUserProfile(profile);
-    if (!s) {
-      setIsCountrySelectOpen(false);
-      return;
-    }
-    const saved: SavedCountry = { code, nameZh: s.nameZh, savedAt: Date.now() };
-    setCurrentCountry(saved);
-    saveCountry(saved);
-    ensureSafetyCard(saved);
+    const ok = await countryController.confirm(code, profile, detectedPlace?.city);
     setIsCountrySelectOpen(false);
+    if (ok) {
+      const s = getCountrySafety(code);
+      setCurrentCountry(s ? { code, nameZh: s.nameZh, savedAt: Date.now() } : null);
+    }
   };
 
   const handleSwitchCountry = () => {
     if (!switchPrompt || !detectedPlace?.countryCode) return;
     setSwitchPrompt(null);
     // 切换国家时保留当前档案
-    handleCountryConfirm(detectedPlace.countryCode, userProfile ?? { nationality: 'CN', language: 'zh-CN' });
+    handleCountryConfirm(
+      detectedPlace.countryCode,
+      userProfile ?? { nationality: 'CN', language: 'zh-CN' },
+    );
   };
 
   const handleKeepCountry = () => {
@@ -434,32 +426,21 @@ export default Sentry.wrap(function App() {
     ensureSafetyCard(currentCountry);
   };
 
-  // 国家流程：首次启动选择（GPS 检测高亮）；再次打开 GPS 与缓存比对，不同则询问
+  // 国家流程：首次启动选择（GPS 检测高亮）；再次打开 GPS 与缓存比对，不同则询问（业务在 countryController.init）
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const cached = await loadCountry();
-      const profile = await loadUserProfile();
-      const place = await getPlaceContext();
+      const result = await countryController.init();
       if (cancelled) return;
-      setUserProfile(profile);
-      setDetectedPlace(place);
-      if (!cached) {
+      setUserProfile(result.profile);
+      setDetectedPlace(result.place);
+      if (!result.cached) {
         // 首次启动（或档案/国家未设置）：打开选择（检测结果高亮）
         setIsCountrySelectOpen(true);
         return;
       }
-      setCurrentCountry(cached);
-      if (place?.countryCode && place.countryCode !== cached.code) {
-        const detected = getCountrySafety(place.countryCode);
-        if (detected) {
-          setSwitchPrompt({ detectedName: detected.nameZh });
-        } else {
-          ensureSafetyCard(cached);
-        }
-      } else {
-        ensureSafetyCard(cached);
-      }
+      setCurrentCountry(result.cached);
+      setSwitchPrompt(result.switchPrompt);
     })();
     return () => {
       cancelled = true;
@@ -502,140 +483,151 @@ export default Sentry.wrap(function App() {
         <StatusBar barStyle="light-content" />
 
         <View style={styles.mainLayout}>
-          {/* Top Header */}
-          <View style={styles.topHeader}>
-            <Text style={styles.brandTitle}>SCENEGO</Text>
-            <View style={styles.statusPill}>
-              <View style={[styles.statusDot, isMicActive ? styles.dotGreen : styles.dotGray]} />
-              <Text style={styles.statusText}>{isMicActive ? 'LIVE' : 'IDLE'}</Text>
-            </View>
-          </View>
-
-          {/* 当前位置栏：GPS 实际位置；与设置国家不一致时并排展示 */}
-          <TouchableOpacity
-            style={styles.locationBar}
-            onPress={() => setIsCountrySelectOpen(true)}
-            activeOpacity={0.75}
-          >
-            <View style={[styles.locationDot, currentCountry ? styles.dotGreen : styles.dotAmber]} />
-            <Text style={styles.locationText} numberOfLines={1}>
-              {(() => {
-                const gpsName =
-                  detectedPlace && (detectedPlace.country || detectedPlace.city)
-                    ? [detectedPlace.country, detectedPlace.city].filter(Boolean).join(' · ')
-                    : null;
-                const selectedName = currentCountry?.nameZh ?? '未选择国家';
-                const mismatch =
-                  !!gpsName &&
-                  !!currentCountry &&
-                  detectedPlace?.countryCode !== currentCountry.code;
-                return mismatch ? `位置 ${gpsName} · 设置 ${selectedName}` : selectedName;
-              })()}
-            </Text>
-            <Text style={styles.locationChange}>切换 ›</Text>
-          </TouchableOpacity>
-
-          {/* Processing Indicator */}
-          {processingLabel && (
-            <View style={styles.processingCard}>
-              <ActivityIndicator size="small" color="#4fc3f7" />
-              <Text style={styles.processingText}>{processingLabel}</Text>
-            </View>
-          )}
-
-          {/* Live Speech Transcript Banner：录音中常显；关闭后仅真实异常（失败/异常/错误）保留 */}
-          {isMicActive ||
-          (liveTranscript &&
-            (liveTranscript.includes('异常') ||
-              liveTranscript.includes('失败') ||
-              liveTranscript.includes('错误'))) ? (
-            <View style={styles.liveTranscriptCard}>
-              <View style={styles.liveHeaderRow}>
-                <Text style={styles.liveBadge}>
-                  {isMicActive ? '实时语音转录中' : '语音识别提示'}
-                </Text>
-                <View style={styles.liveHeaderRight}>
-                  {isMicActive && (
-                    <Animated.Text style={[styles.liveRecordingPulse, { opacity: pulseAnim }]}>
-                      REC
-                    </Animated.Text>
-                  )}
-                  {/* 异常提示可手动关闭 */}
-                  {!isMicActive && (
-                    <TouchableOpacity
-                      onPress={() => setLiveTranscript('')}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Text style={styles.liveCloseText}>关闭</Text>
-                    </TouchableOpacity>
-                  )}
+          {activeTab === 'chat' ? (
+            <KeyboardAvoidingView
+              style={styles.chatTabWrapper}
+              behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+            >
+              {/* Top Header */}
+              <View style={styles.topHeader}>
+                <Text style={styles.brandTitle}>SCENEGO</Text>
+                <View style={styles.statusPill}>
+                  <View style={[styles.statusDot, isMicActive ? styles.dotGreen : styles.dotGray]} />
+                  <Text style={styles.statusText}>{isMicActive ? 'LIVE' : 'IDLE'}</Text>
                 </View>
               </View>
-              <Text style={styles.liveTranscriptText}>
-                {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
-              </Text>
-            </View>
-          ) : null}
 
-          {/* Center Card / 内嵌取景 */}
-          <View style={styles.centerCardArea}>
-            {isCameraActive ? (
-              <CameraPreviewBox
-                cameraRef={cameraRef}
-                onCameraReady={() => setIsCameraReady(true)}
+              {/* 当前位置栏 */}
+              <TouchableOpacity
+                style={styles.locationBar}
+                onPress={() => setIsCountrySelectOpen(true)}
+                activeOpacity={0.75}
+              >
+                <View style={[styles.locationDot, currentCountry ? styles.dotGreen : styles.dotAmber]} />
+                <Text style={styles.locationText} numberOfLines={1}>
+                  {(() => {
+                    const gpsName =
+                      detectedPlace && (detectedPlace.country || detectedPlace.city)
+                        ? [detectedPlace.country, detectedPlace.city].filter(Boolean).join(' · ')
+                        : null;
+                    const selectedName = currentCountry?.nameZh ?? '未选择国家';
+                    const mismatch =
+                      !!gpsName &&
+                      !!currentCountry &&
+                      detectedPlace?.countryCode !== currentCountry.code;
+                    return mismatch ? `位置 ${gpsName} · 设置 ${selectedName}` : selectedName;
+                  })()}
+                </Text>
+                <Text style={styles.locationChange}>切换 ›</Text>
+              </TouchableOpacity>
+
+              {/* Processing Indicator */}
+              {processingLabel && (
+                <View style={styles.processingCard}>
+                  <ActivityIndicator size="small" color="#4fc3f7" />
+                  <Text style={styles.processingText}>{processingLabel}</Text>
+                </View>
+              )}
+
+              {/* V2 对话流 */}
+              <ChatPage
+                messages={chatMessages}
+                isRecording={isMicActive}
+                liveTranscript={liveTranscript}
+                onCardPress={handleCardPress}
               />
-            ) : isCardVisible ? (
-              <FlashCardView
-                card={currentCard}
-                currentIndex={cardIndex}
-                totalCards={cards.length}
-                onNextCard={handleNextScenario}
-                tipActionLabel={
-                  currentCard.id.startsWith('safety-')
-                    ? '安全信息'
-                    : currentCard.sessionId === sessionIdRef.current
-                      ? 'AI 解读'
-                      : undefined
-                }
-                onTipAction={
-                  currentCard.id.startsWith('safety-')
-                    ? () => setIsSafetyDetailOpen(true)
-                    : currentCard.sessionId === sessionIdRef.current
-                      ? handleOpenSnapshotFromCard
-                      : undefined
-                }
-              />
-            ) : (
-              <View style={styles.hiddenCardContainer}>
-                <Text style={styles.hiddenCardText}>CARD HIDDEN</Text>
+
+              {/* V2 输入栏 + Tab 栏（贴底，Safe 区在 bottomBar 内） */}
+              {/* V2 输入栏 + Tab 栏（键盘弹起时收起 TabBar 贴合键盘上沿） */}
+              <View style={[styles.bottomBar, isKeyboardVisible && styles.bottomBarKeyboard]}>
+                <ChatInputBar
+                  isRecording={isMicActive}
+                  onCamera={() => setIsCameraActive(true)}
+                  onMicToggle={handleMicToggle}
+                  onSend={handleSend}
+                />
+                {!isKeyboardVisible && <TabBar active={activeTab} onChange={setActiveTab} />}
               </View>
-            )}
-          </View>
-
-          {/* 卡片下方的输入双按钮：CAM 拍照 / MIC 说话 */}
-          <CaptureDock
-            isCameraActive={isCameraActive}
-            isMicActive={isMicActive}
-            onCamTap={handleToggleCamera}
-            onCamDoubleTap={handleCaptureFrame}
-            onCamSingleTap={() => {
-              // 单击：只退出取景，不拍照、不触发云端分析
-              setIsCameraReady(false);
-              setIsCameraActive(false);
-            }}
-            onMicTap={handleStartMic}
-            onMicDoubleTap={handleMicDoubleTap}
-            onMicSingleTap={handleMicSingleTap}
-          />
-
-          {/* Bottom Control Bar：仅状态开关与入口 */}
-          <ControlBar
-            isCardVisible={isCardVisible}
-            onToggleCard={() => setIsCardVisible(!isCardVisible)}
-            onOpenNotes={() => setIsNotesOpen(true)}
-            onOpenTools={() => setIsToolsOpen(true)}
-          />
+            </KeyboardAvoidingView>
+          ) : (
+            <>
+              {activeTab === 'stack' && (
+                <CardStackPage
+                  cards={cards}
+                  onCardPress={(card) => setFullscreenCard(card)}
+                  onDelete={(id) => cardStackStore.getState().remove(id)}
+                  onClear={() => cardStackStore.getState().clear()}
+                />
+              )}
+              {activeTab === 'notes' && (
+                <NotesPage notes={notes} onAddNote={handleAddNote} onDeleteNote={handleDeleteNote} />
+              )}
+              {activeTab === 'more' && (
+                <MorePage
+                  onOpenSafety={() => setIsSafetyDetailOpen(true)}
+                  onOpenHistory={handleOpenHistory}
+                  onOpenLogs={() => setIsLogsOpen(true)}
+                  onOpenSettings={() => setIsSettingsOpen(true)}
+                  onSwitchCountry={() => setIsCountrySelectOpen(true)}
+                />
+              )}
+              <View style={styles.bottomBar}>
+                <TabBar active={activeTab} onChange={setActiveTab} />
+              </View>
+            </>
+          )}
         </View>
+
+        {/* V2 全屏取景（输入栏 📷 调起；段 E 精化 SNAP 交互） */}
+        {isCameraActive ? (
+          <View style={styles.cameraOverlay}>
+            <View style={styles.cameraHeader}>
+              <Text style={styles.cameraBrand}>SCENEGO</Text>
+              <TouchableOpacity
+                style={styles.cameraCancel}
+                onPress={() => {
+                  setIsCameraReady(false);
+                  setIsCameraActive(false);
+                }}
+              >
+                <Text style={styles.cameraCancelText}>取消</Text>
+              </TouchableOpacity>
+            </View>
+            <Text style={styles.cameraHint}>对准菜单 / 标牌 / 售票机</Text>
+            <CameraPreviewBox cameraRef={cameraRef} onCameraReady={() => setIsCameraReady(true)} />
+            <TouchableOpacity style={styles.snapButton} onPress={handleCaptureFrame} activeOpacity={0.85}>
+              <Text style={styles.snapText}>SNAP</Text>
+              <Text style={styles.snapHint}>拍照即发送 · 单击取消</Text>
+            </TouchableOpacity>
+          </View>
+        ) : null}
+
+        {/* V2 全屏大字卡（点表达卡消息调起） */}
+        {fullscreenCard ? (
+          <View style={styles.fullscreenCardOverlay}>
+            <FlashCardView
+              card={fullscreenCard}
+              currentIndex={0}
+              totalCards={1}
+              onNextCard={() => {}}
+              tipActionLabel={
+                fullscreenCard.id.startsWith('safety-')
+                  ? '安全信息'
+                  : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
+                    ? 'AI 解读'
+                    : undefined
+              }
+              onTipAction={
+                fullscreenCard.id.startsWith('safety-')
+                  ? () => setIsSafetyDetailOpen(true)
+                  : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
+                    ? handleOpenSnapshotFromCard
+                    : undefined
+              }
+              onClose={() => setFullscreenCard(null)}
+            />
+          </View>
+        ) : null}
 
         <QuickNotesModal
           visible={isNotesOpen}
@@ -649,7 +641,7 @@ export default Sentry.wrap(function App() {
           visible={isSnapshotModalOpen}
           imageUri={pendingSnapshotUri}
           scenarioResult={activeScenarioResult}
-          turns={chatTurns}
+          turns={messagesToTurns(chatMessages)}
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
           onCollect={(content) => handleAddNote(content, 'CARD')}
@@ -708,7 +700,7 @@ export default Sentry.wrap(function App() {
       </SafeAreaView>
     </CameraBackground>
   );
-});
+}
 
 const styles = StyleSheet.create({
   safeArea: {
@@ -783,13 +775,15 @@ const styles = StyleSheet.create({
     lineHeight: 18,
     fontWeight: '500',
   },
+  chatTabWrapper: {
+    flex: 1,
+  },
   topHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 8,
+    paddingVertical: 10,
   },
   brandTitle: {
     fontFamily: FONT.monoBold,
@@ -800,48 +794,44 @@ const styles = StyleSheet.create({
   statusPill: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 6,
     backgroundColor: COLORS.bgCard,
     paddingHorizontal: 10,
-    paddingVertical: 4,
+    paddingVertical: 8,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
   },
   statusDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 6,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   dotGreen: {
-    backgroundColor: '#10b981',
+    backgroundColor: COLORS.accentGreen,
   },
   dotGray: {
     backgroundColor: COLORS.textMuted,
   },
   statusText: {
     fontFamily: FONT.mono,
-    color: COLORS.textSecondary,
+    color: COLORS.accentGreen,
     fontSize: 10,
-    letterSpacing: 0.8,
+    letterSpacing: 1,
   },
   locationBar: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 8,
     backgroundColor: COLORS.bgCard,
-    borderColor: COLORS.borderSubtle,
-    borderWidth: 1,
     borderRadius: 10,
     height: 39,
-    paddingHorizontal: 12,
+    paddingHorizontal: 14,
     marginHorizontal: 20,
-    marginTop: 8,
+    marginTop: 4,
   },
   locationDot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    marginRight: 7,
+    width: 8,
+    height: 8,
+    borderRadius: 4,
   },
   locationText: {
     fontFamily: FONT.semibold,
@@ -871,5 +861,102 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '700',
     letterSpacing: 1.5,
+  },
+  // V2：底部输入栏 + Tab 栏（Safe 区）
+  bottomBar: {
+    paddingBottom: LAYOUT.bottomSafeArea,
+    backgroundColor: COLORS.bgBar,
+  },
+  bottomBarKeyboard: {
+    paddingBottom: 0,
+  },
+  tabPlaceholder: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  tabPlaceholderText: {
+    color: COLORS.textMuted,
+    fontSize: 14,
+  },
+  // V2：全屏取景覆盖层
+  cameraOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: '#000000',
+    zIndex: 20,
+  },
+  cameraHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingTop: 52,
+    paddingBottom: 12,
+  },
+  cameraBrand: {
+    color: '#ffffff',
+    fontSize: 16,
+    fontWeight: '800',
+    letterSpacing: 2,
+    fontFamily: FONT.monoBold,
+  },
+  cameraCancel: {
+    backgroundColor: COLORS.bgCardLight,
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+  },
+  cameraCancelText: {
+    color: COLORS.textSecondary,
+    fontSize: 13,
+  },
+  cameraHint: {
+    color: '#4a4a52',
+    fontSize: 14,
+    textAlign: 'center',
+    paddingBottom: 12,
+  },
+  snapButton: {
+    marginHorizontal: 20,
+    height: 64,
+    borderRadius: 12,
+    backgroundColor: COLORS.redBg,
+    borderWidth: 1,
+    borderColor: COLORS.accentRed,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 34,
+  },
+  snapText: {
+    color: COLORS.accentRed,
+    fontSize: 18,
+    fontWeight: '800',
+    letterSpacing: 2,
+    fontFamily: FONT.monoBold,
+  },
+  snapHint: {
+    color: COLORS.textTertiary,
+    fontSize: 9,
+  },
+  // V2：全屏大字卡覆盖层
+  fullscreenCardOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    backgroundColor: COLORS.bgPrimary,
+    zIndex: 30,
+    paddingTop: 52,
+    paddingHorizontal: 20,
+  },
+  fullscreenClose: {
+    alignSelf: 'center',
+    backgroundColor: COLORS.bgCardLight,
+    borderRadius: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    marginBottom: 34,
+  },
+  fullscreenCloseText: {
+    color: COLORS.textSecondary,
+    fontSize: 12,
+    fontWeight: '700',
   },
 });

@@ -4,7 +4,7 @@
  * 动态卡优先使用 VLM 输出的当地语言字段；缺失时逐级降级，保证卡面不为空。
  */
 import { ScenarioResult } from '../plugins/types';
-import { CardData } from '../components/FlashCardView';
+import { CardData } from '../core/types';
 
 export function scenarioToCard(s: ScenarioResult, location: string): CardData {
   const fallbackText =

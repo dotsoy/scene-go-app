@@ -1,0 +1,66 @@
+/**
+ * 表达引擎：场景识别与表达卡生成的业务核心（与 UI 无关）。
+ * 输入（图片/文本/追问）→ 解读或表达卡；所有 AI/本地匹配经由 plugins 层。
+ */
+import { pluginManager } from '../plugins/PluginManager';
+import { parseVlmScenarioResult } from '../plugins/ocr/CloudVlmOcrPlugin';
+import { ChatTurn, ScenarioResult } from '../plugins/types';
+import { getLocationContext } from '../utils/locationContext';
+import { compressImage } from '../utils/imageCompress';
+import { scenarioToCard } from '../utils/cardBuilder';
+import { CardData } from './types';
+
+export interface ProcessImageResult {
+  scenario: ScenarioResult;
+  card: CardData;
+}
+
+export interface AskFollowUpResult {
+  text: string;
+  /** 追问中表达沟通需求时 VLM 返回表达卡，命中则附带卡片数据 */
+  card?: CardData;
+}
+
+export const expressionEngine = {
+  /**
+   * 拍照管线：压缩 → OCR/匹配 → 解读 + 表达卡。
+   * （照片捕获本身属设备/UI 层，调用方传入 uri；位置上下文内部获取）
+   */
+  async processImage(photoUri: string, location?: string): Promise<ProcessImageResult> {
+    const uri = await compressImage(photoUri);
+    const locationCtx = location ?? (await getLocationContext()) ?? undefined;
+    const result = await pluginManager.processImageSnapshot(uri, locationCtx);
+    return {
+      scenario: result.scenario,
+      card: scenarioToCard(result.scenario, locationCtx ?? '当前位置'),
+    };
+  },
+
+  /** 文本驱动的动态表达卡：一句话需求（语音转写/手打）→ 表达卡 */
+  async generateCard(text: string, location?: string): Promise<CardData | null> {
+    const result = await pluginManager.generateCardFromText(text, location);
+    if (!result) return null;
+    return scenarioToCard(result, location ?? '当前位置');
+  },
+
+  /**
+   * 多轮追问：携带会话历史，回答追加到对话流；
+   * 用户表达沟通需求时自动生成表达卡（解析 VLM 卡片 JSON，命中 targetText 即成卡）。
+   */
+  async askFollowUp(
+    imageUri: string,
+    question: string,
+    history: ChatTurn[],
+  ): Promise<AskFollowUpResult> {
+    const reply = await pluginManager.getCloudVlmPlugin().askFollowUp(imageUri, question, history);
+    const parsed = parseVlmScenarioResult(reply);
+    if (parsed && parsed.targetText) {
+      const locationCtx = await getLocationContext();
+      return {
+        text: `${reply}\n\n✅ 已为你生成表达卡「${parsed.title || '场景表达'}」，关闭对话即可查看。`,
+        card: scenarioToCard(parsed, locationCtx ?? '当前位置'),
+      };
+    }
+    return { text: reply };
+  },
+};

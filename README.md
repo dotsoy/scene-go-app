@@ -1,6 +1,6 @@
 # SceneGo
 
-Zero-search, context-aware travel assistance for overseas trips. Point the camera at a menu, sign, or ticket machine — SceneGo reads the scene, explains it, and hands you a high-contrast local-language flash card to show a driver, cashier, or police officer.
+On-demand, context-aware travel assistance for overseas trips. Point the camera at a menu, sign, or ticket machine — or say what you need — SceneGo matches the scene and hands you a high-contrast local-language flash card to show a driver, cashier, or police officer.
 
 Built with Expo / React Native. Client-only: no backend required.
 
@@ -8,7 +8,7 @@ Built with Expo / React Native. Client-only: no backend required.
 
 - **Scene snapshot analysis** — capture a photo, cloud vision model interprets the scene (menu, signboard, station, store) and returns a structured interpretation with tips and useful phrases.
 - **Multi-turn follow-up** — keep asking about the same photo (prices, allergens, directions). Conversations persist locally and can be resumed later.
-- **Zero-search flash cards** — high-contrast, large-type cards for high-frequency needs (taxi by meter, allergen warnings, tax refund, SOS), with local-language TTS.
+- **Ready-made flash cards** — high-contrast, large-type cards for high-frequency needs (taxi by meter, allergen warnings, tax refund, SOS), with local-language TTS.
 - **Realtime speech transcription** — native iOS `SFSpeechRecognizer` bridge (Expo Local Module) with live transcript banner and auto-archiving to notes.
 - **Quick notes** — vouchers, Wi-Fi passwords, refund numbers; persist across launches, one-tap copy, fullscreen large-type display, and voice-memo auto-archive.
 - **Session history** — past snapshot conversations are saved locally (AsyncStorage) and restorable.
@@ -16,7 +16,21 @@ Built with Expo / React Native. Client-only: no backend required.
   - Cloud OCR: OpenRouter vision models (`openrouter/free`)
   - Local matcher: keyword dictionary with Chinese/English/Thai/Japanese coverage
   - Optional on-device: Qwen2.5-0.5B (llama.rn) and Whisper-Tiny (whisper.rn)
-- **Crash reporting** — Sentry with source maps and dSYM upload.
+
+## Screens
+
+对话优先架构（V2），视觉稿由 [Pencil](https://pen.dev) 设计（`docs/scenego.pen`），以下截图从视觉稿导出：
+
+| | | | |
+|---|---|---|---|
+| ![01 对话页](docs/screens/01-dialog.png) | ![02 全屏大字卡](docs/screens/02-flash-card.png) | ![03 卡栈](docs/screens/03-card-stack.png) | ![04 笔记](docs/screens/04-notes.png) |
+| 01 对话页 | 02 全屏大字卡 | 03 卡栈 | 04 笔记 |
+| ![05 更多](docs/screens/05-more.png) | ![06 相机取景](docs/screens/06-camera.png) | ![07 安全卡](docs/screens/07-safety-card.png) | ![08 安全详情](docs/screens/08-safety-detail.png) |
+| 05 更多 | 06 相机取景 | 07 安全卡 | 08 安全详情 |
+| ![09 国家选择](docs/screens/09-country-select.png) | ![10 位置切换](docs/screens/10-switch-prompt.png) | ![11 会话历史](docs/screens/11-session-history.png) | ![12 API 日志](docs/screens/12-api-log.png) |
+| 09 国家选择 | 10 位置切换 | 11 会话历史 | 12 API 日志 |
+| ![13 引擎设置](docs/screens/13-engine-settings.png) | | | |
+| 13 引擎设置 | | | |
 
 ## Architecture
 
@@ -63,9 +77,6 @@ Create a `.env` file (`.env.example` committed as a template):
 ```env
 # OpenRouter API key for cloud vision recognition
 EXPO_PUBLIC_OPENROUTER_API_KEY=sk-or-v1-...
-
-# Sentry (optional): auth token for source map / dSYM upload
-SENTRY_AUTH_TOKEN=...
 ```
 
 The API key is also configurable in-app (Settings → 识别引擎设置), stored in the iOS Keychain.
@@ -74,7 +85,7 @@ The API key is also configurable in-app (Settings → 识别引擎设置), store
 
 ```text
 scenego/
-├── App.tsx                     # Entry: Sentry init, app state, modals
+├── App.tsx                     # Entry: app state, modals
 ├── app.json                    # Expo config, permissions, plugins
 ├── modules/
 │   └── scenego-speech/         # Expo Local Module (Swift)
@@ -103,7 +114,7 @@ scenego/
 
 - Expo SDK 51 / React Native 0.74 (TypeScript)
 - expo-modules-core (Swift local module), expo-camera, expo-speech, expo-clipboard, expo-secure-store
-- AsyncStorage (sessions & notes), Sentry React Native
+- AsyncStorage (sessions & notes)
 - OpenRouter chat completions API for vision
 
 ## Contributing
