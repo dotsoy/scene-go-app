@@ -25,6 +25,10 @@ export const COLORS = {
   borderBlue: 'rgba(79,195,247,0.4)',
   grayBtnBg: 'rgba(255,255,255,0.06)',
   grayBtnText: '#777777',
+  /** V2：用户消息气泡 */
+  userBubble: 'rgba(37,99,235,0.15)',
+  /** V2：模态遮罩 */
+  mask: 'rgba(0,0,0,0.65)',
 } as const;
 
 /** 字体族（expo-font 注册名）；按字重显式指定 family，不依赖 fontWeight 映射 */
@@ -43,4 +47,12 @@ export const LAYOUT = {
   cameraBarHeight: 64,
   screenPaddingH: 20,
   cardRadius: 12,
+  /** V2：状态栏 */
+  statusBarHeight: 52,
+  /** V2：底部输入栏 */
+  inputBarHeight: 72,
+  /** V2：Tab 栏 */
+  tabBarHeight: 56,
+  /** V2：底部 Safe 区 */
+  bottomSafeArea: 34,
 } as const;

@@ -23,3 +23,19 @@ export interface CardData {
   /** 来源快照会话 id：卡面提供「AI 解读」入口 */
   sessionId?: string;
 }
+
+/**
+ * V2 对话流消息（UI 渲染模型）。
+ * 表达卡消息携带 CardData，与卡栈（cardStackStore）同源。
+ */
+export interface ChatMessage {
+  id: string;
+  kind: 'user' | 'assistant' | 'card' | 'system';
+  /** 文本内容（user/assistant/system 消息） */
+  content?: string;
+  /** kind=assistant 解读消息的照片缩略 */
+  imageUri?: string;
+  /** kind=card：直接渲染表达卡（与卡栈共享数据源） */
+  card?: CardData;
+  createdAt: number;
+}

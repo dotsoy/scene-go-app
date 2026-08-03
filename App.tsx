@@ -26,7 +26,7 @@ import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
 import { useStore } from 'zustand';
 import { cardStackStore, TAP_TALK_CARD } from './src/core/cardStackStore';
-import { chatSessionStore } from './src/core/chatSession';
+import { chatSessionStore, messagesToTurns } from './src/core/chatSession';
 import { expressionEngine } from './src/core/expressionEngine';
 import { speechController } from './src/core/speechController';
 import { countryController } from './src/core/countryController';
@@ -63,8 +63,8 @@ export default function App() {
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
   const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
   const [processingLabel, setProcessingLabel] = useState<string | null>(null);
-  // 快照多轮对话（首条为场景解读，后续为追问问答）——状态由 chatSessionStore 管理
-  const chatTurns = useStore(chatSessionStore, (s) => s.turns);
+  // 快照对话流（首条为场景解读，后续为追问问答）——状态由 chatSessionStore 管理（V2 ChatMessage[]）
+  const chatMessages = useStore(chatSessionStore, (s) => s.messages);
   const sessionId = useStore(chatSessionStore, (s) => s.sessionId);
   const scenarioResult = useStore(chatSessionStore, (s) => s.scenario);
 
@@ -143,9 +143,9 @@ export default function App() {
       const result = await expressionEngine.askFollowUp(
         imageUri,
         userPrompt,
-        chatSessionStore.getState().turns,
+        messagesToTurns(chatSessionStore.getState().messages),
       );
-      chatSessionStore.getState().append(userPrompt, result.text);
+      chatSessionStore.getState().appendFollowUp(userPrompt, result.text, result.card);
       if (result.card) {
         cardStackStore.getState().add({
           ...result.card,
@@ -566,7 +566,7 @@ export default function App() {
           visible={isSnapshotModalOpen}
           imageUri={pendingSnapshotUri}
           scenarioResult={activeScenarioResult}
-          turns={chatTurns}
+          turns={messagesToTurns(chatMessages)}
           onClose={() => setIsSnapshotModalOpen(false)}
           onSubmit={handleSnapshotSubmit}
           onCollect={(content) => handleAddNote(content, 'CARD')}
