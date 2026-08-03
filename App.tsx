@@ -590,10 +590,22 @@ export default function App() {
               currentIndex={0}
               totalCards={1}
               onNextCard={() => {}}
+              tipActionLabel={
+                fullscreenCard.id.startsWith('safety-')
+                  ? '安全信息'
+                  : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
+                    ? 'AI 解读'
+                    : undefined
+              }
+              onTipAction={
+                fullscreenCard.id.startsWith('safety-')
+                  ? () => setIsSafetyDetailOpen(true)
+                  : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
+                    ? handleOpenSnapshotFromCard
+                    : undefined
+              }
+              onClose={() => setFullscreenCard(null)}
             />
-            <TouchableOpacity style={styles.fullscreenClose} onPress={() => setFullscreenCard(null)}>
-              <Text style={styles.fullscreenCloseText}>✕ 返回</Text>
-            </TouchableOpacity>
           </View>
         ) : null}
 

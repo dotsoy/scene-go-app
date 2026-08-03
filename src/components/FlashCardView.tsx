@@ -13,9 +13,11 @@ interface FlashCardViewProps {
   currentIndex: number;
   totalCards: number;
   onNextCard: () => void;
-  /** LOCAL PROTOCOL 框内可选操作入口（如安全卡的「安全信息」） */
+  /** LOCAL PROTOCOL 框内可选操作入口（如安全卡的「安全信息」/ 普通卡「AI 解读」） */
   tipActionLabel?: string;
   onTipAction?: () => void;
+  /** 全屏模式关闭（✕） */
+  onClose?: () => void;
 }
 
 export const FlashCardView: React.FC<FlashCardViewProps> = ({
@@ -25,6 +27,7 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
   onNextCard,
   tipActionLabel,
   onTipAction,
+  onClose,
 }) => {
   const handlePlayAudio = (e: GestureResponderEvent) => {
     e.stopPropagation();
@@ -55,103 +58,69 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
 
   return (
     <View ref={cardRef} collapsable={false} style={styles.cardContainer}>
-      {/* Top Header: 分类名称 + 进度位置指示 */}
+      {/* TopRow：关闭 + 分类 + 位置 + 进度 */}
       <View style={styles.topRow}>
-        <View style={styles.leftPillGroup}>
-          <View style={styles.categoryPill}>
-            <Text style={styles.categoryText}>{card.categoryTag.toUpperCase()}</Text>
-          </View>
-          <Text style={styles.locationText}>{card.locationName.toUpperCase()}</Text>
-        </View>
-
-        {/* 顶部进度批次展示 (01 / 04) + 分享按钮 */}
-        <View style={styles.topRightGroup}>
-          <TouchableOpacity style={styles.sharePill} onPress={handleShare} activeOpacity={0.7} hitSlop={{ top: 6, bottom: 6, left: 6, right: 6 }}>
-            <Text style={styles.shareText}>SHARE</Text>
+        {onClose ? (
+          <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={8} activeOpacity={0.7}>
+            <Text style={styles.closeIcon}>✕</Text>
           </TouchableOpacity>
-          <View style={styles.progressPill}>
-            <Text style={styles.progressText}>{formattedProgress}</Text>
-          </View>
+        ) : null}
+        <View style={styles.categoryPill}>
+          <Text style={styles.categoryText}>{card.categoryTag.toUpperCase()}</Text>
+        </View>
+        <Text style={styles.locationText} numberOfLines={1}>
+          {card.locationName}
+        </Text>
+        <View style={styles.topSpacer} />
+        <View style={styles.progressPill}>
+          <Text style={styles.progressText}>{formattedProgress}</Text>
         </View>
       </View>
 
-      {/* 点击卡片任意主体区域可快速切卡 */}
-      <TouchableOpacity
-        style={styles.cardBody}
-        onPress={onNextCard}
-        activeOpacity={0.9}
-      >
-        <Text style={styles.cardTitle}>{card.title}</Text>
-
+      <View style={styles.bigWrap}>
         {/* 高对比大字核心展示区 */}
-        <View style={styles.displayArea}>
+        <View style={styles.bigArea}>
           <Text style={styles.targetText}>{card.targetText}</Text>
+          {card.phonetic ? <Text style={styles.phoneticText}>{card.phonetic}</Text> : null}
+          {card.subText ? <Text style={styles.supplementText}>{card.subText}</Text> : null}
         </View>
 
-        {/* 读音与补充说明 */}
-        <Text style={styles.phoneticText}>{card.phonetic}</Text>
-
-        {/* 备用表达短语（点击朗读） */}
-        {card.phrases && card.phrases.length > 0 && (
-          <View style={styles.phrasesBlock}>
-            <Text style={styles.phrasesHeader}>常用表达</Text>
-            {card.phrases.slice(0, 3).map((phrase, idx) => (
-              <TouchableOpacity
-                key={idx}
-                style={styles.phraseRow}
-                onPress={() =>
-                  Speech.speak(phrase.split('(')[0].trim(), {
-                    language: card.languageCode,
-                    pitch: 1.0,
-                    rate: 0.85,
-                  })
-                }
-                activeOpacity={0.6}
-              >
-                <Text style={styles.phraseLocal} numberOfLines={1}>
-                  {phrase.split('(')[0].trim()}
-                </Text>
-                <Text style={styles.phraseZh} numberOfLines={1}>
-                  {phrase.includes('(') ? phrase.slice(phrase.indexOf('(') + 1, phrase.lastIndexOf(')')) : ''}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
-        )}
-
-        <Text style={styles.englishText}>{card.subText}</Text>
-
-        {/* 底部双操作按钮栏：PLAY AUDIO (左) 与 放大显眼的 NEXT CARD 按钮 (右) */}
+        {/* 操作行：PLAY AUDIO + AI 解读 + NEXT CARD */}
         <View style={styles.actionRow}>
-          <TouchableOpacity style={styles.audioPill} onPress={handlePlayAudio} activeOpacity={0.75}>
-            <Text style={styles.audioPillText}>PLAY AUDIO</Text>
+          <TouchableOpacity style={styles.playBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
+            <Text style={styles.playBtnText}>▶ PLAY AUDIO</Text>
           </TouchableOpacity>
-
-          <TouchableOpacity style={styles.nextCardPill} onPress={onNextCard} activeOpacity={0.8}>
-            <Text style={styles.nextCardPillText}>{'NEXT CARD ->'}</Text>
+          {tipActionLabel && onTipAction ? (
+            <TouchableOpacity style={styles.aiBtn} onPress={onTipAction} activeOpacity={0.75}>
+              <Text style={styles.aiBtnText}>{tipActionLabel}</Text>
+            </TouchableOpacity>
+          ) : null}
+          <View style={styles.actionSpacer} />
+          <TouchableOpacity style={styles.nextBtn} onPress={onNextCard} activeOpacity={0.7}>
+            <Text style={styles.nextBtnText}>NEXT CARD →</Text>
           </TouchableOpacity>
         </View>
-      </TouchableOpacity>
 
-      {/* 本地指南提示卡：安全卡附带「安全信息」入口 */}
-      <View style={styles.tipBox}>
-        <Text style={styles.tipHeader}>LOCAL PROTOCOL</Text>
-        <Text style={styles.tipBody}>{card.localTip}</Text>
-        {card.tips && card.tips.length > 0 && (
-          <View style={styles.tipList}>
-            {card.tips.map((tip, idx) => (
-              <View key={idx} style={styles.tipRow}>
-                <Text style={styles.tipBullet}>•</Text>
-                <Text style={styles.tipRowText}>{tip}</Text>
+        {/* LOCAL PROTOCOL */}
+        <View style={styles.protoWrap}>
+          <Text style={styles.protoHead}>LOCAL PROTOCOL</Text>
+          <View style={styles.protoBox}>
+            <Text style={styles.protoBody}>{card.localTip}</Text>
+            {card.tips && card.tips.length > 0 && (
+              <View style={styles.tipList}>
+                {card.tips.map((tip, idx) => (
+                  <View key={idx} style={styles.tipRow}>
+                    <Text style={styles.tipBullet}>•</Text>
+                    <Text style={styles.tipRowText}>{tip}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
+            )}
           </View>
-        )}
-        {tipActionLabel && onTipAction && (
-          <TouchableOpacity style={styles.tipActionRow} onPress={onTipAction} activeOpacity={0.7}>
-            <Text style={styles.tipActionText}>{tipActionLabel} ›</Text>
-          </TouchableOpacity>
-        )}
+        </View>
+
+        <View style={styles.bottomSpacer} />
+        <Text style={styles.swipeHint}>点击 ✕ 返回 · 下滑关闭</Text>
       </View>
     </View>
   );
@@ -167,53 +136,47 @@ const styles = StyleSheet.create({
   topRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    gap: 8,
     marginBottom: 14,
   },
-  topRightGroup: {
-    flexDirection: 'row',
+  closeBtn: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    backgroundColor: COLORS.bgCardLight,
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'center',
   },
-  sharePill: {
-    backgroundColor: 'transparent',
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
+  closeIcon: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    fontWeight: '700',
   },
-  shareText: {
-    fontFamily: FONT.monoBold,
-    color: COLORS.textTertiary,
-    fontSize: 10,
-    letterSpacing: 0.8,
-  },
-  leftPillGroup: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+  topSpacer: {
     flex: 1,
+  },
+  actionSpacer: {
+    flex: 1,
+  },
+  bigWrap: {
+    gap: 12,
   },
   categoryPill: {
     backgroundColor: COLORS.bgCardLight,
-    paddingHorizontal: 10,
+    paddingHorizontal: 8,
     paddingVertical: 4,
     borderRadius: 6,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
   },
   categoryText: {
     fontFamily: FONT.bold,
-    color: '#e4e4e7',
+    color: COLORS.textSecondary,
     fontSize: 11,
     letterSpacing: 1,
   },
   locationText: {
-    fontFamily: FONT.semibold,
+    fontFamily: FONT.regular,
     color: COLORS.textTertiary,
-    fontSize: 10,
-    letterSpacing: 0.5,
+    fontSize: 12,
     flexShrink: 1,
   },
   progressPill: {
@@ -221,33 +184,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 12,
-    borderWidth: 1,
-    borderColor: COLORS.borderLight,
   },
   progressText: {
     fontFamily: FONT.monoBold,
     color: COLORS.accentYellow,
-    fontSize: 11,
-    letterSpacing: 0.8,
+    fontSize: 12,
+    letterSpacing: 1,
   },
-  cardBody: {
-    backgroundColor: COLORS.bgCard,
-    borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-  },
-  cardTitle: {
-    fontFamily: FONT.semibold,
-    color: COLORS.textPrimary,
-    fontSize: 15,
-    marginBottom: 12,
-  },
-  displayArea: {
+  bigArea: {
     backgroundColor: '#000000',
     borderRadius: 12,
-    padding: 18,
-    marginBottom: 14,
+    padding: 20,
+    gap: 10,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.2)',
   },
@@ -261,118 +209,75 @@ const styles = StyleSheet.create({
   phoneticText: {
     fontFamily: FONT.regular,
     color: COLORS.textSecondary,
-    fontSize: 13,
-    marginBottom: 10,
+    fontSize: 14,
   },
-  phrasesBlock: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    marginBottom: 12,
-  },
-  phrasesHeader: {
-    fontFamily: FONT.mono,
-    color: COLORS.textTertiary,
-    fontSize: 9,
-    letterSpacing: 1,
-    marginBottom: 6,
-  },
-  phraseRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 4,
-  },
-  phraseLocal: {
-    fontFamily: FONT.semibold,
-    color: '#e4e4e7',
-    fontSize: 13,
-    flex: 1,
-  },
-  phraseZh: {
-    fontFamily: FONT.regular,
-    color: COLORS.textTertiary,
-    fontSize: 11,
-    marginLeft: 12,
-  },
-  englishText: {
+  supplementText: {
     fontFamily: FONT.regular,
     color: COLORS.textMuted,
-    fontSize: 12,
-    marginBottom: 16,
+    fontSize: 13,
   },
   actionRow: {
     flexDirection: 'row',
+    alignItems: 'center',
     gap: 10,
   },
-  audioPill: {
-    flex: 1,
-    backgroundColor: COLORS.bgCardLight,
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-  },
-  audioPillText: {
-    fontFamily: FONT.bold,
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    letterSpacing: 0.8,
-  },
-  nextCardPill: {
-    flex: 1.2,
-    backgroundColor: COLORS.bgCardLight,
-    borderRadius: 10,
-    paddingVertical: 12,
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
-  },
-  nextCardPillText: {
-    fontFamily: FONT.bold,
-    color: COLORS.textSecondary,
-    fontSize: 12,
-    letterSpacing: 0.8,
-  },
-  tipBox: {
-    marginTop: 14,
-    backgroundColor: COLORS.bgCard,
+  playBtn: {
+    backgroundColor: COLORS.accentBlue,
     borderRadius: 12,
-    padding: 14,
-    borderWidth: 1,
-    borderColor: COLORS.borderSubtle,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
   },
-  tipHeader: {
+  playBtnText: {
+    fontFamily: FONT.bold,
+    color: '#0a0a1e',
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+  aiBtn: {
+    backgroundColor: COLORS.bgCardLight,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    alignItems: 'center',
+  },
+  aiBtnText: {
+    fontFamily: FONT.regular,
+    color: COLORS.textPrimary,
+    fontSize: 12,
+  },
+  nextBtn: {
+    alignItems: 'center',
+  },
+  nextBtnText: {
+    fontFamily: FONT.bold,
+    color: COLORS.accentBlue,
+    fontSize: 12,
+    letterSpacing: 1,
+  },
+  protoWrap: {
+    gap: 4,
+  },
+  protoHead: {
     fontFamily: FONT.mono,
     color: COLORS.textTertiary,
     fontSize: 10,
     letterSpacing: 1,
-    marginBottom: 4,
   },
-  tipActionRow: {
-    marginTop: 10,
-    paddingTop: 8,
-    borderTopWidth: StyleSheet.hairlineWidth,
-    borderTopColor: COLORS.borderSubtle,
+  protoBox: {
+    backgroundColor: COLORS.bgCardLight,
+    borderRadius: 10,
+    padding: 12,
+    gap: 4,
   },
-  tipActionText: {
-    fontFamily: FONT.bold,
-    color: COLORS.accentBlue,
-    fontSize: 12,
-    letterSpacing: 0.5,
-  },
-  tipBody: {
+  protoBody: {
     fontFamily: FONT.regular,
-    color: '#d4d4d8',
+    color: COLORS.textSecondary,
     fontSize: 12,
     lineHeight: 18,
   },
   tipList: {
-    marginTop: 6,
+    marginTop: 4,
   },
   tipRow: {
     flexDirection: 'row',
@@ -385,9 +290,18 @@ const styles = StyleSheet.create({
   },
   tipRowText: {
     fontFamily: FONT.regular,
-    color: '#c4c4cc',
+    color: COLORS.textSecondary,
     fontSize: 11,
     lineHeight: 16,
     flex: 1,
+  },
+  bottomSpacer: {
+    flex: 1,
+  },
+  swipeHint: {
+    fontFamily: FONT.regular,
+    color: COLORS.textMuted,
+    fontSize: 11,
+    textAlign: 'center',
   },
 });
