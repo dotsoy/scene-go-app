@@ -1,6 +1,6 @@
 # SceneGo
 
-Zero-search, context-aware travel assistance for overseas trips. Point the camera at a menu, sign, or ticket machine — SceneGo reads the scene, explains it, and hands you a high-contrast local-language flash card to show a driver, cashier, or police officer.
+On-demand, context-aware travel assistance for overseas trips. Point the camera at a menu, sign, or ticket machine — or say what you need — SceneGo matches the scene and hands you a high-contrast local-language flash card to show a driver, cashier, or police officer.
 
 Built with Expo / React Native. Client-only: no backend required.
 
@@ -8,7 +8,7 @@ Built with Expo / React Native. Client-only: no backend required.
 
 - **Scene snapshot analysis** — capture a photo, cloud vision model interprets the scene (menu, signboard, station, store) and returns a structured interpretation with tips and useful phrases.
 - **Multi-turn follow-up** — keep asking about the same photo (prices, allergens, directions). Conversations persist locally and can be resumed later.
-- **Zero-search flash cards** — high-contrast, large-type cards for high-frequency needs (taxi by meter, allergen warnings, tax refund, SOS), with local-language TTS.
+- **Ready-made flash cards** — high-contrast, large-type cards for high-frequency needs (taxi by meter, allergen warnings, tax refund, SOS), with local-language TTS.
 - **Realtime speech transcription** — native iOS `SFSpeechRecognizer` bridge (Expo Local Module) with live transcript banner and auto-archiving to notes.
 - **Quick notes** — vouchers, Wi-Fi passwords, refund numbers; persist across launches, one-tap copy, fullscreen large-type display, and voice-memo auto-archive.
 - **Session history** — past snapshot conversations are saved locally (AsyncStorage) and restorable.
