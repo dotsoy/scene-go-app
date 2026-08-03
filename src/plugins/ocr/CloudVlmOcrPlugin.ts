@@ -1,6 +1,6 @@
 import { OcrPlugin, OcrResult, ScenarioResult, ChatTurn } from '../types';
 import { getOpenRouterApiKey } from '../../utils/SecureConfig';
-import { apiLogger } from '../../utils/ApiLogger';
+import { chatCompletions, AiChatMessage } from '../../utils/aiGateway';
 import * as FileSystem from 'expo-file-system';
 
 const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异国旅行，会通过手机摄像头拍摄眼前的场景（菜单、路牌、车站、商店、景点、告示牌等）。
@@ -35,54 +35,6 @@ const CARD_SYSTEM_PROMPT = `你是 SceneGo 出行助手。用户正在异国旅�
   "phrases": ["备用表达1（当地语言，括号内中文翻译）", "备用表达2（当地语言，括号内中文翻译）", "备用表达3（当地语言，括号内中文翻译）"]
 }`;
 
-const OPENROUTER_API_URL = 'https://openrouter.ai/api/v1/chat/completions';
-const MODEL_ID = 'openrouter/free';
-
-/** 请求超时（毫秒）：弱网下避免 fetch 无限挂起 */
-const FETCH_TIMEOUT_MS = 30_000;
-/** 网络异常最大尝试次数（含首次） */
-const MAX_ATTEMPTS = 2;
-
-/** 带超时的 POST 请求 + 网络异常自动重试（HTTP 非 2xx 不重试） */
-async function postWithTimeoutRetry(
-  url: string,
-  headers: Record<string, string>,
-  body: string,
-  logId: string,
-): Promise<{ ok: boolean; status: number; text: string }> {
-  let lastError: unknown = null;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const start = Date.now();
-    try {
-      const controller = new AbortController();
-      const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
-      let resp: Response;
-      try {
-        resp = await fetch(url, {
-          method: 'POST',
-          headers,
-          body,
-          signal: controller.signal,
-        });
-      } finally {
-        clearTimeout(timer);
-      }
-      const text = await resp.text();
-      apiLogger.logResponse(logId, resp.status, Date.now() - start, text);
-      return { ok: resp.ok, status: resp.status, text };
-    } catch (err) {
-      lastError = err;
-      const msg = err instanceof Error ? err.message : String(err);
-      if (attempt < MAX_ATTEMPTS) {
-        console.warn(`[CloudVlm] 网络异常(${msg})，第 ${attempt + 1} 次重试`);
-      }
-    }
-  }
-  const errMsg = lastError instanceof Error ? lastError.message : String(lastError);
-  apiLogger.logResponse(logId, 0, 0, `网络异常: ${errMsg}`);
-  return { ok: false, status: 0, text: `[网络异常: ${errMsg}]` };
-}
-
 /** 安全转换图片为 Base64 字符串（具备 FileSystem 原生模块 + Fetch Blob 双层降级） */
 async function convertImageToBase64(imageUri: string): Promise<string> {
   try {
@@ -110,13 +62,12 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
   });
 }
 
-/** 构造场景识别请求体（日志与真实请求共用同一对象，避免两处重复维护） */
-function buildSceneRequestBody(base64: string, location?: string) {
+/** 构造场景识别消息（图片 + 位置提示） */
+function buildSceneMessages(base64: string, location?: string) {
   const userText = location
     ? `请分析这张照片中的场景，给出出行解读。\n（用户当前所在位置：${location}，可结合位置判断场景地点与当地语言）`
     : '请分析这张照片中的场景，给出出行解读。';
   return {
-    model: MODEL_ID,
     messages: [
       { role: 'system', content: SCENE_SYSTEM_PROMPT },
       {
@@ -133,13 +84,13 @@ function buildSceneRequestBody(base64: string, location?: string) {
         ],
       },
     ],
-    max_tokens: 1024,
+    maxTokens: 1024,
   };
 }
 
-/** 构造多轮追问请求体：首轮带图，后续轮携带纯文本历史问答 */
-function buildFollowUpRequestBody(base64: string, question: string, history: ChatTurn[] = []) {
-  const messages: Array<Record<string, unknown>> = [
+/** 构造多轮追问消息：首轮带图，后续轮携带纯文本历史问答 */
+function buildFollowUpMessages(base64: string, question: string, history: ChatTurn[] = []) {
+  const messages: AiChatMessage[] = [
     {
       role: 'system',
       content:
@@ -171,11 +122,7 @@ function buildFollowUpRequestBody(base64: string, question: string, history: Cha
     messages.push({ role: 'user', content: question });
   }
 
-  return {
-    model: MODEL_ID,
-    messages,
-    max_tokens: 512,
-  };
+  return { messages, maxTokens: 512 };
 }
 
 export class CloudVlmOcrPlugin implements OcrPlugin {
@@ -193,84 +140,47 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       };
     }
 
-    const url = OPENROUTER_API_URL;
-    const model = MODEL_ID;
     const startTime = Date.now();
 
     try {
       const base64 = await convertImageToBase64(imageUri);
+      const req = buildSceneMessages(base64, location);
 
-      const reqHeaders: Record<string, string> = {
-        Authorization: `Bearer ${apiKey.slice(0, 12)}•••••••• (OpenRouter Key)`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://scenego.app',
-        'X-OpenRouter-Title': 'SceneGo',
-      };
-
-      const reqBodyObject = buildSceneRequestBody(base64, location);
-
-      const fullRequestLog = JSON.stringify(
-        {
-          url,
-          method: 'POST',
-          headers: reqHeaders,
-          body: reqBodyObject,
-        },
-        null,
-        2,
-      );
-
-      console.log('=============== [CloudVlm 全量请求参数] ===============');
-      console.log(fullRequestLog);
-      console.log('=====================================================');
-
-      const logId = apiLogger.logRequest({
-        url,
-        model,
-        requestBody: fullRequestLog,
+      const result = await chatCompletions({
+        messages: req.messages,
+        maxTokens: req.maxTokens,
+        logLabel: '[Scene OCR]',
       });
 
-      const actualHeaders: Record<string, string> = {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://scenego.app',
-        'X-OpenRouter-Title': 'SceneGo',
-      };
-
-      const { ok, status, text: respText } = await postWithTimeoutRetry(
-        url,
-        actualHeaders,
-        JSON.stringify(reqBodyObject),
-        logId,
-      );
-
       const durationMs = Date.now() - startTime;
+      console.log(`[CloudVlm] 响应 (${result.status}, ${durationMs}ms)`);
+      if (result.content) console.log(result.content.slice(0, 200));
 
-      console.log(`=============== [CloudVlm 响应 (${status})] ===============`);
-      console.log(respText);
-      console.log('=====================================================');
-
-      if (!ok) {
-        console.warn('[CloudVlm API Error]:', status, respText);
-        if (status === 401) {
+      if (!result.ok) {
+        console.warn('[CloudVlm API Error]:', result.status, result.text);
+        if (result.status === 401) {
           return {
-            rawText: respText,
-            lines: [`[API Key 鉴权失败 (${status})，请在设置中确认你的 Key 是否有效]`],
+            rawText: result.text,
+            lines: [`[API Key 鉴权失败 (${result.status})，请在设置中确认你的 Key 是否有效]`],
+            confidence: 0,
+          };
+        }
+        if (result.status === 0) {
+          return {
+            rawText: result.text,
+            lines: [`[网络异常，请检查网络连接]`],
             confidence: 0,
           };
         }
         return {
-          rawText: respText,
-          lines: [`[云端识别失败: HTTP ${status}]`],
+          rawText: result.text,
+          lines: [`[云端识别失败: HTTP ${result.status}]`],
           confidence: 0,
         };
       }
 
-      const data = JSON.parse(respText);
-      const content = data?.choices?.[0]?.message?.content || respText;
-      return { rawText: content, lines: [content], confidence: 1.0 };
+      return { rawText: result.content ?? '', lines: [result.content ?? ''], confidence: 1.0 };
     } catch (err: unknown) {
-      const durationMs = Date.now() - startTime;
       const errMsg = err instanceof Error ? err.message : String(err);
       console.warn('[CloudVlm Fetch Network Error]:', errMsg);
       return {
@@ -286,36 +196,18 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) return '请先配置 API Key';
 
-    const url = OPENROUTER_API_URL;
-    const model = MODEL_ID;
-
     try {
       const base64 = await convertImageToBase64(imageUri);
+      const req = buildFollowUpMessages(base64, question, history);
 
-      const actualHeaders: Record<string, string> = {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://scenego.app',
-        'X-OpenRouter-Title': 'SceneGo',
-      };
-
-      const logId = apiLogger.logRequest({
-        url,
-        model,
-        requestBody: `[Follow-Up Question]: ${question}\n[History]: ${history.length} turns`,
+      const result = await chatCompletions({
+        messages: req.messages,
+        maxTokens: req.maxTokens,
+        logLabel: `[Follow-Up]: ${question}\n[History]: ${history.length} turns`,
       });
 
-      const { ok, status, text: respText } = await postWithTimeoutRetry(
-        url,
-        actualHeaders,
-        JSON.stringify(buildFollowUpRequestBody(base64, question, history)),
-        logId,
-      );
-
-      if (!ok) return `响应错误 (${status}): ${respText}`;
-
-      const data = JSON.parse(respText);
-      return data?.choices?.[0]?.message?.content || respText;
+      if (!result.ok) return `响应错误 (${result.status}): ${result.text}`;
+      return result.content ?? result.text;
     } catch (err: unknown) {
       const errMsg = err instanceof Error ? err.message : '请检查网络连接';
       return `网络错误: ${errMsg}`;
@@ -327,47 +219,22 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) return null;
 
-    const url = OPENROUTER_API_URL;
-    const model = MODEL_ID;
-
     try {
-      const actualHeaders: Record<string, string> = {
-        Authorization: `Bearer ${apiKey}`,
-        'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://scenego.app',
-        'X-OpenRouter-Title': 'SceneGo',
-      };
-
       const userContent = location
         ? `${text}\n\n（用户当前所在位置：${location}，生成卡片请使用当地语言）`
         : text;
 
-      const body = {
-        model,
+      const result = await chatCompletions({
         messages: [
           { role: 'system', content: CARD_SYSTEM_PROMPT },
           { role: 'user', content: userContent },
         ],
-        max_tokens: 512,
-      };
-
-      const logId = apiLogger.logRequest({
-        url,
-        model,
-        requestBody: `[Card From Text]: ${text}`,
+        maxTokens: 512,
+        logLabel: `[Card From Text]: ${text}`,
       });
 
-      const { ok, status, text: respText } = await postWithTimeoutRetry(
-        url,
-        actualHeaders,
-        JSON.stringify(body),
-        logId,
-      );
-
-      if (!ok || status === 0) return null;
-      const data = JSON.parse(respText);
-      const content = data?.choices?.[0]?.message?.content || '';
-      return parseVlmScenarioResult(content);
+      if (!result.ok || result.status === 0) return null;
+      return parseVlmScenarioResult(result.content ?? '');
     } catch (err: unknown) {
       console.warn('[Card Generate Error]:', err);
       return null;
