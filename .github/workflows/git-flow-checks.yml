@@ -1,0 +1,45 @@
+name: git-flow-checks
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+  push:
+    branches: [main, develop]
+
+jobs:
+  branch-and-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 校验分支名
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            BRANCH="${{ github.event.pull_request.head.ref }}"
+          else
+            BRANCH="${GITHUB_REF#refs/heads/}"
+          fi
+          echo "分支: $BRANCH"
+          case "$BRANCH" in
+            main|develop) exit 0 ;;  # 受保护分支，跳过命名校验
+          esac
+          echo "$BRANCH" | grep -qE '^(feature|bugfix|hotfix|release|chore|docs)/[A-Za-z0-9][A-Za-z0-9._-]*$' \
+            || { echo "分支名不合规: $BRANCH"; \
+                 echo "期望: feature/<scope>-<desc>、bugfix/<desc>、hotfix/vX.Y.Z-<desc>、release/vX.Y.Z、chore/...、docs/..."; \
+                 exit 1; }
+
+      - name: 校验提交信息 (Conventional Commits)
+        run: |
+          if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+            RANGE="${{ github.event.pull_request.base.sha }}..${{ github.event.pull_request.head.sha }}"
+          else
+            RANGE="HEAD~1..HEAD"
+          fi
+          BAD=$(git log --format=%s "$RANGE" | grep -vE '^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(\([a-z0-9-]+\))?: ' || true)
+          if [ -n "$BAD" ]; then
+            echo "以下提交信息不合规（应为 Conventional Commits 格式）:"
+            echo "$BAD"
+            exit 1
+          fi
+          echo "提交信息校验通过"
