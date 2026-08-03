@@ -4,26 +4,9 @@ import * as Speech from 'expo-speech';
 import { captureRef } from 'react-native-view-shot';
 import * as Sharing from 'expo-sharing';
 import { COLORS, FONT } from '../theme/tokens';
+import { CardData } from '../core/types';
 
-export interface CardData {
-  id: string;
-  categoryTag: string;
-  locationName: string;
-  title: string;
-  targetText: string;
-  phonetic: string;
-  /** 补充说明/服务语句（原 english 字段，实际存中文语义，改名避免误导） */
-  subText: string;
-  localTip: string;
-  languageCode: string;
-  badgeColor?: string;
-  /** 备用表达短语（当地语言 (中文翻译)），点击可朗读 */
-  phrases?: string[];
-  /** 出行提示列表（LOCAL PROTOCOL 展开） */
-  tips?: string[];
-  /** 来源快照会话 id：卡面提供「AI 解读」入口（仅最新会话可进） */
-  sessionId?: string;
-}
+export type { CardData } from '../core/types';
 
 interface FlashCardViewProps {
   card: CardData;

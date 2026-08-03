@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 
-import { pluginManager, ScenarioResult, ChatTurn } from './src/plugins';
+import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { CameraPreviewBox } from './src/components/CameraPreviewBox';
 import { CaptureDock } from './src/components/CaptureDock';
@@ -18,32 +18,24 @@ import { ApiLogModal } from './src/components/ApiLogModal';
 import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { NativeSpeech } from './src/utils/NativeSpeech';
-import { scenarioToCard } from './src/utils/cardBuilder';
-import { parseVlmScenarioResult } from './src/plugins/ocr/CloudVlmOcrPlugin';
-import { getLocationContext, getPlaceContext, PlaceContext } from './src/utils/locationContext';
-import { compressImage } from './src/utils/imageCompress';
-import { loadCountry, saveCountry, SavedCountry } from './src/utils/countryStore';
-import { loadUserProfile, saveUserProfile, UserProfile } from './src/utils/userProfile';
+import { PlaceContext } from './src/utils/locationContext';
+import { SavedCountry } from './src/utils/countryStore';
+import { UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
 import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
+import { useStore } from 'zustand';
+import { cardStackStore, TAP_TALK_CARD } from './src/core/cardStackStore';
+import { chatSessionStore } from './src/core/chatSession';
+import { expressionEngine } from './src/core/expressionEngine';
+import { speechController } from './src/core/speechController';
+import { countryController } from './src/core/countryController';
 import { sessionStore, SavedSession } from './src/utils/SessionStore';
 import { noteStore, NoteItem } from './src/utils/NoteStore';
 import { useFonts } from 'expo-font';
 import { COLORS, FONT } from './src/theme/tokens';
 
-// Tap&Talk 兜底卡：始终存在于卡栈末尾，动态卡缺失时的默认表达入口
-const TAP_TALK_CARD: CardData = {
-  id: 'tap-talk',
-  categoryTag: '通用 / 双向语音',
-  locationName: '当前位置',
-  title: 'Tap & Talk 通用表达',
-  targetText: '按住麦克风说话，说出需求即可生成当地语言表达卡',
-  phonetic: '',
-  subText: '或拍摄眼前场景，一键生成表达卡递给当地人',
-  localTip: '说清诉求（如：我要打车 / 我对花生过敏），卡片会按当地语言生成。',
-  languageCode: 'zh-CN',
-};
+// Tap&Talk 兜底卡定义已移至 src/core/cardStackStore（TAP_TALK_CARD）
 
 export default function App() {
   // 字体加载：未就绪前保持启动画面（注意：必须放在所有 hooks 之后提前返回，避免 hooks 数量跳变崩溃）
@@ -59,7 +51,7 @@ export default function App() {
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
   const [liveTranscript, setLiveTranscript] = useState<string>('');
-  const [isCardVisible, setIsCardVisible] = useState<boolean>(true);
+  const isCardVisible = useStore(cardStackStore, (s) => s.visible);
   const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
@@ -71,17 +63,14 @@ export default function App() {
   const [pendingSnapshotUri, setPendingSnapshotUri] = useState<string | null>(null);
   const [activeScenarioResult, setActiveScenarioResult] = useState<ScenarioResult | null>(null);
   const [processingLabel, setProcessingLabel] = useState<string | null>(null);
-  // 快照多轮对话历史（首条为场景解读，后续为追问问答）
-  const [chatTurns, setChatTurns] = useState<ChatTurn[]>([]);
-  const chatTurnsRef = useRef<ChatTurn[]>([]);
-  // 当前会话 id：新快照时重建，追问时更新同一会话
-  const sessionIdRef = useRef<string | null>(null);
-  // 场景结果 ref 副本（持久化/追问时读取最新值）
-  const scenarioResultRef = useRef<ScenarioResult | null>(null);
+  // 快照多轮对话（首条为场景解读，后续为追问问答）——状态由 chatSessionStore 管理
+  const chatTurns = useStore(chatSessionStore, (s) => s.turns);
+  const sessionId = useStore(chatSessionStore, (s) => s.sessionId);
+  const scenarioResult = useStore(chatSessionStore, (s) => s.scenario);
 
-  // 表达卡栈：动态生成卡在前，Tap&Talk 兑底卡恒在末尾；cardIndex 指向当前展示卡
-  const [cards, setCards] = useState<CardData[]>([TAP_TALK_CARD]);
-  const [cardIndex, setCardIndex] = useState<number>(0);
+  // 表达卡栈（动态卡在前，Tap&Talk 兜底卡恒在末尾）——状态由 cardStackStore 管理
+  const cards = useStore(cardStackStore, (s) => s.cards);
+  const cardIndex = useStore(cardStackStore, (s) => s.index);
   // 当前国家/地区（缓存的用户选择）与 GPS 检测位置；用户档案（国籍+语言）
   const [currentCountry, setCurrentCountry] = useState<SavedCountry | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -147,34 +136,21 @@ export default function App() {
     };
   }, []);
 
-  /** 云端 VLM 多轮追问：携带会话历史，回答后追加到对话流并持久化；表达需求自动生成表达卡 */
+  /** 云端 VLM 多轮追问（业务在 expressionEngine + chatSessionStore）：回答追加对话流；表达需求自动成卡 */
   const sendSnapshotAndPromptToAI = async (imageUri: string, userPrompt: string) => {
     setProcessingLabel('正在回答...');
     try {
-      const cloudVlm = pluginManager.getCloudVlmPlugin();
-      const reply = await cloudVlm.askFollowUp(imageUri, userPrompt, chatTurnsRef.current);
-
-      // 追问中表达沟通需求：VLM 按约定返回表达卡 JSON，解析命中 targetText 即入卡栈
-      const parsed = parseVlmScenarioResult(reply);
-      let assistantText = reply;
-      if (parsed && parsed.targetText) {
-        const locationCtx = await getLocationContext();
-        addExpressionCard({
-          ...scenarioToCard(parsed, locationCtx ?? '当前位置'),
-          sessionId: sessionIdRef.current ?? undefined,
+      const result = await expressionEngine.askFollowUp(
+        imageUri,
+        userPrompt,
+        chatSessionStore.getState().turns,
+      );
+      chatSessionStore.getState().append(userPrompt, result.text);
+      if (result.card) {
+        cardStackStore.getState().add({
+          ...result.card,
+          sessionId: chatSessionStore.getState().sessionId ?? undefined,
         });
-        assistantText = `${reply}\n\n✅ 已为你生成表达卡「${parsed.title || '场景表达'}」，关闭对话即可查看。`;
-      }
-
-      const newTurns = [
-        ...chatTurnsRef.current,
-        { role: 'user' as const, content: userPrompt },
-        { role: 'assistant' as const, content: assistantText },
-      ];
-      chatTurnsRef.current = newTurns;
-      setChatTurns(newTurns);
-      if (sessionIdRef.current) {
-        persistSession(sessionIdRef.current, imageUri, scenarioResultRef.current, newTurns);
       }
     } catch (err) {
       console.warn('[AI Follow-up Error]:', err);
@@ -183,24 +159,11 @@ export default function App() {
     }
   };
 
-  /** 持久化当前快照会话（显式传参，避免 async 闭包读到过期 state） */
-  const persistSession = (
-    id: string,
-    imageUri: string | null,
-    scenarioResult: ScenarioResult | null,
-    turns: ChatTurn[],
-  ) => {
-    sessionStore.save(sessionStore.build(id, imageUri, scenarioResult, turns));
-  };
-
-  /** 恢复历史会话：回填全部状态，待历史列表 dismiss 完成后打开快照弹窗 */
+  /** 恢复历史会话（业务状态由 chatSessionStore 回填）：待历史列表 dismiss 完成后打开快照弹窗 */
   const restoreSession = (s: SavedSession) => {
-    sessionIdRef.current = s.id;
-    scenarioResultRef.current = s.scenarioResult;
-    chatTurnsRef.current = s.turns;
+    chatSessionStore.getState().restore(s);
     setActiveScenarioResult(s.scenarioResult);
     setPendingSnapshotUri(s.imageUri);
-    setChatTurns(s.turns);
     // 历史列表必然开着：先关，等 dismiss 动画完成再 present 快照
     pendingSnapshotRef.current = true;
     setIsHistoryOpen(false);
@@ -233,7 +196,7 @@ export default function App() {
     setSessions(await sessionStore.getAll());
   };
 
-  /** CAM 双击：拍照 → 提取信息 → 直接生成表达卡（卡片优先，解读降级为卡面入口） */
+  /** CAM 双击：拍照（设备层）→ expressionEngine 识别 → 新会话 + 表达卡入栈 */
   const handleCaptureFrame = async () => {
     if (!isCameraActive) return;
     setProcessingLabel('正在提取信息并生成卡片...');
@@ -248,10 +211,6 @@ export default function App() {
         } catch (camErr) {
           console.log('[Camera] 真实摄像头捕获失败 (模拟器环境)，启用模拟快照降级:', camErr);
         }
-        // 上传前压缩（最长边 1280px + JPEG 0.7），弱网体验优化
-        if (photoUri) {
-          photoUri = await compressImage(photoUri);
-        }
       }
 
       // 模拟器/测试环境降级保底：若无法取得真实硬件快照，生成测试快照数据
@@ -263,30 +222,16 @@ export default function App() {
       setIsCameraActive(false);
       setIsCameraReady(false);
 
-      // 触发插件管线: 场景识别 + 语义匹配（携带位置上下文）
+      // 识别管线（压缩/OCR/匹配/成卡）在 expressionEngine
       console.log('[Plugins] 启动插件管线，处理图像快照...');
-      const locationCtx = await getLocationContext();
-      const result = await pluginManager.processImageSnapshot(photoUri, locationCtx ?? undefined);
-      console.log('[Plugin OCR 结果]:', result.ocr.rawText.slice(0, 100));
-      console.log('[Plugin 场景匹配结果]:', result.scenario.title);
+      const { scenario, card } = await expressionEngine.processImage(photoUri);
+      console.log('[Plugin 场景匹配结果]:', scenario.title);
 
-      setActiveScenarioResult(result.scenario);
+      setActiveScenarioResult(scenario);
       setPendingSnapshotUri(photoUri);
-      scenarioResultRef.current = result.scenario;
-      // 新会话：首条消息为场景解读，并持久化
-      const initialTurns: ChatTurn[] = [
-        { role: 'assistant', content: result.scenario.translatedText },
-      ];
-      const newSessionId = Date.now().toString();
-      sessionIdRef.current = newSessionId;
-      chatTurnsRef.current = initialTurns;
-      setChatTurns(initialTurns);
-      persistSession(newSessionId, photoUri, result.scenario, initialTurns);
-      // 直接成卡：场景解读 → 表达卡，置顶卡栈（解读不再自动弹窗，走卡面「AI 解读」入口）
-      addExpressionCard({
-        ...scenarioToCard(result.scenario, locationCtx ?? '当前位置'),
-        sessionId: newSessionId,
-      });
+      // 新会话：首条消息为场景解读并持久化；表达卡入栈（带会话 id，卡面可进追问）
+      const newSessionId = chatSessionStore.getState().start(photoUri, scenario);
+      cardStackStore.getState().add({ ...card, sessionId: newSessionId });
     } catch (err) {
       console.warn('Camera snapshot error:', err);
       setIsCameraActive(false);
@@ -298,7 +243,7 @@ export default function App() {
 
   /** 卡面「AI 解读」入口：仅最新快照会话可进（状态已在内存） */
   const handleOpenSnapshotFromCard = () => {
-    if (!currentCard.sessionId || currentCard.sessionId !== sessionIdRef.current) return;
+    if (!currentCard.sessionId || currentCard.sessionId !== sessionId) return;
     setIsSnapshotModalOpen(true);
   };
 
@@ -306,15 +251,12 @@ export default function App() {
     await sendSnapshotAndPromptToAI(imageUri, userPrompt);
   };
 
-  /** 启动麦克风（MIC OFF 态点按） */
+  /** 启动麦克风（MIC OFF 态点按）——听写能力在 speechController */
   const handleStartMic = async () => {
     // Android 无原生听写模块：明确降级提示，避免启动失败的黑盒体验
-    if (Platform.OS === 'android') {
+    if (!speechController.isSupported()) {
       micActiveRef.current = false;
-      Alert.alert(
-        '语音转写暂不可用',
-        '当前设备为 Android：实时语音转写模块仅支持 iOS。\n请用 CAM 拍照识别场景，或使用下方文字表达（Tap&Talk）。'
-      );
+      Alert.alert('语音转写暂不可用', speechController.unsupportedReason());
       return;
     }
     // 期望状态先行，杜绝授权异步窗口内的重复触发
@@ -322,7 +264,7 @@ export default function App() {
     liveTranscriptRef.current = '';
     setIsMicActive(true);
     setLiveTranscript('正在开启原生听写，请说话...');
-    const started = await NativeSpeech.start('zh-CN');
+    const started = await speechController.start();
     if (!started.ok) {
       // 启动失败：若用户已快速关回（micActiveRef 已 false）则静默，否则回滚并展示真实原因
       if (micActiveRef.current) {
@@ -337,7 +279,7 @@ export default function App() {
   const stopMic = async (): Promise<string> => {
     micActiveRef.current = false;
     setIsMicActive(false);
-    await NativeSpeech.stop();
+    await speechController.stop();
     const finalTranscript = liveTranscriptRef.current;
     liveTranscriptRef.current = '';
     setLiveTranscript('');
@@ -349,18 +291,14 @@ export default function App() {
     await stopMic();
   };
 
-  /** 麦克风双击：停止转录，理解意图生成表达卡（双击即显式意图信号） */
+  /** 麦克风双击：停止转录 → speechController 意图处理（成卡 + 归档笔记） */
   const handleMicDoubleTap = async () => {
     const transcript = await stopMic();
     if (!transcript || transcript.includes('正在开启')) return;
-    handleAddNote(transcript, 'VOICE');
     setProcessingLabel('正在理解意图并生成表达卡...');
     try {
-      const locationCtx = await getLocationContext();
-      const result = await pluginManager.generateCardFromText(transcript, locationCtx ?? undefined);
-      if (result && result.targetText) {
-        addExpressionCard(scenarioToCard(result, '当前位置'));
-      }
+      await speechController.handleTranscript(transcript);
+      setNotes(await noteStore.getAll());
     } catch (err) {
       console.warn('[Voice Card Error]:', err);
     } finally {
@@ -372,7 +310,7 @@ export default function App() {
     if (!isCameraActive) {
       setIsCameraReady(false);
       setIsCameraActive(true);
-      setIsCardVisible(false);
+      cardStackStore.getState().setVisible(false);
     } else {
       setIsCameraReady(false);
       setIsCameraActive(false);
@@ -389,59 +327,33 @@ export default function App() {
   }, []);
 
   const handleNextScenario = () => {
-    setCardIndex((prev) => (prev + 1) % cards.length);
+    cardStackStore.getState().next();
   };
 
-  /** 新表达卡入栈：去重后置顶展示，并确保卡面可见 */
-  const addExpressionCard = (card: CardData) => {
-    setCards((prev) => [card, ...prev.filter((c) => c.id !== card.id)]);
-    setCardIndex(0);
-    setIsCardVisible(true);
-  };
-
-  /** 当前位置预设安全卡（卡栈第一张） */
-  const buildSafetyCard = (country: SavedCountry): CardData => {
-    const s = getCountrySafety(country.code)!;
-    const city = detectedPlace?.city ?? '';
-    return {
-      id: `safety-${country.code}`,
-      categoryTag: '本地安全指南',
-      locationName: `${country.nameZh}${city ? ' · ' + city : ''}`,
-      title: `${country.nameZh}安全与实用信息`,
-      targetText: s.sos.local,
-      phonetic: s.sos.phonetic,
-      subText: `紧急电话：警察 ${s.emergency.police} · 急救 ${s.emergency.ambulance} · 火警 ${s.emergency.fire}${s.emergency.touristPolice ? ` · 旅游警察 ${s.emergency.touristPolice}` : ''}`,
-      localTip: `使领馆领保 ${s.embassy} · ${s.tipping}`,
-      languageCode: s.langCode,
-    };
-  };
-
+  /** 当前位置预设安全卡（countryController 提供） */
   const ensureSafetyCard = (country: SavedCountry) => {
-    if (!getCountrySafety(country.code)) return;
-    addExpressionCard(buildSafetyCard(country));
+    countryController.ensureSafetyCard(country, detectedPlace?.city);
   };
 
-  /** 确认国家选择（首次启动/手动切换）：保存档案 + 缓存国家 + 生成安全卡 */
-  const handleCountryConfirm = (code: string, profile: UserProfile) => {
-    const s = getCountrySafety(code);
+  /** 确认国家选择（首次启动/手动切换）：保存档案 + 缓存国家 + 生成安全卡（业务在 countryController） */
+  const handleCountryConfirm = async (code: string, profile: UserProfile) => {
     setUserProfile(profile);
-    saveUserProfile(profile);
-    if (!s) {
-      setIsCountrySelectOpen(false);
-      return;
-    }
-    const saved: SavedCountry = { code, nameZh: s.nameZh, savedAt: Date.now() };
-    setCurrentCountry(saved);
-    saveCountry(saved);
-    ensureSafetyCard(saved);
+    const ok = await countryController.confirm(code, profile, detectedPlace?.city);
     setIsCountrySelectOpen(false);
+    if (ok) {
+      const s = getCountrySafety(code);
+      setCurrentCountry(s ? { code, nameZh: s.nameZh, savedAt: Date.now() } : null);
+    }
   };
 
   const handleSwitchCountry = () => {
     if (!switchPrompt || !detectedPlace?.countryCode) return;
     setSwitchPrompt(null);
     // 切换国家时保留当前档案
-    handleCountryConfirm(detectedPlace.countryCode, userProfile ?? { nationality: 'CN', language: 'zh-CN' });
+    handleCountryConfirm(
+      detectedPlace.countryCode,
+      userProfile ?? { nationality: 'CN', language: 'zh-CN' },
+    );
   };
 
   const handleKeepCountry = () => {
@@ -450,32 +362,21 @@ export default function App() {
     ensureSafetyCard(currentCountry);
   };
 
-  // 国家流程：首次启动选择（GPS 检测高亮）；再次打开 GPS 与缓存比对，不同则询问
+  // 国家流程：首次启动选择（GPS 检测高亮）；再次打开 GPS 与缓存比对，不同则询问（业务在 countryController.init）
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const cached = await loadCountry();
-      const profile = await loadUserProfile();
-      const place = await getPlaceContext();
+      const result = await countryController.init();
       if (cancelled) return;
-      setUserProfile(profile);
-      setDetectedPlace(place);
-      if (!cached) {
+      setUserProfile(result.profile);
+      setDetectedPlace(result.place);
+      if (!result.cached) {
         // 首次启动（或档案/国家未设置）：打开选择（检测结果高亮）
         setIsCountrySelectOpen(true);
         return;
       }
-      setCurrentCountry(cached);
-      if (place?.countryCode && place.countryCode !== cached.code) {
-        const detected = getCountrySafety(place.countryCode);
-        if (detected) {
-          setSwitchPrompt({ detectedName: detected.nameZh });
-        } else {
-          ensureSafetyCard(cached);
-        }
-      } else {
-        ensureSafetyCard(cached);
-      }
+      setCurrentCountry(result.cached);
+      setSwitchPrompt(result.switchPrompt);
     })();
     return () => {
       cancelled = true;
@@ -609,14 +510,14 @@ export default function App() {
                 tipActionLabel={
                   currentCard.id.startsWith('safety-')
                     ? '安全信息'
-                    : currentCard.sessionId === sessionIdRef.current
+                    : currentCard.sessionId === sessionId
                       ? 'AI 解读'
                       : undefined
                 }
                 onTipAction={
                   currentCard.id.startsWith('safety-')
                     ? () => setIsSafetyDetailOpen(true)
-                    : currentCard.sessionId === sessionIdRef.current
+                    : currentCard.sessionId === sessionId
                       ? handleOpenSnapshotFromCard
                       : undefined
                 }
@@ -647,7 +548,7 @@ export default function App() {
           {/* Bottom Control Bar：仅状态开关与入口 */}
           <ControlBar
             isCardVisible={isCardVisible}
-            onToggleCard={() => setIsCardVisible(!isCardVisible)}
+            onToggleCard={() => cardStackStore.getState().setVisible(!isCardVisible)}
             onOpenNotes={() => setIsNotesOpen(true)}
             onOpenTools={() => setIsToolsOpen(true)}
           />
