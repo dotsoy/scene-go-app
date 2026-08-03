@@ -70,8 +70,10 @@ export const ChatPage: React.FC<ChatPageProps> = ({
       />
       {isRecording ? (
         <View style={styles.transcriptBar}>
-          <Text style={styles.transcriptTitle}>实时语音转录中</Text>
-          <Text style={styles.transcriptRec}>REC</Text>
+          <View style={styles.transcriptTitleRow}>
+            <Text style={styles.transcriptTitle}>实时语音转录中</Text>
+            <Text style={styles.transcriptRec}>REC</Text>
+          </View>
           <Text style={styles.transcriptText} numberOfLines={2}>
             {liveTranscript || '请说话，系统正在进行原生 0 延迟实时语音听写...'}
           </Text>
@@ -148,10 +150,12 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: COLORS.borderBlue,
     padding: 12,
+    gap: 6,
+  },
+  transcriptTitleRow: {
     flexDirection: 'row',
-    flexWrap: 'wrap',
     alignItems: 'center',
-    gap: 8,
+    justifyContent: 'space-between',
   },
   transcriptTitle: {
     fontSize: 11,
@@ -163,10 +167,10 @@ const styles = StyleSheet.create({
     fontSize: 10,
     fontWeight: '700',
     color: COLORS.accentRed,
+    letterSpacing: 1,
     fontFamily: FONT.monoBold,
   },
   transcriptText: {
-    flexBasis: '100%',
     fontSize: 14,
     color: COLORS.textPrimary,
     fontFamily: FONT.regular,

@@ -62,11 +62,12 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     flex: 1,
     height: '100%',
+    gap: 2,
   },
   indicator: {
     position: 'absolute',
     top: 0,
-    width: 24,
+    width: 16,
     height: 2,
     borderRadius: 1,
     backgroundColor: 'transparent',
