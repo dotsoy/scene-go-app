@@ -28,6 +28,11 @@ export const ExprCard: React.FC<ExprCardProps> = ({ card, variant, onPress, onDe
       <View style={styles.categoryPill}>
         <Text style={styles.categoryText}>{card.categoryTag}</Text>
       </View>
+      {card.steps && card.steps.length > 0 ? (
+        <View style={styles.stepsBadge}>
+          <Text style={styles.stepsBadgeText}>共 {card.steps.length} 步</Text>
+        </View>
+      ) : null}
       <Text style={styles.title} numberOfLines={1}>
         {card.title}
       </Text>
@@ -84,6 +89,18 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     letterSpacing: 1,
     color: COLORS.textSecondary,
+    fontFamily: FONT.regular,
+  },
+  stepsBadge: {
+    backgroundColor: COLORS.greenBg,
+    borderRadius: 6,
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+  },
+  stepsBadgeText: {
+    fontSize: 10,
+    fontWeight: '700',
+    color: COLORS.accentGreen,
     fontFamily: FONT.regular,
   },
   title: {

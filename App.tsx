@@ -7,6 +7,7 @@ import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { CameraPreviewBox } from './src/components/CameraPreviewBox';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
+import { StepsCardView } from './src/components/StepsCardView';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { CountrySelectModal } from './src/components/CountrySelectModal';
 import { CountrySwitchPromptModal } from './src/components/CountrySwitchPromptModal';
@@ -21,7 +22,7 @@ import { TabBar, TabKey } from './src/components/TabBar';
 import { CardStackPage } from './src/components/CardStackPage';
 import { NotesPage } from './src/components/NotesPage';
 import { MorePage } from './src/components/MorePage';
-import { ChatMessage } from './src/core/types';
+import { ChatMessage, ReplyOption } from './src/core/types';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { PlaceContext } from './src/utils/locationContext';
 import { SavedCountry } from './src/utils/countryStore';
@@ -75,6 +76,8 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>('chat');
   // V2：点表达卡 → 全屏大字卡覆盖层
   const [fullscreenCard, setFullscreenCard] = useState<CardData | null>(null);
+  // V2：听对方说话覆盖层（一卡全览/单步的 🎙️ 入口；状态与逻辑在 Phase 3 补齐）
+  const [listenCard, setListenCard] = useState<CardData | null>(null);
   const isCardVisible = useStore(cardStackStore, (s) => s.visible);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
 
@@ -406,6 +409,12 @@ export default function App() {
     if (m.card) setFullscreenCard(m.card);
   };
 
+  /** 一卡全览回应选项：回卡入卡栈 + 对话流（听对方说话/全览共用） */
+  const handleReplyPick = (option: ReplyOption) => {
+    cardStackStore.getState().add(option.replyCard);
+    chatSessionStore.getState().appendCard(option.replyCard);
+  };
+
 
 
   const currentCard = cards[cardIndex] ?? TAP_TALK_CARD;
@@ -630,30 +639,40 @@ export default function App() {
           </View>
         ) : null}
 
-        {/* V2 全屏大字卡（点表达卡消息调起） */}
+        {/* V2 全屏大字卡（点表达卡消息调起；多步骤卡走一卡全览） */}
         {fullscreenCard ? (
           <View style={styles.fullscreenCardOverlay}>
-            <FlashCardView
-              card={fullscreenCard}
-              currentIndex={0}
-              totalCards={1}
-              onNextCard={() => {}}
-              tipActionLabel={
-                fullscreenCard.id.startsWith('safety-')
-                  ? '安全信息'
-                  : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
-                    ? 'AI 解读'
-                    : undefined
-              }
-              onTipAction={
-                fullscreenCard.id.startsWith('safety-')
-                  ? () => setIsSafetyDetailOpen(true)
-                  : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
-                    ? handleOpenSnapshotFromCard
-                    : undefined
-              }
-              onClose={() => setFullscreenCard(null)}
-            />
+            {fullscreenCard.steps && fullscreenCard.steps.length > 0 ? (
+              <StepsCardView
+                card={fullscreenCard}
+                locationName={fullscreenCard.locationName}
+                onClose={() => setFullscreenCard(null)}
+                onListen={() => setListenCard(fullscreenCard)}
+                onReplyPick={handleReplyPick}
+              />
+            ) : (
+              <FlashCardView
+                card={fullscreenCard}
+                currentIndex={0}
+                totalCards={1}
+                onNextCard={() => {}}
+                tipActionLabel={
+                  fullscreenCard.id.startsWith('safety-')
+                    ? '安全信息'
+                    : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
+                      ? 'AI 解读'
+                      : undefined
+                }
+                onTipAction={
+                  fullscreenCard.id.startsWith('safety-')
+                    ? () => setIsSafetyDetailOpen(true)
+                    : fullscreenCard.sessionId === chatSessionStore.getState().sessionId
+                      ? handleOpenSnapshotFromCard
+                      : undefined
+                }
+                onClose={() => setFullscreenCard(null)}
+              />
+            )}
           </View>
         ) : null}
 
