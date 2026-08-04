@@ -12,6 +12,8 @@ export interface UserProfile {
   nationality: string;
   /** 语言（BCP-47） */
   language: string;
+  /** 过敏原（中文，如 ['花生']）；目前无写入 UI，仅供药店分步卡读取与未来「个人档案」使用 */
+  allergens?: string[];
 }
 
 /** 国籍可选列表（用户来源国，不限于目的地数据集） */

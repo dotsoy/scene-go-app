@@ -8,6 +8,7 @@ import { ChatTurn, ScenarioResult } from '../plugins/types';
 import { getLocationContext } from '../utils/locationContext';
 import { compressImage } from '../utils/imageCompress';
 import { scenarioToCard } from '../utils/cardBuilder';
+import { sopEngine } from './sopEngine';
 import { CardData } from './types';
 
 export interface ProcessImageResult {
@@ -40,8 +41,15 @@ export const expressionEngine = {
     };
   },
 
-  /** 文本驱动的动态表达卡：一句话需求（语音转写/手打）→ 表达卡 */
-  async generateCard(text: string, location?: string): Promise<CardData | null> {
+  /** 文本驱动的动态表达卡：一句话需求（语音转写/手打）→ 表达卡；lang 为用户侧文案语言 */
+  async generateCard(text: string, location?: string, lang?: string): Promise<CardData | null> {
+    // 离线 SOP 优先：打车/药店确定性模板（无 Key 也能成卡）
+    const local = sopEngine.matchLocalSop(text, {
+      location: location ?? undefined,
+      lang: (lang as 'zh-CN' | 'en-US') ?? undefined,
+    });
+    if (local) return local;
+
     const result = await pluginManager.generateCardFromText(text, location);
     if (!result) return null;
     return scenarioToCard(result, location ?? '当前位置');

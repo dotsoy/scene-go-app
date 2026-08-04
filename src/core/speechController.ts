@@ -5,6 +5,7 @@
 import { Platform } from 'react-native';
 import { NativeSpeech } from '../utils/NativeSpeech';
 import { getLocationContext } from '../utils/locationContext';
+import { loadUserProfile } from '../utils/userProfile';
 import { noteStore, NoteItem } from '../utils/NoteStore';
 import { expressionEngine } from './expressionEngine';
 import { cardStackStore } from './cardStackStore';
@@ -43,8 +44,9 @@ export const speechController = {
     return '当前设备为 Android：实时语音转写模块仅支持 iOS。\n请用 CAM 拍照识别场景，或使用下方文字表达（Tap&Talk）。';
   },
 
-  async start(): Promise<SpeechStartResult> {
-    return NativeSpeech.start('zh-CN');
+  /** 开始听写；locale 为 BCP-47 识别语言（默认中文，听对方说话时传对方语言） */
+  async start(locale: string = 'zh-CN'): Promise<SpeechStartResult> {
+    return NativeSpeech.start(locale);
   },
 
   /** 停止转录并返回最终文本（await 期间到达的 final 事件不会丢失） */
@@ -59,7 +61,12 @@ export const speechController = {
    */
   async handleTranscript(transcript: string): Promise<TranscriptResult> {
     const locationCtx = await getLocationContext();
-    const card = await expressionEngine.generateCard(transcript, locationCtx ?? undefined);
+    const profile = await loadUserProfile();
+    const card = await expressionEngine.generateCard(
+      transcript,
+      locationCtx ?? undefined,
+      profile?.language ?? 'zh-CN',
+    );
     const note: NoteItem = {
       id: Date.now().toString(),
       content: transcript,

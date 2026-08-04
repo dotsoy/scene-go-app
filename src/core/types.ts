@@ -24,6 +24,54 @@ export interface CardData {
   sessionId?: string;
   /** 安全卡专属：一键拨打号码（警察/救护/火警/旅游警察） */
   dials?: { num: string; label: string }[];
+  /** 多步骤卡（一卡全览）：点步骤可放大为全屏大字 */
+  steps?: CardStep[];
+  /** 一卡全览引导语（如「全部步骤一张卡 · 点任意步骤可放大」） */
+  stepsLead?: string;
+  /** 顶行右侧胶囊文字（如「一卡全览」/「3 步一张卡」） */
+  allPillText?: string;
+  /** 全览卡底部回应选项（听完对方说话后选择） */
+  reply?: { label: string; options: ReplyOption[] };
+}
+
+/** 多步骤卡中的一步（打车/药店等协商流程） */
+export interface CardStep {
+  tag: string;
+  /** 令牌色：#38bdf8 / #facc15 / #81C784 */
+  tagColor: string;
+  /** 当地语言大字 */
+  targetText: string;
+  /** 拉丁转写 */
+  phonetic?: string;
+  /** 中文补充（含翻译） */
+  supplement?: string;
+  /** 协商筹码 chips（如 🚕 打表计费 / 🛣 不走高速） */
+  chips?: { emoji: string; label: string }[];
+}
+
+/** 全览卡回应选项（选中后生成回卡，成卡时已构建） */
+export interface ReplyOption {
+  emoji: string;
+  label: string;
+  replyCard: CardData;
+}
+
+/** 菜单解读：VLM 结构化菜单条目 */
+export interface MenuDish {
+  zh: string;
+  en: string;
+  /** 当地语言菜名（出卡必用） */
+  th: string;
+  price: string;
+  spice: string;
+  signature?: boolean;
+  allergens?: string[];
+}
+
+export interface MenuData {
+  signature: MenuDish[];
+  allergenWarn?: string;
+  dishes: MenuDish[];
 }
 
 /**
@@ -39,5 +87,7 @@ export interface ChatMessage {
   imageUri?: string;
   /** kind=card：直接渲染表达卡（与卡栈共享数据源） */
   card?: CardData;
+  /** kind=assistant：菜单解读面板数据（VLM 结构化菜单） */
+  menu?: MenuData;
   createdAt: number;
 }

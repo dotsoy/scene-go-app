@@ -1,3 +1,5 @@
+import { MenuDish, MenuData } from '../core/types';
+
 export interface OcrResult {
   rawText: string;
   lines: string[];
@@ -21,6 +23,8 @@ export interface ScenarioResult {
   localTip?: string;
   /** BCP-47 语言代码（如 th-TH / ja-JP / en-US） */
   languageCode?: string;
+  /** 菜单照片：结构化菜单（无则 undefined，走普通解读） */
+  menu?: MenuData | null;
 }
 
 export interface OcrPlugin {
