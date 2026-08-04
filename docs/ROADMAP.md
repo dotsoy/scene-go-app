@@ -22,14 +22,14 @@
 | `STRAT-` | 产品战略 | `reference/STRAT-01.md` |
 | `TECH-` | 技术架构 / 工程 | `reference/TECH-01.md`、`reference/TECH-02.md` |
 | `OPS-` | 运营 / 合规 | `reference/OPS-01.md`、`reference/OPS-02.md` |
-| `DESIGN-` | 设计规范 / 数据 / 草图 | `reference/DESIGN-01.md`、`reference/DESIGN-pen.pen`、`reference/DESIGN-v2功能实现.tldraw` |
+| `DESIGN-` | 设计规范 / 数据 / 草图 | `reference/DESIGN-01.md`、`reference/DESIGN-02.json`、`reference/scenego.pen`、`reference/DESIGN-v*.tldraw` |
 | `SCREEN-` | UI 截图 | `reference/SCREEN-01-dialog.png` ~ `reference/SCREEN-13-engine-settings.png` |
 | `ARCHIVE-` | 归档（不再活跃） | `reference/ARCHIVE-01.md`、`reference/ARCHIVE-02.md` |
 | `DEPENDENCIES-` | 能力依赖关系 | `reference/DEPENDENCIES-01.md` |
 
 **阅读顺序**：
 - **新人/Agent**：本文件（进度总览）→ `reference/PRD-01.md` → `reference/STRAT-01.md` → `reference/TECH-01.md`
-- **设计施工**：`reference/DESIGN-01.md` → `reference/DESIGN-02.json` → `reference/DESIGN-pen.pen` → `reference/SCREEN-*.png`
+- **设计施工**：`reference/DESIGN-01.md` → `reference/DESIGN-02.json` → `reference/scenego.pen` → `reference/SCREEN-*.png`
 - **运营规划**：`reference/OPS-01.md` → `reference/OPS-02.md`
 
 ---

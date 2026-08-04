@@ -19,7 +19,7 @@ Built with Expo / React Native. Client-only: no backend required.
 
 ## Screens
 
-视觉稿由 [Pencil](https://pen.dev) 设计（`docs/DESIGN-pen.pen`）
+视觉稿由 [Pencil](https://pen.dev) 设计（`docs/reference/scenego.pen`）
 
 | | | | |
 |---|---|---|---|
