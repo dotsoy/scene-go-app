@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView, Keyboard, Linking } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import * as Device from 'expo-device';
@@ -27,11 +27,14 @@ import { NotesPage } from './src/components/NotesPage';
 import { MorePage } from './src/components/MorePage';
 import { ChatMessage, ReplyOption, MenuDish } from './src/core/types';
 import { NativeSpeech } from './src/utils/NativeSpeech';
-import { PlaceContext } from './src/utils/locationContext';
+import { PlaceContext, getPlaceContext } from './src/utils/locationContext';
 import { SavedCountry } from './src/utils/countryStore';
 import { UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
 import { getAirportCapsules, detectAirportDest, buildCapsuleCard, buildOrderCard } from './src/data/scenarioSops';
+import { inferSceneFromPlace } from './src/core/sceneInference';
+import { pipelineTraceStore } from './src/core/pipelineTrace';
+import { PipelineTracePanel } from './src/components/PipelineTracePanel';
 import { getOpenRouterApiKey } from './src/utils/SecureConfig';
 import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
@@ -432,7 +435,7 @@ export default function App() {
     chatSessionStore.getState().appendCard(withSession);
   };
 
-  /** 机场场景胶囊：一键生成打车/末班车/eSIM 表达卡（离线内容） */
+  /** 机场场景胶囊：一键生成打车/末班车/eSIM 表达卡（离线内容；目的地优先用场景推理结果） */
   const handleCapsuleSelect = (key: string) => {
     const capsule = getAirportCapsules().find((c) => c.key === key);
     if (!capsule) return;
@@ -440,7 +443,7 @@ export default function App() {
       [detectedPlace?.city, detectedPlace?.region, detectedPlace?.country]
         .filter(Boolean)
         .join(' · ') || '';
-    const dest = detectAirportDest(placeStr);
+    const dest = inferredScene?.dest ?? detectAirportDest(placeStr);
     const lang = userProfile?.language === 'en-US' ? 'en-US' : 'zh-CN';
     const card = buildCapsuleCard(capsule, { dest }, currentCountry?.nameZh ?? '当前位置', lang);
     const now = new Date();
@@ -450,6 +453,20 @@ export default function App() {
       .appendSystem(`📍 已根据你的位置与时间（${pad(now.getHours())}:${pad(now.getMinutes())}），为你推荐机场场景`);
     chatSessionStore.getState().appendCard(card);
     cardStackStore.getState().add(card);
+    pipelineTraceStore.getState().pushTrace({
+      at: Date.now(),
+      input: '',
+      path: 'capsule',
+      category: card.categoryTag,
+      targetText: card.targetText,
+      steps: card.steps?.length ?? 0,
+    });
+  };
+
+  /** 悬浮面板「重新定位」：强制刷新 GPS（绕过 5 分钟缓存）并重推场景 */
+  const handleRelocate = async () => {
+    const place = await getPlaceContext(true);
+    setDetectedPlace(place);
   };
 
   /** 紧急拨打：先弹二次确认（FlashCardView/SafetyDetailModal 拨号入口统一走此） */
@@ -556,6 +573,19 @@ export default function App() {
 
 
   const currentCard = cards[cardIndex] ?? TAP_TALK_CARD;
+
+  // GPS 场景推理 → 推荐胶囊（真实定位驱动：命中机场场景才显示，未命中不显示）
+  const inferredScene = useMemo(() => inferSceneFromPlace(detectedPlace), [detectedPlace]);
+  const sceneCapsules = inferredScene ? getAirportCapsules() : [];
+
+  // 定位/推理/推荐写入管线 trace（悬浮面板实时订阅）
+  useEffect(() => {
+    pipelineTraceStore.getState().setScene(
+      detectedPlace,
+      inferredScene,
+      sceneCapsules.map((c) => c.label.zh),
+    );
+  }, [detectedPlace, inferredScene, sceneCapsules]);
 
   const [notes, setNotes] = useState<NoteItem[]>([]);
 
@@ -695,10 +725,10 @@ export default function App() {
                 <Text style={styles.locationChange}>切换 ›</Text>
               </TouchableOpacity>
 
-              {/* 场景胶囊（机场推荐，内容通用不绑定国家） */}
-              {getAirportCapsules().length > 0 ? (
+              {/* 场景胶囊（GPS 场景推理驱动：命中机场等场景才显示，未命中不显示） */}
+              {sceneCapsules.length > 0 ? (
                 <ScenarioCapsuleBar
-                  capsules={getAirportCapsules()}
+                  capsules={sceneCapsules}
                   lang={userProfile?.language === 'en-US' ? 'en-US' : 'zh-CN'}
                   onSelect={handleCapsuleSelect}
                 />
@@ -915,6 +945,9 @@ export default function App() {
           onClose={() => setConfirmDial(null)}
           onConfirm={handleConfirmDial}
         />
+
+        {/* 管线实时反馈悬浮入口（仅开发构建） */}
+        {__DEV__ ? <PipelineTracePanel onRelocate={handleRelocate} /> : null}
       </SafeAreaView>
     </CameraBackground>
   );
