@@ -244,6 +244,32 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       return null;
     }
   }
+
+  /** 听对方说话：当地语言发言 → 用户语言一行译文（失败返回 null，UI 显示兜底） */
+  async translateUtterance(text: string, lang?: string): Promise<string | null> {
+    const apiKey = await getOpenRouterApiKey();
+    if (!apiKey) return null;
+    const target = lang === 'en-US' ? '英语' : '简体中文';
+    try {
+      const result = await chatCompletions({
+        messages: [
+          {
+            role: 'system',
+            content: `你是出行翻译助手。把用户的当地语言发言翻译成${target}。只输出一行译文，不要任何其他内容。`,
+          },
+          { role: 'user', content: text },
+        ],
+        maxTokens: 256,
+        logLabel: '[Listen Translate]',
+      });
+      if (!result.ok || result.status === 0) return null;
+      const content = (result.content ?? '').trim();
+      return content || null;
+    } catch (err: unknown) {
+      console.warn('[Listen Translate Error]:', err);
+      return null;
+    }
+  }
 }
 
 /** 尝试从云端 VLM 原始返回文本中解析出 ScenarioResult JSON */

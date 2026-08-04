@@ -8,6 +8,7 @@ import { CameraBackground } from './src/components/CameraBackground';
 import { CameraPreviewBox } from './src/components/CameraPreviewBox';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { StepsCardView } from './src/components/StepsCardView';
+import { ListenReplyView } from './src/components/ListenReplyView';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { CountrySelectModal } from './src/components/CountrySelectModal';
 import { CountrySwitchPromptModal } from './src/components/CountrySwitchPromptModal';
@@ -76,8 +77,12 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<TabKey>('chat');
   // V2：点表达卡 → 全屏大字卡覆盖层
   const [fullscreenCard, setFullscreenCard] = useState<CardData | null>(null);
-  // V2：听对方说话覆盖层（一卡全览/单步的 🎙️ 入口；状态与逻辑在 Phase 3 补齐）
+  // V2：听对方说话覆盖层（一卡全览/单步的 🎙️ 入口）
   const [listenCard, setListenCard] = useState<CardData | null>(null);
+  const [listenTranslated, setListenTranslated] = useState<string | null>(null);
+  const [listenTranslateFailed, setListenTranslateFailed] = useState<boolean>(false);
+  const [listenElapsed, setListenElapsed] = useState<number>(0);
+  const listenStartAtRef = useRef<number>(0);
   const isCardVisible = useStore(cardStackStore, (s) => s.visible);
   const [isKeyboardVisible, setIsKeyboardVisible] = useState<boolean>(false);
 
@@ -415,6 +420,84 @@ export default function App() {
     chatSessionStore.getState().appendCard(option.replyCard);
   };
 
+  // ── 听对方说话（ListenReplyView）──
+  /** 打开听对方说话：先静默停止对话麦克风（不触发成卡），再以卡片语言开始听写 */
+  const openListen = async (card: CardData) => {
+    if (isMicActive) await stopMic();
+    setListenTranslated(null);
+    setListenTranslateFailed(false);
+    setListenElapsed(0);
+    setListenCard(card);
+    await startListenMic(card);
+  };
+
+  /** 以卡片语言开始听写（locale = card.languageCode，如 en-US） */
+  const startListenMic = async (card: CardData | null = listenCard) => {
+    if (!card) return;
+    if (!speechController.isSupported()) {
+      micActiveRef.current = false;
+      Alert.alert('语音转写暂不可用', speechController.unsupportedReason());
+      return;
+    }
+    micActiveRef.current = true;
+    liveTranscriptRef.current = '';
+    listenStartAtRef.current = Date.now();
+    setListenElapsed(0);
+    setIsMicActive(true);
+    setLiveTranscript('正在开启原生听写，请说话...');
+    const started = await speechController.start(card.languageCode);
+    if (!started.ok && micActiveRef.current) {
+      micActiveRef.current = false;
+      setIsMicActive(false);
+      setLiveTranscript(`语音识别启动失败: ${started.error}`);
+    }
+  };
+
+  /** 停止听写并翻译最终转写（失败显示兜底提示） */
+  const stopListenMic = async () => {
+    const transcript = await stopMic();
+    if (!transcript || transcript.includes('正在开启')) return;
+    setListenTranslated(null);
+    setListenTranslateFailed(false);
+    const translated = await pluginManager
+      .getCloudVlmPlugin()
+      .translateUtterance(transcript, userProfile?.language ?? 'zh-CN');
+    if (translated) setListenTranslated(translated);
+    else setListenTranslateFailed(true);
+  };
+
+  /** 换个说法：清译文重听 */
+  const handleListenRephrase = async () => {
+    setListenTranslated(null);
+    setListenTranslateFailed(false);
+    if (isMicActive) await stopMic();
+    await startListenMic(listenCard);
+  };
+
+  /** 返回一卡全览 / 关闭：静默停止麦克风并收起覆盖层 */
+  const handleListenExit = async () => {
+    if (isMicActive) await stopMic();
+    setListenCard(null);
+    setListenTranslated(null);
+    setListenTranslateFailed(false);
+  };
+
+  /** 听对方说话回应：回卡 + 收起覆盖层（回落一卡全览） */
+  const handleListenReply = async (option: ReplyOption) => {
+    if (isMicActive) await stopMic();
+    setListenCard(null);
+    handleReplyPick(option);
+  };
+
+  // 听译秒表：仅听对方说话覆盖层录音期间走动
+  useEffect(() => {
+    if (!listenCard || !isMicActive) return;
+    const timer = setInterval(() => {
+      setListenElapsed(Math.floor((Date.now() - listenStartAtRef.current) / 1000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [listenCard, isMicActive]);
+
 
 
   const currentCard = cards[cardIndex] ?? TAP_TALK_CARD;
@@ -647,7 +730,7 @@ export default function App() {
                 card={fullscreenCard}
                 locationName={fullscreenCard.locationName}
                 onClose={() => setFullscreenCard(null)}
-                onListen={() => setListenCard(fullscreenCard)}
+                onListen={() => openListen(fullscreenCard)}
                 onReplyPick={handleReplyPick}
               />
             ) : (
@@ -673,6 +756,25 @@ export default function App() {
                 onClose={() => setFullscreenCard(null)}
               />
             )}
+          </View>
+        ) : null}
+
+        {/* V2 听对方说话覆盖层（层级在 steps 全览之上） */}
+        {listenCard ? (
+          <View style={styles.fullscreenCardOverlay}>
+            <ListenReplyView
+              card={listenCard}
+              isRecording={isMicActive}
+              transcript={liveTranscript}
+              translated={listenTranslated}
+              translateFailed={listenTranslateFailed}
+              elapsedSec={listenElapsed}
+              onToggleMic={isMicActive ? stopListenMic : () => startListenMic(listenCard)}
+              onRephrase={handleListenRephrase}
+              onBack={handleListenExit}
+              onReplyPick={handleListenReply}
+              onClose={handleListenExit}
+            />
           </View>
         ) : null}
 
