@@ -81,12 +81,9 @@ export const CameraPreviewBox: React.FC<CameraPreviewBoxProps> = ({
         <View style={styles.dim} />
         {/* 取景引导 */}
         <View style={styles.guideLayer} pointerEvents="none">
-          <View style={styles.guideFrame}>
-            <Text style={styles.guideFrameText}>对准画面中的文字区域</Text>
-          </View>
-          <Text style={styles.guideHint}>
-            {'对准菜单 / 标牌 / 售票机\n单击 SNAP 拍照发送'}
-          </Text>
+          <Text style={styles.guideText}>将菜单 / 标牌文本置于框内</Text>
+          <View style={styles.guideFrame} />
+          <Text style={styles.subHint}>自动识别本地语言并生成表达卡</Text>
         </View>
       </CameraView>
     </View>
@@ -141,27 +138,23 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
     alignItems: 'center',
     justifyContent: 'center',
+    gap: 16,
+  },
+  guideText: {
+    fontFamily: FONT.regular,
+    color: '#a1a1aa',
+    fontSize: 13,
   },
   guideFrame: {
-    width: 240,
-    height: 180,
+    width: 280,
+    height: 200,
     borderWidth: 1.5,
-    borderColor: 'rgba(255,255,255,0.9)',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'center',
+    borderColor: 'rgba(255,255,255,0.4)',
+    borderRadius: 16,
   },
-  guideFrameText: {
+  subHint: {
     fontFamily: FONT.regular,
-    color: 'rgba(255,255,255,0.75)',
-    fontSize: 12,
-  },
-  guideHint: {
-    fontFamily: FONT.regular,
-    color: '#4a4a52',
-    fontSize: 13,
-    lineHeight: 21,
-    textAlign: 'center',
-    marginTop: 14,
+    color: '#52525b',
+    fontSize: 11,
   },
 });

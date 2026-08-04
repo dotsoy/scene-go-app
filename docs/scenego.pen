@@ -2849,6 +2849,176 @@
     },
     {
       "type": "frame",
+      "id": "Asjqc_opt",
+      "x": 4580,
+      "y": 0,
+      "name": "06 CAMERA 相机取景 (优化稿)",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "#09090b",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "r9KCz8_opt",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "kUMQ6_opt",
+          "name": "Header",
+          "width": "fill_container",
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "s1ZXg_opt",
+              "name": "Brand",
+              "fill": "#ffffff",
+              "content": "SCENEGO",
+              "fontFamily": "$font-mono",
+              "fontSize": 16,
+              "fontWeight": "800",
+              "letterSpacing": 2
+            },
+            {
+              "type": "frame",
+              "id": "RQxmL_opt",
+              "name": "HSpacer",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "P1qHB_opt",
+              "name": "Cancel",
+              "fill": "rgba(255,255,255,0.08)",
+              "cornerRadius": 12,
+              "padding": [
+                8,
+                14
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "RFnYd_opt",
+                  "name": "CancelText",
+                  "fill": "$text-secondary",
+                  "content": "取消",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "KgHjW_opt",
+          "name": "Viewfinder",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "I1Ds7W_opt",
+              "name": "GuideText",
+              "fill": "#a1a1aa",
+              "content": "将菜单 / 标牌文本置于框内",
+              "fontFamily": "Inter",
+              "fontSize": 13,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "L2dJz_opt",
+              "name": "FocusBox",
+              "width": 280,
+              "height": 200,
+              "cornerRadius": 16,
+              "stroke": "rgba(255,255,255,0.4)",
+              "strokeWidth": 1.5,
+              "justifyContent": "center",
+              "alignItems": "center"
+            },
+            {
+              "type": "text",
+              "id": "SubHint_opt",
+              "name": "SubHint",
+              "fill": "#52525b",
+              "content": "自动识别本地语言并生成表达卡",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Rg1vS_opt",
+          "name": "BottomBar",
+          "width": "fill_container",
+          "height": 130,
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            0,
+            20
+          ],
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ShutterOuter_opt",
+              "name": "ShutterOuter",
+              "width": 72,
+              "height": 72,
+              "cornerRadius": 36,
+              "stroke": "rgba(255,255,255,0.8)",
+              "strokeWidth": 2,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "ShutterInner_opt",
+                  "name": "ShutterInner",
+                  "width": 60,
+                  "height": 60,
+                  "cornerRadius": 30,
+                  "fill": "#ffffff"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "SnapHint_opt",
+              "name": "SnapHint",
+              "fill": "$text-tertiary",
+              "content": "轻触拍照",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
       "id": "kKvF8",
       "x": 4620,
       "y": 0,

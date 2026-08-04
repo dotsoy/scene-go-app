@@ -620,12 +620,13 @@ export default function App() {
                 <Text style={styles.cameraCancelText}>取消</Text>
               </TouchableOpacity>
             </View>
-            <Text style={styles.cameraHint}>对准菜单 / 标牌 / 售票机</Text>
             <CameraPreviewBox cameraRef={cameraRef} onCameraReady={() => setIsCameraReady(true)} />
-            <TouchableOpacity style={styles.snapButton} onPress={handleCaptureFrame} activeOpacity={0.85}>
-              <Text style={styles.snapText}>SNAP</Text>
-              <Text style={styles.snapHint}>拍照即发送 · 单击取消</Text>
-            </TouchableOpacity>
+            <View style={styles.shutterContainer}>
+              <TouchableOpacity style={styles.shutterOuter} onPress={handleCaptureFrame} activeOpacity={0.7}>
+                <View style={styles.shutterInner} />
+              </TouchableOpacity>
+              <Text style={styles.snapHint}>轻触拍照</Text>
+            </View>
           </View>
         ) : null}
 
@@ -927,33 +928,33 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 13,
   },
-  cameraHint: {
-    color: '#4a4a52',
-    fontSize: 14,
-    textAlign: 'center',
-    paddingBottom: 12,
-  },
-  snapButton: {
-    marginHorizontal: 20,
-    height: 64,
-    borderRadius: 12,
-    backgroundColor: COLORS.redBg,
-    borderWidth: 1,
-    borderColor: COLORS.accentRed,
+  shutterContainer: {
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 34,
+    paddingTop: 16,
+    paddingBottom: 34,
+    gap: 8,
   },
-  snapText: {
-    color: COLORS.accentRed,
-    fontSize: 18,
-    fontWeight: '800',
-    letterSpacing: 2,
-    fontFamily: FONT.monoBold,
+  shutterOuter: {
+    width: 72,
+    height: 72,
+    borderRadius: 36,
+    borderWidth: 2,
+    borderColor: 'rgba(255, 255, 255, 0.8)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: 'transparent',
+  },
+  shutterInner: {
+    width: 60,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: '#ffffff',
   },
   snapHint: {
     color: COLORS.textTertiary,
-    fontSize: 9,
+    fontSize: 11,
+    fontFamily: FONT.regular,
   },
   // V2：全屏大字卡覆盖层
   fullscreenCardOverlay: {
