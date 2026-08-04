@@ -142,10 +142,10 @@ export const TAXI_SOP: SopTemplate = {
       {
         tag: '① 说需求 · 点此放大',
         tagColor: '#38bdf8',
-        targetText: `Please take me to the ${dest.en}.`,
+        targetText: `Please take me to ${dest.en}.`,
         phonetic: '',
         supplement: pick(
-          { zh: `请送我去${dest.zh}`, en: `Please take me to the ${dest.en}.` },
+          { zh: `请送我去${dest.zh}`, en: `Please take me to ${dest.en}.` },
           lang,
         ),
         chips: [
@@ -156,7 +156,7 @@ export const TAXI_SOP: SopTemplate = {
       {
         tag: '② 问清楚 · 点此放大',
         tagColor: '#facc15',
-        targetText: `How much is the fare to the ${dest.en}?`,
+        targetText: `How much is the fare to ${dest.en}?`,
         phonetic: '',
         supplement: pick({ zh: '请问车费多少', en: 'How much is the fare?' }, lang),
       },
@@ -190,7 +190,7 @@ export const PHARMACY_SOP: SopTemplate = {
         phonetic: '',
         supplement: pick(
           s2
-            ? { zh: `我${s1.zh}和 ${s2.zh}，有${s1.medZh}吗？`, en: `I have ${s1.en} and ${s2.en}. Do you have ${s1.medEn}?` }
+            ? { zh: `我${s1.zh}和${s2.zh}，有${s1.medZh}吗？`, en: `I have ${s1.en} and ${s2.en}. Do you have ${s1.medEn}?` }
             : { zh: `我${s1.zh}，有${s1.medZh}吗？`, en: `I have ${s1.en}. Do you have ${s1.medEn}?` },
           lang,
         ),
