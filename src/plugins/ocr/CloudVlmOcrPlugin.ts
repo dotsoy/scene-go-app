@@ -1,4 +1,5 @@
 import { OcrPlugin, OcrResult, ScenarioResult, ChatTurn } from '../types';
+import { MenuData, MenuDish } from '../../core/types';
 import { getOpenRouterApiKey } from '../../utils/SecureConfig';
 import { chatCompletions, AiChatMessage } from '../../utils/aiGateway';
 import * as FileSystem from 'expo-file-system';
@@ -17,8 +18,11 @@ const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异
   "phonetic": "targetText 的当地语言发音拉丁转写",
   "subText": "补充说明（当地语言或英文，如忌口细节）",
   "localTip": "中文当地惯例提示（小费/计费/注意事项）",
-  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）"
-}`;
+  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）",
+  "menu": "当照片是菜单/价目表/菜品清单时输出结构化菜单对象，否则为 null（字段结构见下）"
+}
+菜单字段结构（menu 为 null 时忽略）：
+{"signature":[{"zh":"中文菜名","en":"英文名","th":"当地语言菜名","price":"价格(如 150 铢)","spice":"辣度(如 🌶️🌶️ 或 无辣)","allergens":["花生","海鲜"]}],"allergenWarn":"中文避坑预警（含过敏原提示，无则空串）","dishes":[与 signature 相同字段结构]}；signature 最多 3 项，dishes 最多 6 项`;
 
 const CARD_SYSTEM_PROMPT = `你是 SceneGo 出行助手。用户正在异国旅行，会用一句话描述当下的表达需求（可能来自语音转写）。
 根据需求生成一张"递给当地人看"的高对比度表达卡，语言必须用当地语言（按需求语境推断语种，如泰语/日语/英语）。
@@ -276,6 +280,39 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
 export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
   if (!rawText || rawText.trim().length === 0) return null;
 
+  /** VLM 菜单字段 → MenuData；结构不合法返回 undefined（不影响整卡解读） */
+  const parseMenu = (obj: Record<string, unknown> | null | undefined): MenuData | undefined => {
+    if (!obj || typeof obj !== 'object') return undefined;
+    const dishList = (arr: unknown): MenuDish[] => {
+      if (!Array.isArray(arr)) return [];
+      const out: MenuDish[] = [];
+      for (const d of arr) {
+        if (!d || typeof d !== 'object') continue;
+        const item = d as Record<string, unknown>;
+        if (typeof item.zh !== 'string' || typeof item.en !== 'string' || typeof item.th !== 'string') continue;
+        out.push({
+          zh: item.zh,
+          en: item.en,
+          th: item.th,
+          price: typeof item.price === 'string' ? item.price : '',
+          spice: typeof item.spice === 'string' ? item.spice : '无辣',
+          signature: item.signature === true,
+          allergens: Array.isArray(item.allergens)
+            ? (item.allergens.filter((a): a is string => typeof a === 'string') as string[])
+            : undefined,
+        });
+      }
+      return out;
+    };
+    const signature = dishList(obj.signature).slice(0, 3);
+    const dishes = dishList(obj.dishes).slice(0, 6);
+    if (signature.length === 0 && dishes.length === 0) return undefined;
+    const warn = typeof obj.allergenWarn === 'string' && obj.allergenWarn.trim()
+      ? obj.allergenWarn.trim()
+      : undefined;
+    return { signature, dishes, allergenWarn: warn };
+  };
+
   try {
     let jsonStr = rawText;
     const match = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
@@ -298,6 +335,8 @@ export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
         subText: obj.subText,
         localTip: obj.localTip,
         languageCode: obj.languageCode,
+        // 菜单解读：结构不合法时 undefined（走普通解读）
+        menu: parseMenu(obj.menu),
       };
     }
   } catch {

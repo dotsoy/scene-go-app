@@ -63,6 +63,7 @@ export const chatSessionStore = createStore<ChatSessionState>()((set, get) => ({
             kind: 'assistant',
             content: scenario.translatedText,
             imageUri: imageUri ?? undefined,
+            ...(scenario.menu ? { menu: scenario.menu } : {}),
             createdAt: Date.now(),
           },
         ]

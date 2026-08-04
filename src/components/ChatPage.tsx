@@ -6,8 +6,9 @@
 import React from 'react';
 import { View, Text, StyleSheet, FlatList, Image } from 'react-native';
 import { COLORS, FONT } from '../theme/tokens';
-import { ChatMessage } from '../core/types';
+import { ChatMessage, MenuDish } from '../core/types';
 import { ExprCard } from './ExprCard';
+import { MenuPanelCard } from './MenuPanelCard';
 
 interface ChatPageProps {
   messages: ChatMessage[];
@@ -15,6 +16,8 @@ interface ChatPageProps {
   isRecording: boolean;
   liveTranscript: string;
   onCardPress: (card: ChatMessage & { kind: 'card' }) => void;
+  /** 菜单解读面板「出卡」 */
+  onMenuOrder: (dish: MenuDish) => void;
 }
 
 export const ChatPage: React.FC<ChatPageProps> = ({
@@ -22,6 +25,7 @@ export const ChatPage: React.FC<ChatPageProps> = ({
   isRecording,
   liveTranscript,
   onCardPress,
+  onMenuOrder,
 }) => {
   const renderMessage = ({ item }: { item: ChatMessage }) => {
     switch (item.kind) {
@@ -33,6 +37,17 @@ export const ChatPage: React.FC<ChatPageProps> = ({
           </View>
         );
       case 'assistant':
+        // 菜单解读：照片缩略 + 解读面板（替代普通解读气泡）
+        if (item.menu) {
+          return (
+            <View style={styles.menuWrap}>
+              {item.imageUri ? (
+                <Image source={{ uri: item.imageUri }} style={styles.thumbnail} resizeMode="cover" />
+              ) : null}
+              <MenuPanelCard menu={item.menu} onOrder={onMenuOrder} />
+            </View>
+          );
+        }
         return (
           <View style={[styles.bubble, styles.aiBubble]}>
             <Text style={styles.aiLabel}>{item.imageUri ? 'AI 解读' : 'AI 回复'}</Text>
@@ -161,6 +176,9 @@ const styles = StyleSheet.create({
     height: 96,
     borderRadius: 8,
     backgroundColor: COLORS.bgCard,
+  },
+  menuWrap: {
+    gap: 8,
   },
   systemText: {
     alignSelf: 'center',

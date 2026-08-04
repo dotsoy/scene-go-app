@@ -24,13 +24,13 @@ import { TabBar, TabKey } from './src/components/TabBar';
 import { CardStackPage } from './src/components/CardStackPage';
 import { NotesPage } from './src/components/NotesPage';
 import { MorePage } from './src/components/MorePage';
-import { ChatMessage, ReplyOption } from './src/core/types';
+import { ChatMessage, ReplyOption, MenuDish } from './src/core/types';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { PlaceContext } from './src/utils/locationContext';
 import { SavedCountry } from './src/utils/countryStore';
 import { UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
-import { getAirportCapsules, detectAirportDest, buildCapsuleCard } from './src/data/scenarioSops';
+import { getAirportCapsules, detectAirportDest, buildCapsuleCard, buildOrderCard } from './src/data/scenarioSops';
 import { getOpenRouterApiKey } from './src/utils/SecureConfig';
 import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
@@ -415,6 +415,17 @@ export default function App() {
     }
   };
 
+  /** 菜单解读「出卡」：生成点餐大字卡入对话流 + 卡栈 */
+  const handleMenuOrder = (dish: MenuDish) => {
+    const card = buildOrderCard(dish, {
+      location: currentCountry?.nameZh ?? '当前位置',
+      languageCode: chatSessionStore.getState().scenario?.languageCode ?? 'en-US',
+    });
+    const withSession = { ...card, sessionId: chatSessionStore.getState().sessionId ?? undefined };
+    cardStackStore.getState().add(withSession);
+    chatSessionStore.getState().appendCard(withSession);
+  };
+
   /** 机场场景胶囊：一键生成打车/末班车/eSIM 表达卡（离线内容） */
   const handleCapsuleSelect = (key: string) => {
     const capsule = getAirportCapsules().find((c) => c.key === key);
@@ -689,6 +700,7 @@ export default function App() {
                 isRecording={isMicActive}
                 liveTranscript={liveTranscript}
                 onCardPress={handleCardPress}
+                onMenuOrder={handleMenuOrder}
               />
 
               {/* V2 输入栏 + Tab 栏（贴底，Safe 区在 bottomBar 内） */}
