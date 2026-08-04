@@ -2849,7 +2849,7 @@
     },
     {
       "type": "frame",
-      "id": "Asjqc_opt",
+      "id": "CamOpt",
       "x": 4580,
       "y": 0,
       "name": "06 CAMERA 相机取景 (优化稿)",
@@ -5993,7 +5993,7 @@
     },
     {
       "type": "frame",
-      "id": "hifi_01b",
+      "id": "Hf01b",
       "x": 4980,
       "y": 0,
       "name": "01b DIALOG 双向听写对话页 (高保真)",
@@ -6436,7 +6436,7 @@
     },
     {
       "type": "frame",
-      "id": "hifi_01c",
+      "id": "Hf01c",
       "x": 5390,
       "y": 0,
       "name": "01c DIALOG 菜单决策面板 (高保真)",
@@ -6620,7 +6620,7 @@
                       "id": "p_rec_txt_1c",
                       "name": "Txt",
                       "fill": "$text-primary",
-                      "content": "1. 冬阴功海鲜汤 (Tom Yum Goong) · 180铢\\n2. 泰式炒河粉 (Pad Thai) · 120铢",
+                      "content": "1. 冬阴功海鲜汤 (Tom Yum Goong) · 180铢\n2. 泰式炒河粉 (Pad Thai) · 120铢",
                       "fontSize": 12,
                       "lineHeight": 18
                     }
@@ -6702,7 +6702,7 @@
     },
     {
       "type": "frame",
-      "id": "hifi_01d",
+      "id": "Hf01d",
       "x": 5800,
       "y": 0,
       "name": "01d DIALOG 场景推荐胶囊 (高保真)",
@@ -6972,7 +6972,7 @@
     },
     {
       "type": "frame",
-      "id": "hifi_02b",
+      "id": "Hf02b",
       "x": 6210,
       "y": 0,
       "name": "02b FLASH CARD SOP 连贯翻页卡 (高保真)",
