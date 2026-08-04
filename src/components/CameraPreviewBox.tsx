@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { View, StyleSheet, Text } from 'react-native';
+import { View, StyleSheet, Text, ActivityIndicator, TouchableOpacity, Linking } from 'react-native';
 import { CameraView, useCameraPermissions } from 'expo-camera';
 import * as Device from 'expo-device';
 import { COLORS, FONT } from '../theme/tokens';
@@ -16,6 +16,13 @@ export const CameraPreviewBox: React.FC<CameraPreviewBoxProps> = ({
 }) => {
   const [permission, requestPermission] = useCameraPermissions();
 
+  // 权限请求移入 effect：渲染期直接调用会在拒绝后每次渲染空转重试（iOS「不再次询问」后无意义）
+  useEffect(() => {
+    if (permission && !permission.granted && permission.canAskAgain) {
+      requestPermission();
+    }
+  }, [permission, requestPermission]);
+
   useEffect(() => {
     // 仅模拟器启用就绪保底：模拟器无物理摄像头，onCameraReady 可能永不触发；真机必须等原生回调
     if (!Device.isDevice) {
@@ -24,12 +31,47 @@ export const CameraPreviewBox: React.FC<CameraPreviewBoxProps> = ({
     }
   }, [onCameraReady]);
 
-  if (!permission?.granted) {
-    requestPermission();
+  // 权限状态未就绪：保持黑底加载
+  if (!permission) {
+    return (
+      <View style={styles.box}>
+        <ActivityIndicator size="large" color={COLORS.textMuted} style={StyleSheet.absoluteFill} />
+      </View>
+    );
+  }
+
+  // 权限被拒：给出明确引导（可再次询问 → 重试；否则 → 系统设置）
+  if (!permission.granted) {
+    return (
+      <View style={styles.box}>
+        <View style={styles.deniedLayer}>
+          <Text style={styles.deniedTitle}>需要相机权限</Text>
+          <Text style={styles.deniedHint}>
+            {permission.canAskAgain
+              ? '授权相机权限后即可对准菜单 / 标牌 / 售票机拍照'
+              : '相机权限已被拒绝，请前往系统设置开启后重试'}
+          </Text>
+          <TouchableOpacity
+            style={styles.deniedBtn}
+            onPress={permission.canAskAgain ? requestPermission : () => Linking.openSettings()}
+            accessibilityRole="button"
+            accessibilityLabel={permission.canAskAgain ? '重新授权相机权限' : '前往系统设置开启相机权限'}
+          >
+            <Text style={styles.deniedBtnText}>
+              {permission.canAskAgain ? '重新授权' : '前往系统设置'}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </View>
+    );
   }
 
   return (
-    <View style={styles.box}>
+    <View
+      style={styles.box}
+      accessible
+      accessibilityLabel="相机取景预览：对准菜单、标牌或售票机中的文字区域，单击 SNAP 按钮拍照发送"
+    >
       <CameraView
         ref={cameraRef}
         style={StyleSheet.absoluteFillObject}
@@ -43,7 +85,7 @@ export const CameraPreviewBox: React.FC<CameraPreviewBoxProps> = ({
             <Text style={styles.guideFrameText}>对准画面中的文字区域</Text>
           </View>
           <Text style={styles.guideHint}>
-            {'对准菜单 / 标牌 / 售票机\n双击 CAM 按钮拍照分析'}
+            {'对准菜单 / 标牌 / 售票机\n单击 SNAP 拍照发送'}
           </Text>
         </View>
       </CameraView>
@@ -59,6 +101,37 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.12)',
     backgroundColor: '#101014',
+  },
+  deniedLayer: {
+    ...StyleSheet.absoluteFillObject,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 32,
+    gap: 10,
+  },
+  deniedTitle: {
+    fontFamily: FONT.semibold,
+    color: COLORS.textPrimary,
+    fontSize: 16,
+  },
+  deniedHint: {
+    fontFamily: FONT.regular,
+    color: COLORS.textMuted,
+    fontSize: 13,
+    lineHeight: 20,
+    textAlign: 'center',
+  },
+  deniedBtn: {
+    marginTop: 8,
+    backgroundColor: COLORS.accentBlue,
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+  },
+  deniedBtnText: {
+    color: '#ffffff',
+    fontSize: 14,
+    fontWeight: '700',
   },
   dim: {
     ...StyleSheet.absoluteFillObject,

@@ -21,8 +21,8 @@ const ICONS = {
   switch: require('../../assets/icon-switch.png'),
   tabStack: require('../../assets/tab-stack.png'),
   tabStackActive: require('../../assets/tab-stack-active.png'),
-  tabChat: require('../../assets/tab-chat-active.png'),
-  tabChatActive: require('../../assets/tab-chat.png'),
+  tabChat: require('../../assets/tab-chat.png'),
+  tabChatActive: require('../../assets/tab-chat-active.png'),
   tabNotes: require('../../assets/tab-notes.png'),
   tabNotesActive: require('../../assets/tab-notes-active.png'),
   tabMore: require('../../assets/tab-more.png'),
@@ -40,8 +40,15 @@ export type AppIconName = keyof typeof ICONS;
 interface AppIconProps {
   name: AppIconName;
   size?: number;
+  /** 无障碍标签：图标按钮使用处应传入（如 accessibilityLabel="发送"） */
+  accessibilityLabel?: string;
 }
 
-export const AppIcon: React.FC<AppIconProps> = ({ name, size = 20 }) => (
-  <Image source={ICONS[name]} style={{ width: size, height: size }} resizeMode="contain" />
+export const AppIcon: React.FC<AppIconProps> = ({ name, size = 20, accessibilityLabel }) => (
+  <Image
+    source={ICONS[name]}
+    style={{ width: size, height: size }}
+    resizeMode="contain"
+    accessibilityLabel={accessibilityLabel}
+  />
 );
