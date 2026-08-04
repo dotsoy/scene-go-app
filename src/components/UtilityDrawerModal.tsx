@@ -38,7 +38,12 @@ export const UtilityDrawerModal: React.FC<UtilityDrawerModalProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>工具箱</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeBtn}
+              accessibilityRole="button"
+              accessibilityLabel="关闭"
+            >
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -50,6 +55,7 @@ export const UtilityDrawerModal: React.FC<UtilityDrawerModalProps> = ({
               style={styles.toolRow}
               onPress={() => onSelect(tool.kind)}
               activeOpacity={0.75}
+              accessibilityRole="button"
             >
               <View style={styles.toolInfo}>
                 <Text style={styles.toolTitle}>{tool.title}</Text>

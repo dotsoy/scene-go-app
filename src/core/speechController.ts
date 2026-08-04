@@ -8,6 +8,7 @@ import { getLocationContext } from '../utils/locationContext';
 import { noteStore, NoteItem } from '../utils/NoteStore';
 import { expressionEngine } from './expressionEngine';
 import { cardStackStore } from './cardStackStore';
+import { chatSessionStore } from './chatSession';
 import { CardData } from './types';
 
 export interface SpeechStartResult {
@@ -68,8 +69,12 @@ export const speechController = {
     await noteStore.save(note);
     if (card) {
       cardStackStore.getState().add(card);
+      // 语音表达卡同步进入对话流（V2 视觉稿 §5 流程 3：语音 → 表达卡消息入流）
+      chatSessionStore.getState().appendCard(card);
       return { text: transcript, cardCreated: true, card, note };
     }
+    // 成卡失败也要让用户在对话页看到结果，避免「录完毫无反应」
+    chatSessionStore.getState().appendSystem('未识别到明确表达需求，请说得更具体（如：我要打车 / 我对花生过敏）。');
     return { text: transcript, cardCreated: false, note };
   },
 };

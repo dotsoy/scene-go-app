@@ -13,6 +13,8 @@ import { CardData } from './types';
 export interface ProcessImageResult {
   scenario: ScenarioResult;
   card: CardData;
+  /** 云端识别错误标记（如未配置 Key / 鉴权失败 / 网络异常），命中时由 UI 提示用户，本地词库结果仍返回 */
+  ocrIssue?: string;
 }
 
 export interface AskFollowUpResult {
@@ -33,6 +35,8 @@ export const expressionEngine = {
     return {
       scenario: result.scenario,
       card: scenarioToCard(result.scenario, locationCtx ?? '当前位置'),
+      // CloudVlmOcrPlugin 约定：错误行以 [ 开头（如「[未配置 API Key…]」）；此时场景来自本地词库兜底
+      ocrIssue: result.ocr.lines.find((l) => l.startsWith('[')),
     };
   },
 

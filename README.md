@@ -93,9 +93,9 @@ scenego/
 │       ├── ios/SceneGoSpeech.podspec
 │       └── ios/SceneGoSpeechRecognizer.swift
 ├── src/
-│   ├── components/             # FlashCard, SnapshotDialog, ControlBar,
-│   │                           # QuickNotes, ApiLog, SessionHistory,
-│   │                           # PluginSelector, CameraBackground
+│   ├── components/             # FlashCardView, ChatPage, SnapshotDialog,
+│   │                           # CardStackPage, NotesPage, MorePage, ApiLog,
+│   │                           # SessionHistory, PluginSelector, CameraBackground
 │   ├── plugins/                # OCR / matcher / speech plugins
 │   │   ├── PluginManager.ts    # pipeline: recognize → match
 │   │   └── ocr/ matchers/ speech/

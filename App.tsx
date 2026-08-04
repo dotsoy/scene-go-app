@@ -1,12 +1,12 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
+import * as Device from 'expo-device';
 
 import { pluginManager, ScenarioResult } from './src/plugins';
 import { CameraBackground } from './src/components/CameraBackground';
 import { CameraPreviewBox } from './src/components/CameraPreviewBox';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
-import { QuickNotesModal } from './src/components/QuickNotesModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { CountrySelectModal } from './src/components/CountrySelectModal';
 import { CountrySwitchPromptModal } from './src/components/CountrySwitchPromptModal';
@@ -27,6 +27,7 @@ import { PlaceContext } from './src/utils/locationContext';
 import { SavedCountry } from './src/utils/countryStore';
 import { UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
+import { getOpenRouterApiKey } from './src/utils/SecureConfig';
 import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
 import { useStore } from 'zustand';
@@ -41,6 +42,20 @@ import { useFonts } from 'expo-font';
 import { COLORS, FONT, LAYOUT } from './src/theme/tokens';
 
 // Tap&Talk 兜底卡定义已移至 src/core/cardStackStore（TAP_TALK_CARD）
+
+/** 云端插件错误文本前缀（CloudVlmOcrPlugin 约定）：命中则视为错误回复而非正常解读 */
+const CLOUD_ERROR_PREFIXES = ['请先配置 API Key', '响应错误', '网络错误', '请求失败'];
+
+function isCloudErrorText(text: string): boolean {
+  return CLOUD_ERROR_PREFIXES.some((p) => text.startsWith(p));
+}
+
+/** 云端错误 → 用户可操作的中文提示（错误细节只进 ApiLog，不暴露给对话流） */
+function cloudErrorHint(text: string): string {
+  if (text.startsWith('请先配置')) return 'AI 服务未配置：请在「更多 → 识别引擎设置」中填入 API Key 后重试。';
+  if (text.startsWith('响应错误') && text.includes('401')) return 'AI 服务鉴权失败：请检查「识别引擎设置」中的 API Key 是否有效。';
+  return 'AI 服务暂时不可用：请检查网络连接后重试。';
+}
 
 export default function App() {
   // 字体加载：未就绪前保持启动画面（注意：必须放在所有 hooks 之后提前返回，避免 hooks 数量跳变崩溃）
@@ -77,7 +92,6 @@ export default function App() {
       hideSub.remove();
     };
   }, []);
-  const [isNotesOpen, setIsNotesOpen] = useState<boolean>(false);
   const [isSettingsOpen, setIsSettingsOpen] = useState<boolean>(false);
   const [isLogsOpen, setIsLogsOpen] = useState<boolean>(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState<boolean>(false);
@@ -126,8 +140,15 @@ export default function App() {
   const liveTranscriptRef = useRef<string>('');
   // 麦克风期望状态 ref：同步 isMicActive，防止授权异步窗口内重复触发
   const micActiveRef = useRef(false);
-  // 待展示的快照弹窗标记：LOG dismiss 动画完成后再 present，避免 UIKit modal 队列冲突
-  const pendingSnapshotRef = useRef(false);
+  // 恢复历史会话后，等待历史列表 dismiss 动画完成再 present 快照弹窗，避免 UIKit modal 队列冲突。
+  // 统一用延时覆盖双端（iOS Modal.onDismiss 为 iOS 专属，Android 无此回调）
+  // @types/node 环境下全局 setTimeout 返回 NodeJS.Timeout
+  const restoreTimerRef = useRef<NodeJS.Timeout | null>(null);
+  useEffect(() => {
+    return () => {
+      if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
+    };
+  }, []);
 
   // 启动时探测本地模型：已下载的 Qwen/Whisper 自动注册并激活，无文件则静默跳过（不影响云端主链路）
   // 同时初始化场景包：应用缓存内容（离线可用），后台尝试远程下发（未配置时保持内嵌默认包）
@@ -170,6 +191,11 @@ export default function App() {
         userPrompt,
         messagesToTurns(chatSessionStore.getState().messages),
       );
+      // 云端错误文本（请先配置 / 响应错误 / 网络错误）不进入对话流，转为可操作的系统提示
+      if (isCloudErrorText(result.text)) {
+        chatSessionStore.getState().appendSystem(cloudErrorHint(result.text));
+        return;
+      }
       chatSessionStore.getState().appendFollowUp(userPrompt, result.text, result.card);
       if (result.card) {
         cardStackStore.getState().add({
@@ -179,27 +205,20 @@ export default function App() {
       }
     } catch (err) {
       console.warn('[AI Follow-up Error]:', err);
+      chatSessionStore.getState().appendSystem('追问失败：网络异常或服务不可用，请稍后重试。');
     } finally {
       setProcessingLabel(null);
     }
   };
 
-  /** 恢复历史会话（业务状态由 chatSessionStore 回填）：待历史列表 dismiss 完成后打开快照弹窗 */
+  /** 恢复历史会话（业务状态由 chatSessionStore 回填）：先关历史列表，等 dismiss 动画完成再打开快照弹窗 */
   const restoreSession = (s: SavedSession) => {
     chatSessionStore.getState().restore(s);
     setActiveScenarioResult(s.scenarioResult);
     setPendingSnapshotUri(s.imageUri);
-    // 历史列表必然开着：先关，等 dismiss 动画完成再 present 快照
-    pendingSnapshotRef.current = true;
     setIsHistoryOpen(false);
-  };
-
-  /** 待展示快照的延迟 present：任一 modal dismiss 完成后调用 */
-  const handleDeferredSnapshot = () => {
-    if (pendingSnapshotRef.current) {
-      pendingSnapshotRef.current = false;
-      setIsSnapshotModalOpen(true);
-    }
+    if (restoreTimerRef.current) clearTimeout(restoreTimerRef.current);
+    restoreTimerRef.current = setTimeout(() => setIsSnapshotModalOpen(true), 320);
   };
 
   const handleToolSelect = (kind: ToolKind) => {
@@ -221,9 +240,11 @@ export default function App() {
     setSessions(await sessionStore.getAll());
   };
 
-  /** CAM 双击：拍照（设备层）→ expressionEngine 识别 → 新会话 + 表达卡入栈 */
+  /** CAM 拍照：拍照（设备层）→ expressionEngine 识别 → 新会话 + 表达卡入栈（防抖：处理中忽略重复点按） */
+  const captureInFlightRef = useRef(false);
   const handleCaptureFrame = async () => {
-    if (!isCameraActive) return;
+    if (!isCameraActive || captureInFlightRef.current) return;
+    captureInFlightRef.current = true;
     setProcessingLabel('正在提取信息并生成卡片...');
     try {
       const cam = cameraRef.current as { takePictureAsync?: (opts: { quality: number }) => Promise<{ uri: string }> } | null;
@@ -234,14 +255,22 @@ export default function App() {
           const photo = await cam.takePictureAsync({ quality: 0.8 });
           photoUri = photo?.uri || null;
         } catch (camErr) {
-          console.log('[Camera] 真实摄像头捕获失败 (模拟器环境)，启用模拟快照降级:', camErr);
+          console.warn('[Camera] 拍照失败:', camErr);
         }
       }
 
-      // 模拟器/测试环境降级保底：若无法取得真实硬件快照，生成测试快照数据
+      // 无真实画面：仅模拟器走测试图降级；真机拍照失败必须明确提示，绝不静默顶替用户照片
       if (!photoUri) {
-        console.log('[Camera] 正在为模拟器生成快照数据...');
-        photoUri = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800'; // 预设曼谷美食/场景测试图
+        if (__DEV__ && !Device.isDevice) {
+          console.log('[Camera] 模拟器环境，生成测试快照数据');
+          photoUri = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800'; // 预设曼谷美食/场景测试图
+        } else {
+          Alert.alert(
+            '拍照失败',
+            '未能获取相机画面。若相机权限被拒绝，请前往系统设置允许 SceneGo 使用相机后重试。',
+          );
+          return;
+        }
       }
 
       setIsCameraActive(false);
@@ -249,8 +278,12 @@ export default function App() {
 
       // 识别管线（压缩/OCR/匹配/成卡）在 expressionEngine
       console.log('[Plugins] 启动插件管线，处理图像快照...');
-      const { scenario, card } = await expressionEngine.processImage(photoUri);
+      const { scenario, card, ocrIssue } = await expressionEngine.processImage(photoUri);
       console.log('[Plugin 场景匹配结果]:', scenario.title);
+      // 云端识别不可用（未配置 Key / 鉴权失败 / 网络异常）时，明确告知用户已用本地词库兜底，避免误以为是精准识别
+      if (ocrIssue) {
+        Alert.alert('云端识别暂不可用', `${ocrIssue}\n\n已使用本地词库匹配兜底，可在「更多 → 识别引擎设置」中配置 API Key 后重试。`);
+      }
 
       setActiveScenarioResult(scenario);
       setPendingSnapshotUri(photoUri);
@@ -261,7 +294,9 @@ export default function App() {
       console.warn('Camera snapshot error:', err);
       setIsCameraActive(false);
       setIsCameraReady(false);
+      Alert.alert('识别失败', '未能完成场景识别，请检查网络连接或 API Key 设置后重试。');
     } finally {
+      captureInFlightRef.current = false;
       setProcessingLabel(null);
     }
   };
@@ -312,22 +347,7 @@ export default function App() {
   };
 
 
-  /** 麦克风双击：停止转录 → speechController 意图处理（成卡 + 归档笔记） */
-  const handleMicDoubleTap = async () => {
-    const transcript = await stopMic();
-    if (!transcript || transcript.includes('正在开启')) return;
-    setProcessingLabel('正在理解意图并生成表达卡...');
-    try {
-      await speechController.handleTranscript(transcript);
-      setNotes(await noteStore.getAll());
-    } catch (err) {
-      console.warn('[Voice Card Error]:', err);
-    } finally {
-      setProcessingLabel(null);
-    }
-  };
-
-  /** V2 🎙️ 单击切换：开始 / 停止（停止后自动成卡 + 归档） */
+  /** V2 🎙️ 切换：开始 / 停止（停止后自动成卡 + 归档） */
   const handleMicToggle = async () => {
     if (isMicActive) {
       await stopMicAndProcess();
@@ -346,6 +366,7 @@ export default function App() {
       setNotes(await noteStore.getAll());
     } catch (err) {
       console.warn('[Voice Card Error]:', err);
+      Alert.alert('语音处理失败', '未能理解语音内容，请重试，或改用文字表达（Tap & Talk）。');
     } finally {
       setProcessingLabel(null);
     }
@@ -367,7 +388,13 @@ export default function App() {
         cardStackStore.getState().add(withSession);
         chatSessionStore.getState().appendCard(withSession);
       } else {
-        chatSessionStore.getState().appendSystem('未识别到明确表达需求，请说得更具体（如：我要打车 / 我对花生过敏）。');
+        // 区分「未配置 Key」与「表达不明确」，避免把云端不可用误归因给用户输入
+        const hasKey = !!(await getOpenRouterApiKey().catch(() => null));
+        chatSessionStore.getState().appendSystem(
+          hasKey
+            ? '未识别到明确表达需求，请说得更具体（如：我要打车 / 我对花生过敏）。'
+            : 'AI 服务未配置：请在「更多 → 识别引擎设置」中填入 API Key 后重试。',
+        );
       }
     } finally {
       setProcessingLabel(null);
@@ -629,14 +656,6 @@ export default function App() {
           </View>
         ) : null}
 
-        <QuickNotesModal
-          visible={isNotesOpen}
-          onClose={() => setIsNotesOpen(false)}
-          notes={notes}
-          onAddNote={handleAddNote}
-          onDeleteNote={handleDeleteNote}
-        />
-
         <SnapshotDialogModal
           visible={isSnapshotModalOpen}
           imageUri={pendingSnapshotUri}
@@ -664,13 +683,11 @@ export default function App() {
           onClose={() => setIsHistoryOpen(false)}
           onSelect={restoreSession}
           onDelete={handleDeleteSession}
-          onDismiss={handleDeferredSnapshot}
         />
 
         <ApiLogModal
           visible={isLogsOpen}
           onClose={() => setIsLogsOpen(false)}
-          onDismiss={handleDeferredSnapshot}
         />
 
         <CountrySelectModal

@@ -73,6 +73,8 @@ export const NotesPage: React.FC<NotesPageProps> = ({ notes, onAddNote, onDelete
               key={c}
               style={[styles.chip, selected && styles.chipSelected]}
               onPress={() => setFilter(c)}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
             >
               <Text
                 style={[
@@ -86,27 +88,39 @@ export const NotesPage: React.FC<NotesPageProps> = ({ notes, onAddNote, onDelete
           );
         })}
       </ScrollView>
-      {/* 列表 */}
-      <FlatList
-        data={visible}
-        keyExtractor={(n) => n.id}
-        renderItem={({ item }) => (
-          <View style={styles.noteRow}>
-            <View
-              style={[styles.noteDot, { backgroundColor: CATEGORY_COLORS[item.category] ?? COLORS.textSecondary }]}
-            />
-            <Text style={styles.noteContent} numberOfLines={2}>
-              {item.content}
-            </Text>
-            <Text style={styles.noteTime}>{item.timestamp}</Text>
-            <TouchableOpacity onPress={() => onDeleteNote(item.id)} hitSlop={8}>
-              <Text style={styles.noteDelete}>×</Text>
-            </TouchableOpacity>
-          </View>
-        )}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+      {/* 列表 / 空态 */}
+      {visible.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyTitle}>还没有笔记</Text>
+          <Text style={styles.emptyHint}>语音备忘会自动归档到这里，也可手动添加</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={visible}
+          keyExtractor={(n) => n.id}
+          renderItem={({ item }) => (
+            <View style={styles.noteRow}>
+              <View
+                style={[styles.noteDot, { backgroundColor: CATEGORY_COLORS[item.category] ?? COLORS.textSecondary }]}
+              />
+              <Text style={styles.noteContent} numberOfLines={2}>
+                {item.content}
+              </Text>
+              <Text style={styles.noteTime}>{item.timestamp}</Text>
+              <TouchableOpacity
+                onPress={() => onDeleteNote(item.id)}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel="删除笔记"
+              >
+                <Text style={styles.noteDelete}>×</Text>
+              </TouchableOpacity>
+            </View>
+          )}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+        />
+      )}
       {/* 添加栏 */}
       <View style={styles.addBar}>
         <TextInput
@@ -116,7 +130,7 @@ export const NotesPage: React.FC<NotesPageProps> = ({ notes, onAddNote, onDelete
           value={newNote}
           onChangeText={setNewNote}
         />
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave} accessibilityRole="button">
           <Text style={styles.saveText}>保存</Text>
         </TouchableOpacity>
       </View>
@@ -165,6 +179,24 @@ const styles = StyleSheet.create({
   chipText: { fontSize: 12, fontWeight: '600', color: COLORS.textSecondary, fontFamily: FONT.regular },
   chipTextSelected: { color: COLORS.accentBlue, fontWeight: '700' },
   list: { padding: 20, paddingTop: 8, gap: 10 },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 20,
+  },
+  emptyTitle: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontFamily: FONT.regular,
+  },
+  emptyHint: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontFamily: FONT.regular,
+    textAlign: 'center',
+  },
   noteRow: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -30,10 +30,10 @@ export const CountrySwitchPromptModal: React.FC<CountrySwitchPromptModalProps> =
             是否切换并生成对应的安全信息卡片？
           </Text>
           <View style={styles.actions}>
-            <TouchableOpacity style={styles.switchBtn} onPress={onSwitch}>
+            <TouchableOpacity style={styles.switchBtn} onPress={onSwitch} accessibilityRole="button">
               <Text style={styles.switchBtnText}>切换</Text>
             </TouchableOpacity>
-            <TouchableOpacity style={styles.keepBtn} onPress={onKeep}>
+            <TouchableOpacity style={styles.keepBtn} onPress={onKeep} accessibilityRole="button">
               <Text style={styles.keepBtnText}>保持</Text>
             </TouchableOpacity>
           </View>
