@@ -8,7 +8,7 @@
  * tab-chat-active 等）暂由调用方占位，待补充导出。
  */
 import React from 'react';
-import { Image } from 'react-native';
+import { Image, ImageStyle, StyleProp } from 'react-native';
 
 const ICONS = {
   ai: require('../../assets/icon-ai.png'),
@@ -40,14 +40,16 @@ export type AppIconName = keyof typeof ICONS;
 interface AppIconProps {
   name: AppIconName;
   size?: number;
+  tintColor?: string;
+  style?: StyleProp<ImageStyle>;
   /** 无障碍标签：图标按钮使用处应传入（如 accessibilityLabel="发送"） */
   accessibilityLabel?: string;
 }
 
-export const AppIcon: React.FC<AppIconProps> = ({ name, size = 20, accessibilityLabel }) => (
+export const AppIcon: React.FC<AppIconProps> = ({ name, size = 20, tintColor, style, accessibilityLabel }) => (
   <Image
     source={ICONS[name]}
-    style={{ width: size, height: size }}
+    style={[{ width: size, height: size }, tintColor ? { tintColor } : undefined, style]}
     resizeMode="contain"
     accessibilityLabel={accessibilityLabel}
   />

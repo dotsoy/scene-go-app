@@ -38,7 +38,11 @@ export const TabBar: React.FC<TabBarProps> = ({ active, onChange }) => (
             accessibilityState={{ selected }}
           >
             <View style={[styles.indicator, selected && styles.indicatorActive]} />
-            <AppIcon name={selected ? t.activeIcon : t.icon} size={20} />
+            <AppIcon
+              name={selected ? t.activeIcon : t.icon}
+              size={20}
+              tintColor={selected ? COLORS.accentBlue : COLORS.textTertiary}
+            />
             <Text style={[styles.label, selected && styles.labelActive]}>{t.label}</Text>
           </TouchableOpacity>
         );

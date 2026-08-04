@@ -722,7 +722,7 @@ export default function App() {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: 'transparent',
+    backgroundColor: COLORS.bgPrimary,
   },
   fontLoading: {
     flex: 1,

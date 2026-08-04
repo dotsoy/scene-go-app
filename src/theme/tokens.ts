@@ -8,7 +8,7 @@ export const COLORS = {
   bgCard: '#121214',
   bgCardLight: '#18181b',
   bgOverlay: 'rgba(24,24,27,0.95)',
-  bgBar: 'rgba(10,10,30,0.85)',
+  bgBar: 'rgba(12,12,14,0.95)',
   textPrimary: '#f4f4f5',
   textSecondary: '#a1a1aa',
   textTertiary: '#71717a',

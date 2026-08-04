@@ -19,7 +19,7 @@ Built with Expo / React Native. Client-only: no backend required.
 
 ## Screens
 
-对话优先架构（V2），视觉稿由 [Pencil](https://pen.dev) 设计（`docs/scenego.pen`），以下截图从视觉稿导出：
+视觉稿由 [Pencil](https://pen.dev) 设计（`docs/scenego.pen`）
 
 | | | | |
 |---|---|---|---|
