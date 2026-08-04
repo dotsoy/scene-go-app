@@ -9,6 +9,7 @@ import { getLocationContext } from '../utils/locationContext';
 import { compressImage } from '../utils/imageCompress';
 import { scenarioToCard } from '../utils/cardBuilder';
 import { sopEngine } from './sopEngine';
+import { pipelineTraceStore } from './pipelineTrace';
 import { CardData } from './types';
 
 export interface ProcessImageResult {
@@ -48,11 +49,47 @@ export const expressionEngine = {
       location: location ?? undefined,
       lang: (lang as 'zh-CN' | 'en-US') ?? undefined,
     });
-    if (local) return local;
+    if (local) {
+      console.log(
+        `[Card trace] 离线SOP → card=${local.id} category=${local.categoryTag} steps=${local.steps?.length ?? 0} title=${local.title}`,
+      );
+      pipelineTraceStore.getState().pushTrace({
+        at: Date.now(),
+        input: text,
+        path: 'sop',
+        category: local.categoryTag,
+        targetText: local.targetText,
+        steps: local.steps?.length ?? 0,
+      });
+      return local;
+    }
 
     const result = await pluginManager.generateCardFromText(text, location);
-    if (!result) return null;
-    return scenarioToCard(result, location ?? '当前位置');
+    if (!result) {
+      pipelineTraceStore.getState().pushTrace({
+        at: Date.now(),
+        input: text,
+        path: 'none',
+        category: '未命中',
+        targetText: '',
+        steps: 0,
+      });
+      return null;
+    }
+    const card = scenarioToCard(result, location ?? '当前位置');
+    console.log(
+      `[Card trace] 云端VLM → card=${card.id} category=${card.categoryTag} title=${card.title} menu=${result.menu ? `signature=${result.menu.signature.length}/dishes=${result.menu.dishes.length}` : '无'}`,
+    );
+    pipelineTraceStore.getState().pushTrace({
+      at: Date.now(),
+      input: text,
+      path: 'vlm',
+      category: card.categoryTag,
+      targetText: card.targetText,
+      steps: 0,
+      menu: result.menu ? `signature=${result.menu.signature.length}/dishes=${result.menu.dishes.length}` : undefined,
+    });
+    return card;
   },
 
   /**

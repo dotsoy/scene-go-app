@@ -50,8 +50,8 @@ async function resolvePlace(): Promise<PlaceContext | null> {
   }
 }
 
-export async function getPlaceContext(): Promise<PlaceContext | null> {
-  if (cached && Date.now() - cached.at < CACHE_MS) {
+export async function getPlaceContext(force = false): Promise<PlaceContext | null> {
+  if (!force && cached && Date.now() - cached.at < CACHE_MS) {
     return cached.place;
   }
   const place = await resolvePlace();
