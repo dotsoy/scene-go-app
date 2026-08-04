@@ -19,7 +19,7 @@
 
 数据基础：10 类场景词库 + 26 国安全信息（版本化场景包，离线可用）。核心承诺：**秒级成卡、离线可用、精准表达**。
 
-## 二、正在做的（设计稿已画好，在 scenego.pen 里，接下来写代码实现）
+## 二、正在做的（设计稿已画好，在 `DESIGN-v2.1.pen` 里，接下来写代码实现）
 
 | 要做的功能 | 状态 | 说明 |
 |---|---|---|
@@ -36,11 +36,11 @@
 | 文件 | 内容 |
 |---|---|
 | [`PLAN.md`](PLAN.md) | **规划**：未开始的能力 + 里程碑 |
-| `reference/DESIGN-01.md` | 设计规范（含界面红线） |
-| `reference/scenego.pen`、`reference/DESIGN-v2*.tldraw` | 设计画布与草图 |
+| `reference/DESIGN.md` | 设计规范（含界面红线） |
+| `reference/DESIGN-v2.1.pen` | 设计画布（21 屏） |
 | `reference/screens/` | UI 截图（13 张） |
 
-**阅读顺序**：本文件（状态）→ `PLAN.md`（规划）→ `reference/DESIGN-01.md`（设计施工）。
+**阅读顺序**：本文件（进度）→ `PLAN.md`（规划）→ `reference/DESIGN.md`（设计施工）。
 
 ---
 

@@ -1,5 +1,5 @@
 /**
- * SceneGo 设计令牌（docs/DESIGN-01.md §2）
+ * SceneGo 设计令牌（docs/reference/DESIGN.md §2）
  * 全部界面统一引用，禁止散落硬编码色值。
  */
 
