@@ -23,13 +23,13 @@ Built with Expo / React Native. Client-only: no backend required.
 
 | | | | |
 |---|---|---|---|
-| ![01 对话页](docs/reference/SCREEN-01-dialog.png) | ![02 全屏大字卡](docs/reference/SCREEN-02-flash-card.png) | ![03 卡栈](docs/reference/SCREEN-03-card-stack.png) | ![04 笔记](docs/reference/SCREEN-04-notes.png) |
+| ![01 对话页](docs/reference/screens/SCREEN-01-dialog.png) | ![02 全屏大字卡](docs/reference/screens/SCREEN-02-flash-card.png) | ![03 卡栈](docs/reference/screens/SCREEN-03-card-stack.png) | ![04 笔记](docs/reference/screens/SCREEN-04-notes.png) |
 | 01 对话页 | 02 全屏大字卡 | 03 卡栈 | 04 笔记 |
-| ![05 更多](docs/reference/SCREEN-05-more.png) | ![06 相机取景](docs/reference/SCREEN-06-camera.png) | ![07 安全卡](docs/reference/SCREEN-07-safety-card.png) | ![08 安全详情](docs/reference/SCREEN-08-safety-detail.png) |
+| ![05 更多](docs/reference/screens/SCREEN-05-more.png) | ![06 相机取景](docs/reference/screens/SCREEN-06-camera.png) | ![07 安全卡](docs/reference/screens/SCREEN-07-safety-card.png) | ![08 安全详情](docs/reference/screens/SCREEN-08-safety-detail.png) |
 | 05 更多 | 06 相机取景 | 07 安全卡 | 08 安全详情 |
-| ![09 国家选择](docs/reference/SCREEN-09-country-select.png) | ![10 位置切换](docs/reference/SCREEN-10-switch-prompt.png) | ![11 会话历史](docs/reference/SCREEN-11-session-history.png) | ![12 API 日志](docs/reference/SCREEN-12-api-log.png) |
+| ![09 国家选择](docs/reference/screens/SCREEN-09-country-select.png) | ![10 位置切换](docs/reference/screens/SCREEN-10-switch-prompt.png) | ![11 会话历史](docs/reference/screens/SCREEN-11-session-history.png) | ![12 API 日志](docs/reference/screens/SCREEN-12-api-log.png) |
 | 09 国家选择 | 10 位置切换 | 11 会话历史 | 12 API 日志 |
-| ![13 引擎设置](docs/reference/SCREEN-13-engine-settings.png) | | | |
+| ![13 引擎设置](docs/reference/screens/SCREEN-13-engine-settings.png) | | | |
 | 13 引擎设置 | | | |
 
 ## Architecture
