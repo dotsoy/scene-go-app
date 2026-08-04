@@ -20,12 +20,14 @@ const TABS: { key: TabKey; label: string; icon: AppIconName; activeIcon: AppIcon
 interface TabBarProps {
   active: TabKey;
   onChange: (key: TabKey) => void;
+  /** 暂时隐藏的 Tab（如卡栈/笔记先聚焦对话） */
+  hidden?: TabKey[];
 }
 
-export const TabBar: React.FC<TabBarProps> = ({ active, onChange }) => (
+export const TabBar: React.FC<TabBarProps> = ({ active, onChange, hidden = [] }) => (
   <View style={styles.container}>
     <View style={styles.row}>
-      {TABS.map((t) => {
+      {TABS.filter((t) => !hidden.includes(t.key)).map((t) => {
         const selected = t.key === active;
         return (
           <TouchableOpacity

@@ -48,6 +48,9 @@ import { COLORS, FONT, LAYOUT } from './src/theme/tokens';
 
 // Tap&Talk 兜底卡定义已移至 src/core/cardStackStore（TAP_TALK_CARD）
 
+/** 暂时隐藏的 Tab：卡栈/笔记先聚焦对话与更多（隐藏入口可随时恢复） */
+const HIDDEN_TABS: TabKey[] = ['stack', 'notes'];
+
 /** 云端插件错误文本前缀（CloudVlmOcrPlugin 约定）：命中则视为错误回复而非正常解读 */
 const CLOUD_ERROR_PREFIXES = ['请先配置 API Key', '响应错误', '网络错误', '请求失败'];
 
@@ -727,7 +730,9 @@ export default function App() {
                   onMicToggle={handleMicToggle}
                   onSend={handleSend}
                 />
-                {!isKeyboardVisible && <TabBar active={activeTab} onChange={setActiveTab} />}
+                {!isKeyboardVisible && (
+                  <TabBar active={activeTab} onChange={setActiveTab} hidden={HIDDEN_TABS} />
+                )}
               </View>
             </KeyboardAvoidingView>
           ) : (
@@ -753,7 +758,7 @@ export default function App() {
                 />
               )}
               <View style={styles.bottomBar}>
-                <TabBar active={activeTab} onChange={setActiveTab} />
+                <TabBar active={activeTab} onChange={setActiveTab} hidden={HIDDEN_TABS} />
               </View>
             </>
           )}
