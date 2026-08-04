@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView, Keyboard } from 'react-native';
+import { StyleSheet, View, Text, SafeAreaView, StatusBar, ActivityIndicator, Animated, TouchableOpacity, Platform, Alert, KeyboardAvoidingView, Keyboard, Linking } from 'react-native';
 import { StatusBar as ExpoStatusBar } from 'expo-status-bar';
 import * as Device from 'expo-device';
 
@@ -9,6 +9,7 @@ import { CameraPreviewBox } from './src/components/CameraPreviewBox';
 import { FlashCardView, CardData } from './src/components/FlashCardView';
 import { StepsCardView } from './src/components/StepsCardView';
 import { ListenReplyView } from './src/components/ListenReplyView';
+import { EmergencyConfirmModal } from './src/components/EmergencyConfirmModal';
 import { SnapshotDialogModal } from './src/components/SnapshotDialogModal';
 import { CountrySelectModal } from './src/components/CountrySelectModal';
 import { CountrySwitchPromptModal } from './src/components/CountrySwitchPromptModal';
@@ -127,6 +128,8 @@ export default function App() {
   const [isCountrySelectOpen, setIsCountrySelectOpen] = useState<boolean>(false);
   const [switchPrompt, setSwitchPrompt] = useState<{ detectedName: string } | null>(null);
   const [isSafetyDetailOpen, setIsSafetyDetailOpen] = useState<boolean>(false);
+  // 紧急拨打二次确认：待确认的号码（null = 关闭）
+  const [confirmDial, setConfirmDial] = useState<{ num: string; label: string } | null>(null);
   const cameraRef = useRef<unknown>(null);
   // REC 指示呼吸动画
   const pulseAnim = useRef(new Animated.Value(1)).current;
@@ -444,6 +447,18 @@ export default function App() {
       .appendSystem(`📍 已根据你的位置与时间（${pad(now.getHours())}:${pad(now.getMinutes())}），为你推荐机场场景`);
     chatSessionStore.getState().appendCard(card);
     cardStackStore.getState().add(card);
+  };
+
+  /** 紧急拨打：先弹二次确认（FlashCardView/SafetyDetailModal 拨号入口统一走此） */
+  const requestDial = (num: string, label: string) => {
+    setConfirmDial({ num, label });
+  };
+
+  /** 确认拨打：真正拨出（tel: 打开系统拨号） */
+  const handleConfirmDial = () => {
+    if (!confirmDial) return;
+    Linking.openURL(`tel:${confirmDial.num.replace(/[^+\d]/g, '')}`).catch(() => {});
+    setConfirmDial(null);
   };
 
   /** V2 点表达卡消息 → 全屏大字卡覆盖层 */
@@ -801,6 +816,7 @@ export default function App() {
                       : undefined
                 }
                 onClose={() => setFullscreenCard(null)}
+                onDial={requestDial}
               />
             )}
           </View>
@@ -882,6 +898,17 @@ export default function App() {
           place={detectedPlace}
           profile={userProfile}
           onClose={() => setIsSafetyDetailOpen(false)}
+          onDial={requestDial}
+        />
+
+        <EmergencyConfirmModal
+          visible={!!confirmDial}
+          num={confirmDial?.num ?? ''}
+          label={confirmDial?.label ?? ''}
+          countryName={currentCountry?.nameZh ?? ''}
+          sos={currentCountry ? (getCountrySafety(currentCountry.code)?.sos ?? null) : null}
+          onClose={() => setConfirmDial(null)}
+          onConfirm={handleConfirmDial}
         />
       </SafeAreaView>
     </CameraBackground>

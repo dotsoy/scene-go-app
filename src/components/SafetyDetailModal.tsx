@@ -21,6 +21,8 @@ interface SafetyDetailModalProps {
   /** 用户档案：决定使领馆信息展示（各国人士） */
   profile?: UserProfile | null;
   onClose: () => void;
+  /** 拨打入口：由外层统一弹二次确认；缺省时直接 tel: 拨出 */
+  onDial?: (num: string, label: string) => void;
 }
 
 /** 本地安全信息详情：分节展示 + 一键拨打 + 求助句朗读 */
@@ -30,6 +32,7 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
   place,
   profile,
   onClose,
+  onDial,
 }) => {
   const [speaking, setSpeaking] = useState(false);
 
@@ -57,7 +60,11 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
     }
   }, [place?.timezone, place?.city, visible]);
 
-  const dial = (number: string) => {
+  const dial = (number: string, label: string) => {
+    if (onDial) {
+      onDial(number, label);
+      return;
+    }
     Linking.openURL(`tel:${number.replace(/[^+\d]/g, '')}`).catch(() => {});
   };
 
@@ -120,7 +127,7 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
                 <TouchableOpacity
                   key={row.label}
                   style={styles.dialRow}
-                  onPress={() => dial(row.number)}
+                  onPress={() => dial(row.number, row.label)}
                   accessibilityRole="button"
                   accessibilityLabel={`拨打${row.label} ${row.number}`}
                 >
@@ -150,7 +157,7 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
               {profile?.nationality === 'CN' && safety.embassy ? (
                 <TouchableOpacity
                   style={styles.dialRow}
-                  onPress={() => dial(safety.embassy)}
+                  onPress={() => dial(safety.embassy, '中国驻当地领保热线')}
                   accessibilityRole="button"
                   accessibilityLabel={`拨打中国驻当地领保热线 ${safety.embassy}`}
                 >

@@ -19,6 +19,8 @@ interface FlashCardViewProps {
   onTipAction?: () => void;
   /** 全屏模式关闭（✕） */
   onClose?: () => void;
+  /** 拨打入口（紧急电话）：由外层统一弹二次确认；缺省时直接 tel: 拨出 */
+  onDial?: (num: string, label: string) => void;
 }
 
 export const FlashCardView: React.FC<FlashCardViewProps> = ({
@@ -29,6 +31,7 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
   tipActionLabel,
   onTipAction,
   onClose,
+  onDial,
 }) => {
   const handlePlayAudio = (e: GestureResponderEvent) => {
     e.stopPropagation();
@@ -57,8 +60,12 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
 
   const formattedProgress = `${(currentIndex + 1).toString().padStart(2, '0')} / ${totalCards.toString().padStart(2, '0')}`;
   const isSafety = card.id.startsWith('safety-');
-  const handleDial = (num: string) => {
-    Linking.openURL(`tel:${num}`).catch(() => {});
+  const handleDial = (num: string, label: string) => {
+    if (onDial) {
+      onDial(num, label);
+      return;
+    }
+    Linking.openURL(`tel:${num.replace(/[^+\d]/g, '')}`).catch(() => {});
   };
 
   return (
@@ -90,11 +97,11 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
           <View style={styles.safetyPill}>
             <Text style={styles.safetyText}>SAFETY</Text>
           </View>
-        ) : (
+        ) : totalCards > 1 ? (
           <View style={styles.progressPill}>
             <Text style={styles.progressText}>{formattedProgress}</Text>
           </View>
-        )}
+        ) : null}
       </View>
 
       <View style={styles.bigWrap}>
@@ -157,15 +164,17 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
                 </TouchableOpacity>
               ) : null}
               <View style={styles.actionSpacer} />
-              <TouchableOpacity
-                style={styles.nextBtn}
-                onPress={onNextCard}
-                activeOpacity={0.7}
-                accessibilityRole="button"
-                accessibilityLabel="下一张卡片"
-              >
-                <Text style={styles.nextBtnText}>NEXT CARD →</Text>
-              </TouchableOpacity>
+              {totalCards > 1 ? (
+                <TouchableOpacity
+                  style={styles.nextBtn}
+                  onPress={onNextCard}
+                  activeOpacity={0.7}
+                  accessibilityRole="button"
+                  accessibilityLabel="下一张卡片"
+                >
+                  <Text style={styles.nextBtnText}>下一张 →</Text>
+                </TouchableOpacity>
+              ) : null}
             </>
           )}
         </View>
@@ -177,7 +186,7 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
               <TouchableOpacity
                 key={d.num + d.label}
                 style={styles.dialBtn}
-                onPress={() => handleDial(d.num)}
+                onPress={() => handleDial(d.num, d.label)}
                 activeOpacity={0.75}
                 accessibilityRole="button"
                 accessibilityLabel={`拨打${d.label} ${d.num}`}
