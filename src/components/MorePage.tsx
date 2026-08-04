@@ -47,7 +47,12 @@ export const MorePage: React.FC<MorePageProps> = ({
           {ENTRIES.map((e, index) => (
             <React.Fragment key={e.key}>
               {index > 0 && <View style={styles.divider} />}
-              <TouchableOpacity style={styles.row} onPress={handlers[e.key]} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.row}
+                onPress={handlers[e.key]}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+              >
                 <View style={styles.iconBox}>
                   <AppIcon name={e.iconName} size={18} />
                 </View>

@@ -64,7 +64,12 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>设置目的地国家 / 地区</Text>
-            <TouchableOpacity onPress={onClose} style={styles.headerClose}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.headerClose}
+              accessibilityRole="button"
+              accessibilityLabel="关闭"
+            >
               <Text style={styles.headerCloseText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -90,6 +95,8 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
                   key={c.code}
                   style={[styles.chip, active && styles.chipActive]}
                   onPress={() => setSelected(c.code)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: active }}
                 >
                   <Text style={[styles.chipText, active && styles.chipTextActive]} numberOfLines={1}>
                     {c.nameZh}
@@ -98,7 +105,11 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
               );
             })}
             {!showAll && (
-              <TouchableOpacity style={styles.chip} onPress={() => setShowAll(true)}>
+              <TouchableOpacity
+                style={styles.chip}
+                onPress={() => setShowAll(true)}
+                accessibilityRole="button"
+              >
                 <Text style={styles.chipText}>更多</Text>
               </TouchableOpacity>
             )}
@@ -110,6 +121,8 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
             <TouchableOpacity
               style={styles.profileCell}
               onPress={() => setExpandedCell(expandedCell === 'nationality' ? null : 'nationality')}
+              accessibilityRole="button"
+              accessibilityLabel="选择国籍"
             >
               <Text style={styles.profileLabel}>国籍</Text>
               <Text style={styles.profileValue}>
@@ -119,6 +132,8 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
             <TouchableOpacity
               style={styles.profileCell}
               onPress={() => setExpandedCell(expandedCell === 'language' ? null : 'language')}
+              accessibilityRole="button"
+              accessibilityLabel="选择语言"
             >
               <Text style={styles.profileLabel}>语言</Text>
               <Text style={styles.profileValue}>
@@ -136,6 +151,8 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
                     setNationality(n.code);
                     setExpandedCell(null);
                   }}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: nationality === n.code }}
                 >
                   <Text style={[styles.miniChipText, nationality === n.code && styles.miniChipTextActive]}>{n.name}</Text>
                 </TouchableOpacity>
@@ -152,6 +169,8 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
                     setLanguage(l.code);
                     setExpandedCell(null);
                   }}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: language === l.code }}
                 >
                   <Text style={[styles.miniChipText, language === l.code && styles.miniChipTextActive]}>{l.name}</Text>
                 </TouchableOpacity>
@@ -160,7 +179,11 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
           )}
 
           {/* 确认 */}
-          <TouchableOpacity style={styles.confirmBtn} onPress={() => selected && onConfirm(selected, { nationality, language })}>
+          <TouchableOpacity
+            style={styles.confirmBtn}
+            onPress={() => selected && onConfirm(selected, { nationality, language })}
+            accessibilityRole="button"
+          >
             <Text style={styles.confirmBtnText}>确认并生成安全卡</Text>
           </TouchableOpacity>
         </ScrollView>

@@ -33,6 +33,9 @@ export const TabBar: React.FC<TabBarProps> = ({ active, onChange }) => (
             style={styles.tab}
             onPress={() => onChange(t.key)}
             activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel={t.label}
+            accessibilityState={{ selected }}
           >
             <View style={[styles.indicator, selected && styles.indicatorActive]} />
             <AppIcon name={selected ? t.activeIcon : t.icon} size={20} />

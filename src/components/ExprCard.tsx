@@ -17,7 +17,12 @@ interface ExprCardProps {
 }
 
 export const ExprCard: React.FC<ExprCardProps> = ({ card, variant, onPress, onDelete }) => (
-  <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.85}>
+  <TouchableOpacity
+    style={styles.card}
+    onPress={onPress}
+    activeOpacity={0.85}
+    accessibilityRole="button"
+  >
     {/* 顶行：分类胶囊 + 标题 + 操作位 */}
     <View style={styles.topRow}>
       <View style={styles.categoryPill}>
@@ -27,7 +32,12 @@ export const ExprCard: React.FC<ExprCardProps> = ({ card, variant, onPress, onDe
         {card.title}
       </Text>
       {variant === 'stack' && onDelete ? (
-        <TouchableOpacity onPress={onDelete} hitSlop={8}>
+        <TouchableOpacity
+          onPress={onDelete}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="删除卡片"
+        >
           <Text style={styles.delete}>×</Text>
         </TouchableOpacity>
       ) : (

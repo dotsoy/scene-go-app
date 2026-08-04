@@ -59,15 +59,23 @@ export const ChatPage: React.FC<ChatPageProps> = ({
 
   return (
     <View style={styles.container}>
-      <FlatList
-        data={[...messages].reverse()}
-        inverted
-        keyExtractor={(m) => m.id}
-        renderItem={renderMessage}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-        keyboardShouldPersistTaps="handled"
-      />
+      {messages.length === 0 ? (
+        <View style={styles.empty}>
+          <Text style={styles.emptyTitle}>对准菜单 / 标牌 / 售票机拍照</Text>
+          <Text style={styles.emptyHint}>或按住麦克风说出需求</Text>
+          <Text style={styles.emptyHint}>一键生成当地语言表达卡</Text>
+        </View>
+      ) : (
+        <FlatList
+          data={[...messages].reverse()}
+          inverted
+          keyExtractor={(m) => m.id}
+          renderItem={renderMessage}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+          keyboardShouldPersistTaps="handled"
+        />
+      )}
       {isRecording ? (
         <View style={styles.transcriptBar}>
           <View style={styles.transcriptTitleRow}>
@@ -91,6 +99,25 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingVertical: 12,
     gap: 8,
+  },
+  empty: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
+    paddingHorizontal: 32,
+  },
+  emptyTitle: {
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    fontFamily: FONT.regular,
+    textAlign: 'center',
+  },
+  emptyHint: {
+    fontSize: 12,
+    color: COLORS.textMuted,
+    fontFamily: FONT.regular,
+    textAlign: 'center',
   },
   bubble: {
     borderRadius: 12,

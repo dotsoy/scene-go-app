@@ -32,13 +32,21 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.btn} onPress={onCamera} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={styles.btn}
+        onPress={onCamera}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="拍照"
+      >
         <AppIcon name="camera" size={18} />
       </TouchableOpacity>
       <TouchableOpacity
         style={[styles.btn, isRecording && styles.btnRecording]}
         onPress={onMicToggle}
         activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel={isRecording ? '停止录音' : '语音输入'}
       >
         <AppIcon name="mic" size={18} />
       </TouchableOpacity>
@@ -52,7 +60,13 @@ export const ChatInputBar: React.FC<ChatInputBarProps> = ({
         returnKeyType="send"
         multiline={false}
       />
-      <TouchableOpacity style={[styles.btn, styles.btnSend]} onPress={handleSend} activeOpacity={0.7}>
+      <TouchableOpacity
+        style={[styles.btn, styles.btnSend]}
+        onPress={handleSend}
+        activeOpacity={0.7}
+        accessibilityRole="button"
+        accessibilityLabel="发送"
+      >
         <AppIcon name="send" size={18} />
       </TouchableOpacity>
     </View>

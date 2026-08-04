@@ -38,6 +38,7 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
   onCollect,
 }) => {
   const [userPrompt, setUserPrompt] = useState('');
+  const [isSending, setIsSending] = useState(false);
   const [isFullImageVisible, setIsFullImageVisible] = useState(false);
   const [isPlayingSpeech, setIsPlayingSpeech] = useState(false);
   // 恢复的旧会话图片可能已被系统清理（缓存失效），加载失败时降级为占位
@@ -58,11 +59,16 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
     });
   };
 
-  const handleSend = () => {
+  const handleSend = async () => {
     const trimmed = userPrompt.trim();
-    if (!trimmed || !imageUri) return;
-    onSubmit(trimmed, imageUri);
-    setUserPrompt('');
+    if (!trimmed || !imageUri || isSending) return;
+    setIsSending(true);
+    try {
+      await onSubmit(trimmed, imageUri);
+      setUserPrompt('');
+    } finally {
+      setIsSending(false);
+    }
   };
 
   // 收藏：场景标题 + 最新解读文本
@@ -93,10 +99,18 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
               </Text>
             </View>
             <View style={styles.headerActions}>
-              <TouchableOpacity style={styles.collectBtn} onPress={handleCollect}>
+              <TouchableOpacity
+                style={styles.collectBtn}
+                onPress={handleCollect}
+                accessibilityRole="button"
+              >
                 <Text style={styles.collectBtnText}>收藏</Text>
               </TouchableOpacity>
-              <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+              <TouchableOpacity
+                onPress={onClose}
+                style={styles.closeBtn}
+                accessibilityRole="button"
+              >
                 <Text style={styles.closeBtnText}>关闭</Text>
               </TouchableOpacity>
             </View>
@@ -109,6 +123,8 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
                 activeOpacity={0.9}
                 onPress={() => setIsFullImageVisible(!isFullImageVisible)}
                 style={styles.imageContainer}
+                accessibilityRole="button"
+                accessibilityLabel={isFullImageVisible ? '缩小图片' : '查看大图'}
               >
                 <Image
                   source={{ uri: imageUri }}
@@ -191,6 +207,8 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
                       key={idx}
                       style={styles.phraseChip}
                       onPress={() => handleSpeak(phrase)}
+                      accessibilityRole="button"
+                      accessibilityLabel={`朗读：${phrase}`}
                     >
                       <Text style={styles.phraseText}>{phrase}</Text>
                     </TouchableOpacity>
@@ -210,8 +228,13 @@ export const SnapshotDialogModal: React.FC<SnapshotDialogModalProps> = ({
               onChangeText={setUserPrompt}
             />
 
-            <TouchableOpacity style={styles.sendBtn} onPress={handleSend}>
-              <Text style={styles.sendBtnText}>发送</Text>
+            <TouchableOpacity
+              style={[styles.sendBtn, isSending && styles.sendBtnDisabled]}
+              onPress={handleSend}
+              disabled={isSending}
+              accessibilityRole="button"
+            >
+              <Text style={styles.sendBtnText}>{isSending ? '发送中…' : '发送'}</Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -437,6 +460,9 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 11,
     borderRadius: 10,
+  },
+  sendBtnDisabled: {
+    opacity: 0.5,
   },
   sendBtnText: {
     fontFamily: FONT.bold,

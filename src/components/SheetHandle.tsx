@@ -3,7 +3,7 @@ import { View, StyleSheet } from 'react-native';
 
 /** 底部抽屉拖拽把手 + Home Indicator 安全区（spec §7.2） */
 export const SheetHandle: React.FC = () => (
-  <View style={styles.handleWrap}>
+  <View style={styles.handleWrap} accessible={false}>
     <View style={styles.handle} />
   </View>
 );

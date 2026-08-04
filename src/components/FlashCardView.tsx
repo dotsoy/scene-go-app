@@ -66,7 +66,14 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
       {/* TopRow：关闭 + 分类 + 位置 + 进度/SAFETY */}
       <View style={styles.topRow}>
         {onClose ? (
-          <TouchableOpacity style={styles.closeBtn} onPress={onClose} hitSlop={8} activeOpacity={0.7}>
+          <TouchableOpacity
+            style={styles.closeBtn}
+            onPress={onClose}
+            hitSlop={8}
+            activeOpacity={0.7}
+            accessibilityRole="button"
+            accessibilityLabel="关闭"
+          >
             <Text style={styles.closeIcon}>✕</Text>
           </TouchableOpacity>
         ) : null}
@@ -102,12 +109,24 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
         <View style={styles.actionRow}>
           {isSafety ? (
             <>
-              <TouchableOpacity style={styles.aiBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
+              <TouchableOpacity
+                style={styles.aiBtn}
+                onPress={handlePlayAudio}
+                activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel="朗读求助句"
+              >
                 <AppIcon name="play" size={16} />
                 <Text style={styles.aiBtnText}>朗读求助句</Text>
               </TouchableOpacity>
               {tipActionLabel && onTipAction ? (
-                <TouchableOpacity style={styles.playBtn} onPress={onTipAction} activeOpacity={0.75}>
+                <TouchableOpacity
+                  style={styles.playBtn}
+                  onPress={onTipAction}
+                  activeOpacity={0.75}
+                  accessibilityRole="button"
+                  accessibilityLabel={tipActionLabel}
+                >
                   <AppIcon name="ai" size={16} />
                   <Text style={styles.playBtnText}>{tipActionLabel}</Text>
                 </TouchableOpacity>
@@ -115,18 +134,36 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
             </>
           ) : (
             <>
-              <TouchableOpacity style={styles.playBtn} onPress={handlePlayAudio} activeOpacity={0.75}>
+              <TouchableOpacity
+                style={styles.playBtn}
+                onPress={handlePlayAudio}
+                activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel="播放语音"
+              >
                 <AppIcon name="play" size={16} />
                 <Text style={styles.playBtnText}>PLAY AUDIO</Text>
               </TouchableOpacity>
               {tipActionLabel && onTipAction ? (
-                <TouchableOpacity style={styles.aiBtn} onPress={onTipAction} activeOpacity={0.75}>
+                <TouchableOpacity
+                  style={styles.aiBtn}
+                  onPress={onTipAction}
+                  activeOpacity={0.75}
+                  accessibilityRole="button"
+                  accessibilityLabel={tipActionLabel}
+                >
                   <AppIcon name="ai" size={16} />
                   <Text style={styles.aiBtnText}>{tipActionLabel}</Text>
                 </TouchableOpacity>
               ) : null}
               <View style={styles.actionSpacer} />
-              <TouchableOpacity style={styles.nextBtn} onPress={onNextCard} activeOpacity={0.7}>
+              <TouchableOpacity
+                style={styles.nextBtn}
+                onPress={onNextCard}
+                activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityLabel="下一张卡片"
+              >
                 <Text style={styles.nextBtnText}>NEXT CARD →</Text>
               </TouchableOpacity>
             </>
@@ -142,6 +179,8 @@ export const FlashCardView: React.FC<FlashCardViewProps> = ({
                 style={styles.dialBtn}
                 onPress={() => handleDial(d.num)}
                 activeOpacity={0.75}
+                accessibilityRole="button"
+                accessibilityLabel={`拨打${d.label} ${d.num}`}
               >
                 <Text style={styles.dialNum}>{d.num}</Text>
                 <Text style={styles.dialLabel}>{d.label}</Text>

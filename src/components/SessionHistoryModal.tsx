@@ -17,8 +17,6 @@ interface SessionHistoryModalProps {
   onClose: () => void;
   onSelect: (session: SavedSession) => void;
   onDelete: (id: string) => void;
-  /** iOS dismiss 动画完成后的回调（用于串行化后续 modal present） */
-  onDismiss?: () => void;
 }
 
 export const SessionHistoryModal: React.FC<SessionHistoryModalProps> = ({
@@ -27,17 +25,21 @@ export const SessionHistoryModal: React.FC<SessionHistoryModalProps> = ({
   onClose,
   onSelect,
   onDelete,
-  onDismiss,
 }) => {
   return (
-    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose} onDismiss={onDismiss}>
+    <Modal visible={visible} animationType="slide" transparent onRequestClose={onClose}>
       <View style={styles.overlay}>
         <View style={styles.container}>
           <SheetHandle />
           {/* Header */}
           <View style={styles.header}>
             <Text style={styles.title}>对话记录</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeBtn}
+              accessibilityRole="button"
+              accessibilityLabel="关闭"
+            >
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -50,6 +52,8 @@ export const SessionHistoryModal: React.FC<SessionHistoryModalProps> = ({
                 style={styles.sessionCard}
                 onPress={() => onSelect(item)}
                 activeOpacity={0.8}
+                accessibilityRole="button"
+                accessibilityLabel={`恢复对话：${item.title}`}
               >
                 <View style={styles.sessionHeader}>
                   <Text style={styles.sessionTitle} numberOfLines={1}>
@@ -58,6 +62,8 @@ export const SessionHistoryModal: React.FC<SessionHistoryModalProps> = ({
                   <TouchableOpacity
                     onPress={() => onDelete(item.id)}
                     hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                    accessibilityRole="button"
+                    accessibilityLabel="删除此对话"
                   >
                     <Text style={styles.deleteText}>删除</Text>
                   </TouchableOpacity>

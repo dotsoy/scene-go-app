@@ -74,7 +74,12 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
           {/* 标题栏 */}
           <View style={styles.header}>
             <Text style={styles.headerTitle}>识别引擎设置</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeBtn}
+              accessibilityRole="button"
+              accessibilityLabel="关闭"
+            >
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -91,6 +96,8 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
                     activeOcrId === plugin.id && styles.pluginRowActive,
                   ]}
                   onPress={() => handleSelectOcr(plugin.id)}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: activeOcrId === plugin.id }}
                 >
                   <View style={styles.pluginInfo}>
                     <Text
@@ -140,11 +147,11 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
             />
           </View>
           <View style={styles.apiKeyActions}>
-            <TouchableOpacity style={styles.saveBtn} onPress={handleSaveApiKey}>
+            <TouchableOpacity style={styles.saveBtn} onPress={handleSaveApiKey} accessibilityRole="button">
               <Text style={styles.saveBtnText}>保存 Key</Text>
             </TouchableOpacity>
             {hasApiKey && (
-              <TouchableOpacity style={styles.clearBtn} onPress={handleClearApiKey}>
+              <TouchableOpacity style={styles.clearBtn} onPress={handleClearApiKey} accessibilityRole="button">
                 <Text style={styles.clearBtnText}>清除 Key</Text>
               </TouchableOpacity>
             )}
@@ -165,6 +172,7 @@ export const PluginSelectorModal: React.FC<PluginSelectorModalProps> = ({
             style={styles.complianceEntry}
             onPress={() => setIsComplianceOpen(true)}
             activeOpacity={0.7}
+            accessibilityRole="button"
           >
             <Text style={styles.complianceEntryText}>隐私政策 · 用户协议 · 数据清单</Text>
             <Text style={styles.complianceEntryArrow}>›</Text>

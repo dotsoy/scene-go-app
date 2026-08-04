@@ -97,7 +97,11 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
 
           <SheetHandle /><View style={styles.header}>
             <Text style={styles.title}>{safety.nameZh} · 安全与实用信息</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeBtn}
+              accessibilityRole="button"
+            >
               <Text style={styles.closeBtnText}>关闭</Text>
             </TouchableOpacity>
           </View>
@@ -117,6 +121,8 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
                   key={row.label}
                   style={styles.dialRow}
                   onPress={() => dial(row.number)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`拨打${row.label} ${row.number}`}
                 >
                   <Text style={styles.dialLabel}>{row.label}</Text>
                   <Text style={styles.dialNumber}>{row.number}</Text>
@@ -127,7 +133,12 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
 
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>求助句（朗读给当地人听）</Text>
-              <TouchableOpacity style={styles.sosRow} onPress={speakSos}>
+              <TouchableOpacity
+                style={styles.sosRow}
+                onPress={speakSos}
+                accessibilityRole="button"
+                accessibilityLabel={speaking ? '停止朗读' : '朗读求助句'}
+              >
                 <Text style={styles.sosLocal}>{safety.sos.local}</Text>
                 <Text style={styles.sosPhonetic}>{safety.sos.phonetic}</Text>
                 <Text style={styles.sosHint}>{speaking ? '停止朗读' : '朗读 ›'}</Text>
@@ -137,7 +148,12 @@ export const SafetyDetailModal: React.FC<SafetyDetailModalProps> = ({
             <View style={styles.section}>
               <Text style={styles.sectionLabel}>使领馆（领事保护）</Text>
               {profile?.nationality === 'CN' && safety.embassy ? (
-                <TouchableOpacity style={styles.dialRow} onPress={() => dial(safety.embassy)}>
+                <TouchableOpacity
+                  style={styles.dialRow}
+                  onPress={() => dial(safety.embassy)}
+                  accessibilityRole="button"
+                  accessibilityLabel={`拨打中国驻当地领保热线 ${safety.embassy}`}
+                >
                   <Text style={styles.dialLabel}>中国驻当地领保热线</Text>
                   <Text style={styles.dialNumber}>{safety.embassy}</Text>
                   <Text style={styles.dialHint}>拨打 ›</Text>

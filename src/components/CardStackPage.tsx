@@ -44,7 +44,12 @@ export const CardStackPage: React.FC<CardStackPageProps> = ({
       {/* Header */}
       <View style={styles.header}>
         <Text style={styles.title}>卡栈</Text>
-        <TouchableOpacity onPress={onClear} hitSlop={8}>
+        <TouchableOpacity
+          onPress={onClear}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel="清除全部"
+        >
           <Text style={styles.clear}>清空</Text>
         </TouchableOpacity>
       </View>
@@ -62,6 +67,8 @@ export const CardStackPage: React.FC<CardStackPageProps> = ({
               key={c}
               style={[styles.chip, selected && styles.chipSelected]}
               onPress={() => setCat(c)}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
             >
               <Text style={[styles.chipText, selected && styles.chipTextSelected]}>{c}</Text>
             </TouchableOpacity>

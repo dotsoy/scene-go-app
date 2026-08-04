@@ -23,7 +23,13 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ visible, onClo
           <SheetHandle />
           <View style={styles.header}>
             <Text style={styles.headerTitle}>隐私 · 协议 · 数据</Text>
-            <TouchableOpacity onPress={onClose} style={styles.closeBtn} hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}>
+            <TouchableOpacity
+              onPress={onClose}
+              style={styles.closeBtn}
+              hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+              accessibilityRole="button"
+              accessibilityLabel="关闭"
+            >
               <Text style={styles.closeBtnText}>✕</Text>
             </TouchableOpacity>
           </View>
@@ -35,6 +41,8 @@ export const ComplianceModal: React.FC<ComplianceModalProps> = ({ visible, onClo
                 style={[styles.tab, idx === activeTab && styles.tabActive]}
                 onPress={() => setActiveTab(idx)}
                 activeOpacity={0.7}
+                accessibilityRole="button"
+                accessibilityState={{ selected: idx === activeTab }}
               >
                 <Text style={[styles.tabText, idx === activeTab && styles.tabTextActive]}>{doc.title}</Text>
               </TouchableOpacity>
