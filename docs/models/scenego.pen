@@ -216,7 +216,7 @@
                   "id": "svPaL",
                   "name": "Play",
                   "fill": "$text-secondary",
-                  "content": "PLAY AUDIO",
+                  "content": "播放语音",
                   "fontFamily": "Inter",
                   "fontSize": 12,
                   "fontWeight": "700",
@@ -242,7 +242,7 @@
               "id": "PuQxe",
               "name": "ProtoHead",
               "fill": "$text-tertiary",
-              "content": "LOCAL PROTOCOL",
+              "content": "当地提示",
               "fontFamily": "$font-mono",
               "fontSize": 10,
               "fontWeight": "normal",
@@ -1212,7 +1212,7 @@
                   "id": "X4Avs",
                   "name": "PlayText",
                   "fill": "#0a0a1e",
-                  "content": "PLAY AUDIO",
+                  "content": "播放",
                   "fontFamily": "Inter",
                   "fontSize": 12,
                   "fontWeight": "700",
@@ -1311,7 +1311,7 @@
               "id": "SFgDD",
               "name": "ProtoHead",
               "fill": "$text-tertiary",
-              "content": "LOCAL PROTOCOL",
+              "content": "当地提示",
               "fontFamily": "$font-mono",
               "fontSize": 10,
               "fontWeight": "normal",
@@ -2998,8 +2998,8 @@
                   "name": "ShutterInner",
                   "width": 60,
                   "height": 60,
-                  "cornerRadius": 30,
-                  "fill": "#ffffff"
+                  "fill": "#ffffff",
+                  "cornerRadius": 30
                 }
               ]
             },
@@ -5987,6 +5987,5620 @@
       "name": "标注",
       "fill": "#52525b",
       "content": "13 · ENGINE SETTINGS 引擎设置 — 抽屉 · 引擎/Key/偏好",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "frame",
+      "id": "JayOC",
+      "x": 1800,
+      "y": 870,
+      "name": "V3区标题",
+      "gap": 12,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "rectangle",
+          "cornerRadius": 2,
+          "id": "zcy9i",
+          "name": "Accent",
+          "fill": "$accent-yellow",
+          "width": 4,
+          "height": 22
+        },
+        {
+          "type": "text",
+          "id": "YQhcj",
+          "name": "SecTitle",
+          "fill": "$text-primary",
+          "content": "V3 实用度突破 · 4 大功能高保真",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "n1ayn",
+          "name": "SecSub",
+          "fill": "$text-muted",
+          "content": "新区域 · 与 V2 高清稿区分",
+          "fontFamily": "$font-mono",
+          "fontSize": 10,
+          "fontWeight": "normal",
+          "letterSpacing": 1
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "oVh5P",
+      "x": 1800,
+      "y": 934,
+      "name": "14 场景主动感知 · 顶部场景胶囊",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "lcGVf",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "Ydy2I",
+          "name": "Header",
+          "width": "fill_container",
+          "padding": [
+            10,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "GE3X0",
+              "name": "Brand",
+              "fill": "$text-primary",
+              "content": "SCENEGO",
+              "fontFamily": "$font-mono",
+              "fontSize": 18,
+              "fontWeight": "800",
+              "letterSpacing": 2
+            },
+            {
+              "type": "frame",
+              "id": "WhhvR",
+              "name": "LivePill",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                8,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "GZiC0",
+                  "name": "LiveDot",
+                  "fill": "$accent-green",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "B6ZDsO",
+                  "name": "LiveText",
+                  "fill": "$accent-green",
+                  "content": "LIVE",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "f3SLq",
+          "name": "LocationBar",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "jeEiz",
+              "name": "LocInner",
+              "width": "fill_container",
+              "height": 39,
+              "fill": "$bg-card",
+              "cornerRadius": 10,
+              "gap": 8,
+              "padding": [
+                0,
+                14
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "XgcMD",
+                  "name": "LocDot",
+                  "fill": "$accent-green",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "a7LRO",
+                  "name": "LocText",
+                  "fill": "$text-primary",
+                  "content": "曼谷素万那普机场 · 23:15",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "vKrpp",
+                  "name": "Sp",
+                  "width": "fill_container",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "CzCeE",
+                  "name": "Switch",
+                  "fill": "$text-tertiary",
+                  "content": "切换 ›",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "GJ0Fh",
+          "name": "ContextPush",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "x5RqG",
+              "name": "CtxLabel",
+              "fill": "$text-muted",
+              "content": "📍 为你推荐 · 当前场景",
+              "fontFamily": "Inter",
+              "fontSize": 10,
+              "fontWeight": "600",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "VCwsi",
+              "name": "CapsuleRow",
+              "width": "fill_container",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "E1RuKl",
+                  "name": "胶囊 机场打车",
+                  "fill": "$accent-blue",
+                  "cornerRadius": 12,
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "V1QVRf",
+                      "name": "CapEmoji",
+                      "fill": "$text-primary",
+                      "content": "🚕",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "IuQSP",
+                      "name": "CapLabel",
+                      "fill": "#0a0a1e",
+                      "content": "机场打车",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "U6k95",
+                  "name": "胶囊 机场快线末班",
+                  "fill": "$bg-card-light",
+                  "cornerRadius": 12,
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "A6rEX",
+                      "name": "CapEmoji",
+                      "fill": "$text-primary",
+                      "content": "🚆",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "g99lW",
+                      "name": "CapLabel",
+                      "fill": "$text-primary",
+                      "content": "机场快线末班",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "iZkIV",
+                  "name": "胶囊 激活 eSIM",
+                  "fill": "$bg-card-light",
+                  "cornerRadius": 12,
+                  "gap": 6,
+                  "padding": [
+                    8,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "FiJpB",
+                      "name": "CapEmoji",
+                      "fill": "$text-primary",
+                      "content": "📶",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "K4kS6",
+                      "name": "CapLabel",
+                      "fill": "$text-primary",
+                      "content": "激活 eSIM",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "RUhNr",
+          "name": "Conversation",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "Vcb0p",
+              "name": "SysNote",
+              "fill": "$text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "📍 已根据你的位置与时间（23:15），为你推荐机场场景",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            },
+            {
+              "id": "X3ypy3",
+              "type": "ref",
+              "ref": "na3SP",
+              "name": "表达卡 机场打车",
+              "width": "fill_container",
+              "descendants": {
+                "YJnGV": {
+                  "content": "TAXI"
+                },
+                "iV7Ij": {
+                  "content": "请送我去市区"
+                },
+                "pDyZB": {
+                  "content": "ขอแท็กซี่ไปตัวเมืองหน่อยครับ"
+                },
+                "QtdLu": {
+                  "content": "kŏr ták-sîi bpai dtua-mʉang nòi kráp"
+                },
+                "l3kV9": {
+                  "content": "曼谷机场出租车打表计费 · 走高速需另付过路费"
+                },
+                "BH8CT": {
+                  "enabled": false
+                }
+              }
+            },
+            {
+              "type": "frame",
+              "id": "M0oil",
+              "name": "AI回复",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "K5mV50",
+                  "name": "AiLabel",
+                  "fill": "$accent-blue",
+                  "content": "AI 回复",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "text",
+                  "id": "CphAJ",
+                  "name": "AiText",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "点击顶部胶囊可直接生成对应表达卡；出卡后可点卡全屏展示给司机。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "n5DWX",
+          "type": "ref",
+          "ref": "g22rC",
+          "name": "输入栏",
+          "width": "fill_container"
+        },
+        {
+          "id": "hu297",
+          "type": "ref",
+          "ref": "KFGml",
+          "name": "TabBar",
+          "width": "fill_container",
+          "descendants": {
+            "XATbg": {
+              "enabled": true
+            },
+            "k2bGo": {
+              "fill": "$accent-blue"
+            },
+            "G7gvk": {
+              "fontWeight": "700",
+              "fill": "$accent-blue"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "wdxbw",
+      "x": 2270,
+      "y": 934,
+      "name": "15 双向沟通 · 听对方说话",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "q6mnR",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "O2dd8",
+          "name": "Header",
+          "width": "fill_container",
+          "padding": [
+            10,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "giMhH",
+              "name": "Brand",
+              "fill": "$text-primary",
+              "content": "SCENEGO",
+              "fontFamily": "$font-mono",
+              "fontSize": 18,
+              "fontWeight": "800",
+              "letterSpacing": 2
+            },
+            {
+              "type": "frame",
+              "id": "k2bOWC",
+              "name": "LivePill",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                8,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "K1Nuh",
+                  "name": "LiveDot",
+                  "fill": "$accent-green",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "jLTh8",
+                  "name": "LiveText",
+                  "fill": "$accent-green",
+                  "content": "LIVE",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "oqGjc",
+          "name": "LocationBar",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "oNgCx",
+              "name": "LocInner",
+              "width": "fill_container",
+              "height": 39,
+              "fill": "$bg-card",
+              "cornerRadius": 10,
+              "gap": 8,
+              "padding": [
+                0,
+                14
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "twKML",
+                  "name": "LocDot",
+                  "fill": "$accent-green",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "GMqB3",
+                  "name": "LocText",
+                  "fill": "$text-primary",
+                  "content": "泰国 · 曼谷",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "R8TcJ",
+                  "name": "Sp",
+                  "width": "fill_container",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "Y5oLRU",
+                  "name": "Switch",
+                  "fill": "$text-tertiary",
+                  "content": "切换 ›",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "sS1NV",
+          "name": "Conversation",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "X0RRlq",
+              "name": "表达卡 请按表计费",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 16,
+              "stroke": "$border-subtle",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "AGOxY",
+                  "name": "TopRow",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "VCSLl",
+                      "name": "CatPill",
+                      "fill": "$bg-card-light",
+                      "cornerRadius": 6,
+                      "padding": [
+                        4,
+                        8
+                      ],
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "WhLuL",
+                          "name": "Cat",
+                          "fill": "$text-secondary",
+                          "content": "TAXI",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "700",
+                          "letterSpacing": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "xlbBV",
+                      "name": "Title",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "请按表计费",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "600"
+                    },
+                    {
+                      "type": "text",
+                      "id": "SIsHD",
+                      "name": "Full",
+                      "fill": "$accent-blue",
+                      "content": "全屏 ›",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "h4b7Il",
+                  "name": "BigArea",
+                  "width": "fill_container",
+                  "fill": "#000000",
+                  "cornerRadius": 12,
+                  "stroke": "#ffffff33",
+                  "strokeWidth": 1,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "yGAvS",
+                      "name": "BigText",
+                      "fill": "#ffffff",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "โปรดเปิดมิเตอร์",
+                      "lineHeight": 1.3,
+                      "fontFamily": "Inter",
+                      "fontSize": 32,
+                      "fontWeight": "800"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Rouwu",
+                      "name": "Phon",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "bpròht bpə̀ət mí-dtəə · 请打表",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "eZNuY",
+                  "name": "ActionRow",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "qn9Us",
+                      "name": "PlayPill",
+                      "fill": "$bg-card-light",
+                      "cornerRadius": 12,
+                      "gap": 6,
+                      "padding": [
+                        6,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "LMsmi",
+                          "name": "PlayIcon",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "volume-2",
+                          "library": "lucide",
+                          "fill": "$text-secondary"
+                        },
+                        {
+                          "type": "text",
+                          "id": "GKAFi",
+                          "name": "PlayText",
+                          "fill": "$text-secondary",
+                          "content": "播放",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700",
+                          "letterSpacing": 1
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "qpBGr",
+                      "name": "Sp",
+                      "width": "fill_container",
+                      "height": 8
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ULtyO",
+                      "name": "ListenBtn",
+                      "fill": "$accent-blue",
+                      "cornerRadius": 12,
+                      "stroke": "#4fc3f780",
+                      "strokeWidth": 1,
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "zKkma",
+                          "name": "ListenIcon",
+                          "width": 14,
+                          "height": 14,
+                          "icon": "mic",
+                          "library": "lucide",
+                          "fill": "#0a0a1e"
+                        },
+                        {
+                          "type": "text",
+                          "id": "bpaGs",
+                          "name": "ListenText",
+                          "fill": "#0a0a1e",
+                          "content": "听对方说话",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "GmMpw",
+              "name": "听写解毒消息",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 10,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "oakkq",
+                  "name": "DecodeTop",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "icon",
+                      "id": "azVSi",
+                      "name": "MicIcon",
+                      "width": 13,
+                      "height": 13,
+                      "icon": "audio-lines",
+                      "library": "lucide",
+                      "fill": "$accent-cyan"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ccqcn",
+                      "name": "DecodeLabel",
+                      "fill": "$accent-cyan",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "听对方说话 · 实时翻译",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "700",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "krIRh",
+                      "name": "DecodeTime",
+                      "fill": "$text-muted",
+                      "content": "00:12",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "Lemql",
+                  "name": "ThaiLine",
+                  "fill": "$text-tertiary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "รถติดหน่อย ขอเก็บเพิ่ม 50 บาทได้ไหม",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "s8wl80",
+                  "name": "CnLine",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "司机：前边堵车，加收 50 铢过路费，可以吗？",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DXq5j",
+              "name": "二次回应",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 8,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "WvwNI",
+                  "name": "ReplyLabel",
+                  "fill": "$text-muted",
+                  "content": "选择你的回应，自动生成表达卡",
+                  "fontFamily": "Inter",
+                  "fontSize": 10,
+                  "fontWeight": "normal",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "YPloe",
+                  "name": "ReplyRow",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "DCZfX",
+                      "name": "ChipOK",
+                      "fill": "$accent-green-bg",
+                      "cornerRadius": 12,
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "f47cwn",
+                          "name": "OkEmoji",
+                          "fill": "$accent-green",
+                          "content": "✅",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "z7PoEl",
+                          "name": "OkText",
+                          "fill": "$accent-green",
+                          "content": "好的，没问题",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "X2jh8j",
+                      "name": "ChipNo",
+                      "fill": "$accent-red-bg",
+                      "cornerRadius": 12,
+                      "gap": 6,
+                      "padding": [
+                        10,
+                        14
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "X9HOzc",
+                          "name": "NoEmoji",
+                          "fill": "$accent-red",
+                          "content": "❌",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "VsPQf",
+                          "name": "NoText",
+                          "fill": "$accent-red",
+                          "content": "不行，按表走",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "700"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "dbwYo",
+              "name": "SysNote",
+              "fill": "$text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "💡 选择后自动生成当地语言回应卡，点击可全屏展示",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "id": "aDVZQ",
+          "type": "ref",
+          "ref": "g22rC",
+          "name": "输入栏",
+          "width": "fill_container"
+        },
+        {
+          "id": "q39Dc",
+          "type": "ref",
+          "ref": "KFGml",
+          "name": "TabBar",
+          "width": "fill_container",
+          "descendants": {
+            "XATbg": {
+              "enabled": true
+            },
+            "k2bGo": {
+              "fill": "$accent-blue"
+            },
+            "G7gvk": {
+              "fontWeight": "700",
+              "fill": "$accent-blue"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "HTnD5",
+      "x": 2740,
+      "y": 934,
+      "name": "16 菜单解读助手 · 招牌/避坑/辣度",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "JlgYU",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "Mhm5c",
+          "name": "Header",
+          "width": "fill_container",
+          "padding": [
+            10,
+            20
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "X3QGzp",
+              "name": "Brand",
+              "fill": "$text-primary",
+              "content": "SCENEGO",
+              "fontFamily": "$font-mono",
+              "fontSize": 18,
+              "fontWeight": "800",
+              "letterSpacing": 2
+            },
+            {
+              "type": "frame",
+              "id": "MVdxw",
+              "name": "LivePill",
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                8,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "rQyu7",
+                  "name": "LiveDot",
+                  "fill": "$accent-green",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "IvDFp",
+                  "name": "LiveText",
+                  "fill": "$accent-green",
+                  "content": "LIVE",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "j7z9n",
+          "name": "LocationBar",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "mRSSG",
+              "name": "LocInner",
+              "width": "fill_container",
+              "height": 39,
+              "fill": "$bg-card",
+              "cornerRadius": 10,
+              "gap": 8,
+              "padding": [
+                0,
+                14
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "P61Pgj",
+                  "name": "LocDot",
+                  "fill": "$accent-green",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "B5b3E",
+                  "name": "LocText",
+                  "fill": "$text-primary",
+                  "content": "泰国 · 曼谷",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "frame",
+                  "id": "cCoKr",
+                  "name": "Sp",
+                  "width": "fill_container",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "N603D",
+                  "name": "Switch",
+                  "fill": "$text-tertiary",
+                  "content": "切换 ›",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "m4tkq",
+          "name": "Conversation",
+          "width": "fill_container",
+          "height": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "pZoeR",
+              "name": "用户消息",
+              "width": "fill_container",
+              "justifyContent": "end",
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vU3xm",
+                  "name": "Bubble",
+                  "fill": "$user-bubble",
+                  "cornerRadius": 12,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "padding": 10,
+                  "alignItems": "end",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "d7dcHw",
+                      "name": "YouLabel",
+                      "fill": "$accent-cyan",
+                      "content": "你",
+                      "fontFamily": "Inter",
+                      "fontSize": 10,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "nbKoR",
+                      "name": "UserText",
+                      "fill": "$text-primary",
+                      "content": "📷 拍照发送了泰文菜单",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "V68yQb",
+                      "name": "MenuPhoto",
+                      "width": 130,
+                      "height": 56,
+                      "fill": "$bg-card",
+                      "cornerRadius": 8
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HaxSE",
+              "name": "菜单决策面板",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 16,
+              "stroke": "$border-subtle",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": 14,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "H9JREm",
+                  "name": "PanelHead",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "DhNBE",
+                      "name": "HeadEmoji",
+                      "fill": "$text-primary",
+                      "content": "🍲",
+                      "fontFamily": "Inter",
+                      "fontSize": 15,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "ixk6m",
+                      "name": "HeadTitle",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "菜单解读助手",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "700"
+                    },
+                    {
+                      "type": "text",
+                      "id": "llUWa",
+                      "name": "HeadFull",
+                      "fill": "$accent-blue",
+                      "content": "全屏 ›",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "S0lb5e",
+                  "name": "Signature",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pVuyX",
+                      "name": "SigLabel",
+                      "fill": "$accent-yellow",
+                      "content": "🌟 招牌必点",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "g7mAN",
+                      "name": "招牌 冬阴功汤",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "qOUvR",
+                          "name": "Star",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "star",
+                          "library": "lucide",
+                          "fill": "$accent-yellow"
+                        },
+                        {
+                          "type": "text",
+                          "id": "f7qT1Q",
+                          "name": "Zh",
+                          "fill": "$text-primary",
+                          "content": "冬阴功汤",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "JYvL5",
+                          "name": "En",
+                          "fill": "$text-tertiary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Tom Yum",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "MpmlS",
+                          "name": "Price",
+                          "fill": "$text-secondary",
+                          "content": "150 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "TuLzc",
+                      "name": "招牌 泰式炒河粉",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "PNiGC",
+                          "name": "Star",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "star",
+                          "library": "lucide",
+                          "fill": "$accent-yellow"
+                        },
+                        {
+                          "type": "text",
+                          "id": "zQE4z",
+                          "name": "Zh",
+                          "fill": "$text-primary",
+                          "content": "泰式炒河粉",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WfK0g",
+                          "name": "En",
+                          "fill": "$text-tertiary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Pad Thai",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "z6CD7O",
+                          "name": "Price",
+                          "fill": "$text-secondary",
+                          "content": "80 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "D0izI",
+                      "name": "招牌 芒果糯米饭",
+                      "width": "fill_container",
+                      "gap": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon",
+                          "id": "cDoR5",
+                          "name": "Star",
+                          "width": 12,
+                          "height": 12,
+                          "icon": "star",
+                          "library": "lucide",
+                          "fill": "$accent-yellow"
+                        },
+                        {
+                          "type": "text",
+                          "id": "WsAL9",
+                          "name": "Zh",
+                          "fill": "$text-primary",
+                          "content": "芒果糯米饭",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "mdE0S",
+                          "name": "En",
+                          "fill": "$text-tertiary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "Mango Sticky Rice",
+                          "fontFamily": "Inter",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "ka3Td",
+                          "name": "Price",
+                          "fill": "$text-secondary",
+                          "content": "120 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NrW1f",
+                  "name": "AllergenWarn",
+                  "width": "fill_container",
+                  "fill": "$accent-red-bg",
+                  "cornerRadius": 10,
+                  "gap": 8,
+                  "padding": 10,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "zf4Du",
+                      "name": "WarnEmoji",
+                      "fill": "$accent-red",
+                      "content": "⚠️",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "u82wK8",
+                      "name": "WarnText",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "避坑预警：冬阴功汤含花生 / 海鲜过敏原，请勿食用",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "600"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "HP8M3",
+                  "name": "DishList",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "D0UaW",
+                      "name": "MenuLabel",
+                      "fill": "$accent-cyan",
+                      "content": "🌶️ 菜品清单 · 辣度与价格",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "700",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "frame",
+                      "id": "cSD3z",
+                      "name": "菜 绿咖喱鸡",
+                      "width": "fill_container",
+                      "fill": "$bg-card-light",
+                      "cornerRadius": 8,
+                      "gap": 8,
+                      "padding": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xapeT",
+                          "name": "DName",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "绿咖喱鸡",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "bm8Pk",
+                          "name": "DSpice",
+                          "fill": "$accent-red",
+                          "content": "🌶️🌶️",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "Q7Gn8z",
+                          "name": "DPrice",
+                          "fill": "$text-secondary",
+                          "content": "180 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "hcxj3",
+                          "name": "OutBtn",
+                          "fill": "$accent-blue",
+                          "cornerRadius": 8,
+                          "padding": [
+                            4,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Zmrpw",
+                              "name": "OutText",
+                              "fill": "#0a0a1e",
+                              "content": "出卡",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "z1SY3",
+                      "name": "菜 菠萝炒饭",
+                      "width": "fill_container",
+                      "fill": "$bg-card-light",
+                      "cornerRadius": 8,
+                      "gap": 8,
+                      "padding": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "f6a1E",
+                          "name": "DName",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "菠萝炒饭",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "SlNlr",
+                          "name": "DSpice",
+                          "fill": "$text-muted",
+                          "content": "无辣",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "AMQdg",
+                          "name": "DPrice",
+                          "fill": "$text-secondary",
+                          "content": "220 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "m2Ddw",
+                          "name": "OutBtn",
+                          "fill": "$accent-blue",
+                          "cornerRadius": 8,
+                          "padding": [
+                            4,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "Pmz9G",
+                              "name": "OutText",
+                              "fill": "#0a0a1e",
+                              "content": "出卡",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "P82Kw7",
+                      "name": "菜 冬阴功汤",
+                      "width": "fill_container",
+                      "fill": "$bg-card-light",
+                      "cornerRadius": 8,
+                      "gap": 8,
+                      "padding": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "xe0OU",
+                          "name": "DName",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "冬阴功汤",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "G9DyC",
+                          "name": "DSpice",
+                          "fill": "$accent-red",
+                          "content": "🌶️🌶️🌶️",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "RlaGV",
+                          "name": "DPrice",
+                          "fill": "$text-secondary",
+                          "content": "150 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "mR2gf",
+                          "name": "OutBtn",
+                          "fill": "$accent-blue",
+                          "cornerRadius": 8,
+                          "padding": [
+                            4,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "orXPc",
+                              "name": "OutText",
+                              "fill": "#0a0a1e",
+                              "content": "出卡",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "x7mBi",
+                      "name": "菜 泰式炒河粉",
+                      "width": "fill_container",
+                      "fill": "$bg-card-light",
+                      "cornerRadius": 8,
+                      "gap": 8,
+                      "padding": 8,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "GbCm4",
+                          "name": "DName",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "泰式炒河粉",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "600"
+                        },
+                        {
+                          "type": "text",
+                          "id": "MHseR",
+                          "name": "DSpice",
+                          "fill": "$accent-red",
+                          "content": "🌶️",
+                          "fontFamily": "Inter",
+                          "fontSize": 12,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "text",
+                          "id": "cRY2Q",
+                          "name": "DPrice",
+                          "fill": "$text-secondary",
+                          "content": "80 铢",
+                          "fontFamily": "$font-mono",
+                          "fontSize": 11,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "frame",
+                          "id": "vlzMI",
+                          "name": "OutBtn",
+                          "fill": "$accent-blue",
+                          "cornerRadius": 8,
+                          "padding": [
+                            4,
+                            8
+                          ],
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "brXJG",
+                              "name": "OutText",
+                              "fill": "#0a0a1e",
+                              "content": "出卡",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "700"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "u5XAmm",
+              "name": "SysNote",
+              "fill": "$text-muted",
+              "textGrowth": "fixed-width",
+              "width": "fill_container",
+              "content": "💡 点击「出卡」即生成该菜品的大字点餐卡，可递给服务员",
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        },
+        {
+          "id": "ffkhE",
+          "type": "ref",
+          "ref": "g22rC",
+          "name": "输入栏",
+          "width": "fill_container"
+        },
+        {
+          "id": "iZula",
+          "type": "ref",
+          "ref": "KFGml",
+          "name": "TabBar",
+          "width": "fill_container",
+          "descendants": {
+            "XATbg": {
+              "enabled": true
+            },
+            "k2bGo": {
+              "fill": "$accent-blue"
+            },
+            "G7gvk": {
+              "fontWeight": "700",
+              "fill": "$accent-blue"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ONQMO",
+      "x": 3210,
+      "y": 934,
+      "name": "17 点餐大字卡 · 过敏原豁免",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "QxbI9",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "c19aBD",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "SKrsK",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "bFRjv",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "l4QEa",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "IrHH2",
+                  "name": "CatText",
+                  "fill": "$text-secondary",
+                  "content": "RESTAURANT",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "velyF",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "cLGdm",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "M80Qa6",
+              "name": "ProgressPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "padding": [
+                6,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "m8KQAb",
+                  "name": "ProgText",
+                  "fill": "$accent-yellow",
+                  "content": "01 / 01",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CejjR",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "Y4FY53",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "FlVcL",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ขอผัดไทยไม่ใส่ถั่วลิสงครับ",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 42,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "Kg5Kc",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "kŏr pàt-thai mâi sài thùa-lísŏng kráp",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "L2IwIk",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "泰式炒河粉 · 不要花生 · 少辣（ผัดไทยไม่ใส่ถั่วลิสง）",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tROGg",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "OzIms",
+              "name": "PlayBtn",
+              "fill": "$accent-blue",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Ns8Jy",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "#0a0a1e"
+                },
+                {
+                  "type": "text",
+                  "id": "pLnaJ",
+                  "name": "PlayText",
+                  "fill": "#0a0a1e",
+                  "content": "播放",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "jTGoM",
+              "name": "AiBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                16
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "V4l9i",
+                  "name": "AiIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "sparkles",
+                  "library": "lucide",
+                  "fill": "$accent-blue"
+                },
+                {
+                  "type": "text",
+                  "id": "Y4ljlK",
+                  "name": "AiText",
+                  "fill": "$text-primary",
+                  "content": "AI 解读",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "f7LJM8",
+          "name": "ProtoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "TpkBY",
+              "name": "ProtoHead",
+              "fill": "$text-tertiary",
+              "content": "当地提示",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "Dg9w6",
+              "name": "ProtoBox",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 10,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "O1F00",
+                  "name": "ProtoBody",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "点餐时向服务员出示本卡，说明不要花生并少辣；上菜前可确认是否含花生 / 海鲜。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "u8wFIE",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "hWqlR",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Xs0nf",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "点击 ✕ 返回菜单面板 · 下滑关闭",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "kr3lJ",
+      "x": 3680,
+      "y": 934,
+      "name": "18 药店购药指引 1/3 · 表达症状",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "J3F3tA",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "D6qC2",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "rGX1b",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "d3QLf",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "tGtb4",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "a1PFID",
+                  "name": "CatText",
+                  "fill": "$accent-cyan",
+                  "content": "药店购药指引",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "M3IkEC",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "oaBPd",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "rUyH5",
+              "name": "ProgressPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "padding": [
+                6,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qzuYH",
+                  "name": "ProgText",
+                  "fill": "$accent-yellow",
+                  "content": "1 / 3",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "tDQY1",
+          "name": "StepWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "Kp13W",
+              "name": "StepRow",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "k13pXp",
+                  "name": "StepLabel",
+                  "fill": "$accent-cyan",
+                  "content": "第 1 步 / 共 3 步 · 表达症状",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "lo48L",
+                  "name": "SpS",
+                  "width": "fill_container",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "h6qt6",
+                  "name": "StepHint",
+                  "fill": "$text-muted",
+                  "content": "分步引导",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "normal",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "BQpAi",
+              "name": "StepBar",
+              "width": "fill_container",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "PmlFX",
+                  "name": "Step1",
+                  "fill": "$accent-cyan",
+                  "width": "fill_container",
+                  "height": 3
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "I6tafM",
+                  "name": "Step2",
+                  "fill": "$bg-card-light",
+                  "width": "fill_container",
+                  "height": 3
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "T9HDm",
+                  "name": "Step3",
+                  "fill": "$bg-card-light",
+                  "width": "fill_container",
+                  "height": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "lguGI",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "wTrBv",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yZRSB",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ผมมีไข้และปวดหัว",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "xAM81",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "phǒm mii khâi láe pùuat hǔa",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "VLFmc",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "我发烧头痛 · 请问有退烧药吗？",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PnvIC",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "j1Xgoe",
+              "name": "PlayBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "N3GCW",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                },
+                {
+                  "type": "text",
+                  "id": "U4aWM",
+                  "name": "PlayText",
+                  "fill": "$text-primary",
+                  "content": "朗读",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nz3N7",
+              "name": "NextBtn",
+              "fill": "$accent-blue",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "zRurt",
+                  "name": "NextText",
+                  "fill": "#0a0a1e",
+                  "content": "下一步：告知过敏原",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "icon",
+                  "id": "tlnE7",
+                  "name": "NextIcon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "arrow-right",
+                  "library": "lucide",
+                  "fill": "#0a0a1e"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Zlhdj",
+          "name": "ProtoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "c9SCxA",
+              "name": "ProtoHead",
+              "fill": "$text-tertiary",
+              "content": "当地提示",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "L9Yc8",
+              "name": "ProtoBox",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 10,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "YPFNT",
+                  "name": "ProtoBody",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "泰国药店（ร้านขายยา）可直接购买常见退烧药；出示本卡说明症状，药剂师会推荐药品。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "T1rGRp",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "vVHRB",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "zpIuQ",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "连续翻页完成购药沟通 · 第 1 步 / 共 3 步",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "r2si5",
+      "x": 4150,
+      "y": 934,
+      "name": "19 药店购药指引 2/3 · 告知过敏原",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "ntACO",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "IgeON",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "XPISJ",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "he8E5",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "mpi9q",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kh8km",
+                  "name": "CatText",
+                  "fill": "$accent-cyan",
+                  "content": "药店购药指引",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "umxKp",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "yx4vq",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "MICBL",
+              "name": "ProgressPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "padding": [
+                6,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "g4gf8T",
+                  "name": "ProgText",
+                  "fill": "$accent-yellow",
+                  "content": "2 / 3",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Hu255",
+          "name": "StepWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 8,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "p36Ymo",
+              "name": "StepRow",
+              "width": "fill_container",
+              "gap": 8,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "vke18",
+                  "name": "StepLabel",
+                  "fill": "$accent-cyan",
+                  "content": "第 2 步 / 共 3 步 · 告知过敏原",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                },
+                {
+                  "type": "frame",
+                  "id": "n4Vf4",
+                  "name": "SpS",
+                  "width": "fill_container",
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "oJES1",
+                  "name": "StepHint",
+                  "fill": "$text-muted",
+                  "content": "分步引导",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "normal",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "u2Rgam",
+              "name": "StepBar",
+              "width": "fill_container",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "o2Dfhk",
+                  "name": "Step1",
+                  "fill": "$bg-card-light",
+                  "width": "fill_container",
+                  "height": 3
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "G2mWF",
+                  "name": "Step2",
+                  "fill": "$accent-cyan",
+                  "width": "fill_container",
+                  "height": 3
+                },
+                {
+                  "type": "rectangle",
+                  "cornerRadius": 2,
+                  "id": "FUpmk",
+                  "name": "Step3",
+                  "fill": "$bg-card-light",
+                  "width": "fill_container",
+                  "height": 3
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "xSChP",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "XL9AX",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "aQZq1",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ผมแพ้อาสไพริน",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "xE1Oi",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "phǒm phâe aa-sà-pá-rin",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "gIYvn",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "我阿司匹林过敏 · 请勿开含此成分的药物",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "C6LSf",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "jr14B",
+              "name": "PlayBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "TLJ4A",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                },
+                {
+                  "type": "text",
+                  "id": "uLxMb",
+                  "name": "PlayText",
+                  "fill": "$text-primary",
+                  "content": "朗读",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "D812Oq",
+              "name": "NextBtn",
+              "fill": "$accent-blue",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "lw5hs",
+                  "name": "NextText",
+                  "fill": "#0a0a1e",
+                  "content": "下一步：询问用法用量",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "icon",
+                  "id": "Mxxnj",
+                  "name": "NextIcon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "arrow-right",
+                  "library": "lucide",
+                  "fill": "#0a0a1e"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PiSfQ",
+          "name": "ProtoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "rW3v6",
+              "name": "ProtoHead",
+              "fill": "$text-tertiary",
+              "content": "当地提示",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "Ab4KI",
+              "name": "ProtoBox",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 10,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "X1ypqT",
+                  "name": "ProtoBody",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "出示本卡告知过敏史，药剂师将避开阿司匹林（แอสไพริน）成分，推荐替代退烧药。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "nyUOZ",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "UVLXa",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "MoS0O",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "连续翻页完成购药沟通 · 第 2 步 / 共 3 步",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "wXy2G",
+      "x": 1800,
+      "y": 1788,
+      "name": "标注V3",
+      "fill": "#52525b",
+      "content": "14 · 场景主动感知 — 位置+时间→顶部胶囊，点胶囊直接成卡",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "G3zWv",
+      "x": 2270,
+      "y": 1788,
+      "name": "标注V3",
+      "fill": "#52525b",
+      "content": "15 · 双向沟通 — 出卡→听对方说话→翻译→二次回应闭环",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "ph8Zn",
+      "x": 2740,
+      "y": 1788,
+      "name": "标注V3",
+      "fill": "#52525b",
+      "content": "16 · 菜单解读助手 — 招牌必点/避坑预警/辣度价格，点「出卡」展开",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "Mlvmf",
+      "x": 3210,
+      "y": 1788,
+      "name": "标注V3",
+      "fill": "#52525b",
+      "content": "17 · 点餐大字卡 — 点餐交付终端（不要花生·少辣）",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "vzR3p",
+      "x": 3680,
+      "y": 1788,
+      "name": "标注V3",
+      "fill": "#52525b",
+      "content": "18 · 药店购药指引 1/3 — 第1步·表达症状",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "CjnFD",
+      "x": 4150,
+      "y": 1788,
+      "name": "标注V3",
+      "fill": "#52525b",
+      "content": "19 · 药店购药指引 2/3 — 第2步·告知过敏原",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "frame",
+      "id": "TOQtO",
+      "x": 1800,
+      "y": 1814,
+      "name": "V4区标题",
+      "gap": 12,
+      "alignItems": "center",
+      "children": [
+        {
+          "type": "rectangle",
+          "cornerRadius": 2,
+          "id": "p111XW",
+          "name": "Accent",
+          "fill": "$accent-cyan",
+          "width": 4,
+          "height": 22
+        },
+        {
+          "type": "text",
+          "id": "PBzjI",
+          "name": "SecTitle",
+          "fill": "$text-primary",
+          "content": "V4 三步流程引导 · 沟通分层设计",
+          "fontFamily": "Inter",
+          "fontSize": 16,
+          "fontWeight": "700"
+        },
+        {
+          "type": "text",
+          "id": "YfFfj",
+          "name": "SecSub",
+          "fill": "$text-muted",
+          "content": "第1步 说清需求 → 第2步 说明忌口 → 第3步 确认用法 · 纯沟通 / 紧急求助",
+          "fontFamily": "$font-mono",
+          "fontSize": 10,
+          "fontWeight": "normal",
+          "letterSpacing": 1
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "aSgea",
+      "x": 1800,
+      "y": 1878,
+      "name": "20 药店购药指引 第1步 · 说清需求",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "m8PPC",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "JsV9U",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "t4IW6",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "g3pNxx",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "NjLsp",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PbuSC",
+                  "name": "CatText",
+                  "fill": "$accent-cyan",
+                  "content": "药店购药指引",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "A5FQ7I",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "phbSE",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "RgE90",
+              "name": "ProgressPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "padding": [
+                6,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "hpaRg",
+                  "name": "ProgText",
+                  "fill": "$accent-yellow",
+                  "content": "1 / 3",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kDQ3a",
+          "name": "FlowPipeline",
+          "width": "fill_container",
+          "gap": 6,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "l5HlQo",
+              "name": "阶段1",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$accent-cyan",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "DsrDa",
+                  "name": "Dot",
+                  "fill": "#0a0a1e",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "ci327",
+                  "name": "SegLabel",
+                  "fill": "#0a0a1e",
+                  "content": "1 需求",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "P5Luq",
+              "name": "阶段2",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "WMZkU",
+                  "name": "Dot",
+                  "fill": "$text-muted",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "fvFhF",
+                  "name": "SegLabel",
+                  "fill": "$text-secondary",
+                  "content": "2 约束",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YiZtH",
+              "name": "阶段3",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "XTEhf",
+                  "name": "Dot",
+                  "fill": "$text-muted",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "Ib8Qu",
+                  "name": "SegLabel",
+                  "fill": "$text-secondary",
+                  "content": "3 确认",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "G5meWj",
+          "name": "PhaseWrap",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "ts4cG",
+              "name": "PhaseLabel",
+              "fill": "$accent-cyan",
+              "content": "第 1 步 / 共 3 步 · 说清需求",
+              "fontFamily": "$font-mono",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "JKcWf",
+              "name": "SpP",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "text",
+              "id": "erXpV",
+              "name": "PhaseHint",
+              "fill": "$text-muted",
+              "content": "先表达你的核心需求",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kywdS",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "W5O31",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "xMP5r",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ผมมีไข้และปวดหัว",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "F9vF6",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "phǒm mii khâi láe pùuat hǔa",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "owi3r",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "我发烧头痛 · 请问有退烧药吗？",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "mUV5W",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "HOTfD",
+              "name": "PlayBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "DUcR7",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                },
+                {
+                  "type": "text",
+                  "id": "bTBpo",
+                  "name": "PlayText",
+                  "fill": "$text-primary",
+                  "content": "🔊 播放",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "U2tHi",
+              "name": "NextBtn",
+              "fill": "$accent-blue",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HHQ96",
+                  "name": "NextText",
+                  "fill": "#0a0a1e",
+                  "content": "下一步：告知过敏原",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "icon",
+                  "id": "Z2R3O",
+                  "name": "NextIcon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "arrow-right",
+                  "library": "lucide",
+                  "fill": "#0a0a1e"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "MrCWw",
+          "name": "ProtoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "cJX9i",
+              "name": "ProtoHead",
+              "fill": "$text-tertiary",
+              "content": "当地提示",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "q8DiD",
+              "name": "ProtoBox",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 10,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kCDfy",
+                  "name": "ProtoBody",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "这一张卡只用于表达需求，不涉及任何交易，可放心反复出示。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "uOVpC",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "CLbFD",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "SqkEh",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "三步流程引导 · 第 1 步 / 共 3 步 说清需求",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "O6CfOf",
+      "x": 2535,
+      "y": 1878,
+      "name": "21 药店购药指引 第2步 · 说明忌口",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "p4ipi",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "mNVwZ",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "XUTOm",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "TmeKn",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "o9ykbc",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "d1XZV8",
+                  "name": "CatText",
+                  "fill": "$accent-cyan",
+                  "content": "药店购药指引",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "PexzL",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "KIe9d",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "m26gsl",
+              "name": "ProgressPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "padding": [
+                6,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "uT1J1",
+                  "name": "ProgText",
+                  "fill": "$accent-yellow",
+                  "content": "2 / 3",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "u9gqD9",
+          "name": "FlowPipeline",
+          "width": "fill_container",
+          "gap": 6,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "ZNfYj",
+              "name": "阶段1",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "jnGon",
+                  "name": "Dot",
+                  "fill": "$text-muted",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "Tur1f",
+                  "name": "SegLabel",
+                  "fill": "$text-secondary",
+                  "content": "1 需求",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EngRp",
+              "name": "阶段2",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$accent-cyan",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "VJvOo",
+                  "name": "Dot",
+                  "fill": "#0a0a1e",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "qb6Gu",
+                  "name": "SegLabel",
+                  "fill": "#0a0a1e",
+                  "content": "2 约束",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DEnhI",
+              "name": "阶段3",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "O47UVs",
+                  "name": "Dot",
+                  "fill": "$text-muted",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "Tkmlt",
+                  "name": "SegLabel",
+                  "fill": "$text-secondary",
+                  "content": "3 确认",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "VEHoL",
+          "name": "PhaseWrap",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "g0kQRZ",
+              "name": "PhaseLabel",
+              "fill": "$accent-cyan",
+              "content": "第 2 步 / 共 3 步 · 说明忌口",
+              "fontFamily": "$font-mono",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "W1hsl",
+              "name": "SpP",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "text",
+              "id": "X1mnlp",
+              "name": "PhaseHint",
+              "fill": "$text-muted",
+              "content": "自动带入你的个人档案",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "CtJJt",
+          "name": "ProfileRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            12,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "V2PJz",
+              "name": "ProfileBox",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 10,
+              "stroke": "$border-blue",
+              "strokeWidth": 1,
+              "gap": 8,
+              "padding": 10,
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Q41Tn1",
+                  "name": "UserIcon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "user",
+                  "library": "lucide",
+                  "fill": "$accent-blue"
+                },
+                {
+                  "type": "text",
+                  "id": "tzgyk",
+                  "name": "PText",
+                  "fill": "$accent-blue",
+                  "content": "👤 已记住你的个人档案",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "text",
+                  "id": "BWj14",
+                  "name": "PSub",
+                  "fill": "$text-tertiary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "已识别过敏原",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "MoF3a",
+                  "name": "AllergenChip",
+                  "fill": "$accent-red-bg",
+                  "cornerRadius": 12,
+                  "gap": 6,
+                  "padding": [
+                    6,
+                    10
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "iE8iF",
+                      "name": "AllergenText",
+                      "fill": "$accent-red",
+                      "content": "阿司匹林过敏",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "700"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "P4o1qe",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "KUgyk",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "yCcrt",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ผมแพ้อาสไพริน",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "te3QR",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "phǒm phâe aa-sà-pá-rin",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "d4bJlu",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "我阿司匹林过敏 · 请勿开含此成分的药物",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "s12JuI",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "wVgkO",
+              "name": "PlayBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "ZAsN9",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                },
+                {
+                  "type": "text",
+                  "id": "HCe02",
+                  "name": "PlayText",
+                  "fill": "$text-primary",
+                  "content": "🔊 播放",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "cjt2L",
+              "name": "NextBtn",
+              "fill": "$accent-blue",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "GQNoR",
+                  "name": "NextText",
+                  "fill": "#0a0a1e",
+                  "content": "下一步：询问用法用量",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                },
+                {
+                  "type": "icon",
+                  "id": "sgjT3",
+                  "name": "NextIcon",
+                  "width": 14,
+                  "height": 14,
+                  "icon": "arrow-right",
+                  "library": "lucide",
+                  "fill": "#0a0a1e"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "s4RDo",
+          "name": "ProtoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "j4FJk",
+              "name": "ProtoHead",
+              "fill": "$text-tertiary",
+              "content": "当地提示",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "y16pG",
+              "name": "ProtoBox",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 10,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "oll2d",
+                  "name": "ProtoBody",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "你的过敏史保存在个人档案，会自动翻译成当地语言，无需每次重复说明。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "yS1Kb",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "P5AWL",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "IULAu",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "三步流程引导 · 第 2 步 / 共 3 步 说明忌口（自动带入档案）",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "ZwjWx",
+      "x": 3475,
+      "y": 1878,
+      "name": "22 药店购药指引 第3步 · 确认用法",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "npLwQ",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "Clhns",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "s9R3Z",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "bymNK",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nlrGU",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "lLZVk",
+                  "name": "CatText",
+                  "fill": "$accent-cyan",
+                  "content": "药店购药指引",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "ghDdV",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "nxUn4",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "Nj8VX",
+              "name": "ProgressPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "padding": [
+                6,
+                10
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "FYRDr",
+                  "name": "ProgText",
+                  "fill": "$accent-yellow",
+                  "content": "3 / 3",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 12,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Y7YBN8",
+          "name": "FlowPipeline",
+          "width": "fill_container",
+          "gap": 6,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "LUMxf",
+              "name": "阶段1",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "B3KepZ",
+                  "name": "Dot",
+                  "fill": "$text-muted",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "lxAju",
+                  "name": "SegLabel",
+                  "fill": "$text-secondary",
+                  "content": "1 需求",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "YTJkZ",
+              "name": "阶段2",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "Mvtjd",
+                  "name": "Dot",
+                  "fill": "$text-muted",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "n8bYk",
+                  "name": "SegLabel",
+                  "fill": "$text-secondary",
+                  "content": "2 约束",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "600"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "nXIwl",
+              "name": "阶段3",
+              "width": "fill_container",
+              "height": 32,
+              "fill": "$accent-cyan",
+              "cornerRadius": 16,
+              "gap": 6,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "ellipse",
+                  "id": "IEbsJ",
+                  "name": "Dot",
+                  "fill": "#0a0a1e",
+                  "width": 8,
+                  "height": 8
+                },
+                {
+                  "type": "text",
+                  "id": "yGS61",
+                  "name": "SegLabel",
+                  "fill": "#0a0a1e",
+                  "content": "3 确认",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Z0z5e",
+          "name": "PhaseWrap",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            16,
+            20,
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "j64ySg",
+              "name": "PhaseLabel",
+              "fill": "$accent-cyan",
+              "content": "第 3 步 / 共 3 步 · 确认用法",
+              "fontFamily": "$font-mono",
+              "fontSize": 11,
+              "fontWeight": "700",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "BzQJv",
+              "name": "SpP",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "text",
+              "id": "gzmQg",
+              "name": "PhaseHint",
+              "fill": "$text-muted",
+              "content": "向对方确认后续细节",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qwJl6",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "g4hJE",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "UUbjY",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ทานครั้งละ 1 เม็ด วันละ 3 ครั้ง หลังอาหาร",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 40,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "eQnHP",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "thaan khráng-lá nùeng mèt wan-lá sǎam khráng lǎng aa-hǎan",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "vFRJa",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "用法用量：一次一粒，一日三次，饭后服用。",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "l9kHAj",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "eaYCK",
+              "name": "PlayBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Rj0wI",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "$accent-cyan"
+                },
+                {
+                  "type": "text",
+                  "id": "w7IVzc",
+                  "name": "PlayText",
+                  "fill": "$text-primary",
+                  "content": "🔊 播放",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gmzJN",
+              "name": "DoneBtn",
+              "fill": "$accent-green-bg",
+              "cornerRadius": 12,
+              "stroke": "$accent-green",
+              "strokeWidth": 1,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "LOlwl",
+                  "name": "DoneText",
+                  "fill": "$accent-green",
+                  "content": "✅ 已完成 · 归档",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "PSkr2",
+          "name": "ProtoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "J03Wi",
+              "name": "ProtoHead",
+              "fill": "$text-tertiary",
+              "content": "当地提示",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "WsQd1",
+              "name": "ProtoBox",
+              "width": "fill_container",
+              "fill": "$bg-card-light",
+              "cornerRadius": 10,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "a0EqS",
+                  "name": "ProtoBody",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "确认用法用量后，本次指引完成，自动归档到会话历史。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "BVBR6",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "EcUQo",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "N0c36B",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "三步流程引导 · 第 3 步 / 共 3 步 确认用法（完成后归档）",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Mwsxn",
+      "x": 3945,
+      "y": 1878,
+      "name": "23 纯沟通卡 · 点餐",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "gcqjK",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "X5BHb",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "m1Zh1r",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "F7KaXG",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "h0lHT",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "PKg03",
+                  "name": "CatText",
+                  "fill": "$accent-green",
+                  "content": "点餐",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "FCAv3",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "Ptfo0",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "UcfHo",
+              "name": "IdemBadge",
+              "fill": "$accent-green-bg",
+              "cornerRadius": 12,
+              "gap": 4,
+              "padding": [
+                6,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "u2M9in",
+                  "name": "IdemText",
+                  "fill": "$accent-green",
+                  "content": "✅ 可反复出示",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "mAv6a",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "s0aoO",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ICFlm",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "ขอผัดไทยไม่ใส่ถั่วลิสงครับ",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 42,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "q9SqYz",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "kŏr pàt-thai mâi sài thùa-lísŏng kráp",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "EW0rb",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "泰式炒河粉 · 不要花生 · 少辣",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "gJRH5",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "LsmC0",
+              "name": "PlayBtn",
+              "fill": "$accent-blue",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                18
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "D9SUm",
+                  "name": "PlayIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "volume-2",
+                  "library": "lucide",
+                  "fill": "#0a0a1e"
+                },
+                {
+                  "type": "text",
+                  "id": "OqdBK",
+                  "name": "PlayText",
+                  "fill": "#0a0a1e",
+                  "content": "🔊 播放",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "EpR6T",
+              "name": "ListenBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "stroke": "$border-blue",
+              "strokeWidth": 1,
+              "gap": 6,
+              "padding": [
+                12,
+                18
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "Dby8r",
+                  "name": "ListenIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "mic",
+                  "library": "lucide",
+                  "fill": "$accent-blue"
+                },
+                {
+                  "type": "text",
+                  "id": "x45Uw",
+                  "name": "ListenText",
+                  "fill": "$text-primary",
+                  "content": "🎙️ 听对方说话",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "YXtp2",
+          "name": "InfoWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            16,
+            20
+          ],
+          "children": [
+            {
+              "type": "text",
+              "id": "H8kH1B",
+              "name": "InfoHead",
+              "fill": "$accent-green",
+              "content": "关于这张卡",
+              "fontFamily": "$font-mono",
+              "fontSize": 10,
+              "fontWeight": "normal",
+              "letterSpacing": 1
+            },
+            {
+              "type": "frame",
+              "id": "i6XFKx",
+              "name": "InfoBox",
+              "width": "fill_container",
+              "fill": "$accent-green-bg",
+              "cornerRadius": 10,
+              "stroke": "#81c78459",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 4,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kHtTp",
+                  "name": "InfoBody",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "这张卡只用于点餐表达，不涉及任何交易，可放心反复出示。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ilISk",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "W2fOA4",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "mK32G",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "纯沟通卡：播放 + 听对方说话 · 可反复出示",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "AhCSO",
+      "x": 4415,
+      "y": 1878,
+      "name": "24 紧急求助 · 二次确认拨打",
+      "clip": true,
+      "width": 390,
+      "height": 844,
+      "fill": "$bg-primary",
+      "layout": "vertical",
+      "children": [
+        {
+          "id": "b4kY8D",
+          "type": "ref",
+          "ref": "v7L7Gu",
+          "name": "StatusBar",
+          "width": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "rVwJr",
+          "name": "TopRow",
+          "width": "fill_container",
+          "gap": 8,
+          "padding": [
+            10,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "HQmPI",
+              "name": "CloseBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "$bg-card-light",
+              "cornerRadius": 16,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon",
+                  "id": "hv9tj",
+                  "name": "CloseIcon",
+                  "width": 16,
+                  "height": 16,
+                  "icon": "x",
+                  "library": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "gCp8q",
+              "name": "CatPill",
+              "fill": "$bg-card-light",
+              "cornerRadius": 6,
+              "padding": [
+                4,
+                8
+              ],
+              "children": [
+                {
+                  "type": "text",
+                  "id": "n5EdKG",
+                  "name": "CatText",
+                  "fill": "$accent-red",
+                  "content": "紧急求助",
+                  "fontFamily": "Inter",
+                  "fontSize": 11,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "ADyK2",
+              "name": "Loc",
+              "fill": "$text-tertiary",
+              "content": "泰国 · 曼谷",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "JRFCY",
+              "name": "Sp2",
+              "width": "fill_container",
+              "height": 8
+            },
+            {
+              "type": "frame",
+              "id": "e5uHsZ",
+              "name": "GuardBadge",
+              "fill": "$accent-red-bg",
+              "cornerRadius": 12,
+              "gap": 4,
+              "padding": [
+                6,
+                10
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "NsZxa",
+                  "name": "GuardText",
+                  "fill": "$accent-red",
+                  "content": "⚠️ 紧急求助 · 二次确认",
+                  "fontFamily": "$font-mono",
+                  "fontSize": 10,
+                  "fontWeight": "700",
+                  "letterSpacing": 1
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "cXSkw",
+          "name": "BigWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 12,
+          "padding": 20,
+          "children": [
+            {
+              "type": "frame",
+              "id": "qWEky",
+              "name": "BigArea",
+              "width": "fill_container",
+              "fill": "#000000",
+              "cornerRadius": 12,
+              "stroke": "#ffffff33",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 10,
+              "padding": 20,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "kmkO3",
+                  "name": "BigText",
+                  "fill": "#ffffff",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "กรุณาโทรแจ้งตำรวจ",
+                  "lineHeight": 1.3,
+                  "fontFamily": "Inter",
+                  "fontSize": 44,
+                  "fontWeight": "800"
+                },
+                {
+                  "type": "text",
+                  "id": "cs2MB",
+                  "name": "Phonetic",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "kà-rú-naa tho: jâeng dtam-rùat",
+                  "fontFamily": "Inter",
+                  "fontSize": 14,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "text",
+                  "id": "dxaYp",
+                  "name": "Supplement",
+                  "fill": "$text-muted",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "请拨打 191 · 联系当地警方（仅紧急情况）",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "h0p2H",
+          "name": "WarnWrap",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 4,
+          "padding": [
+            0,
+            20
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "pXdeC",
+              "name": "WarnBox",
+              "width": "fill_container",
+              "fill": "$accent-red-bg",
+              "cornerRadius": 12,
+              "stroke": "$accent-red",
+              "strokeWidth": 1,
+              "layout": "vertical",
+              "gap": 6,
+              "padding": 12,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "vs8Td",
+                  "name": "WarnTop",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "QeKHZ",
+                      "name": "WarnEmoji",
+                      "fill": "$accent-red",
+                      "content": "⚠️",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "hxS4s",
+                      "name": "WarnTitle",
+                      "fill": "$accent-red",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "请再次确认 · 拨出紧急电话",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "700"
+                    }
+                  ]
+                },
+                {
+                  "type": "text",
+                  "id": "nGDzO",
+                  "name": "WarnBody",
+                  "fill": "$text-primary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "确认后将拨打当地警方电话 191。仅在你确实需要帮助时点击，避免误拨。",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "KKQEb",
+                  "name": "FlagRow",
+                  "width": "fill_container",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qDKeW",
+                      "name": "FlagKey",
+                      "fill": "$accent-red",
+                      "content": "呼叫状态",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "700",
+                      "letterSpacing": 1
+                    },
+                    {
+                      "type": "text",
+                      "id": "gdpaO",
+                      "name": "FlagVal",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "未拨打 · 待确认",
+                      "fontFamily": "$font-mono",
+                      "fontSize": 10,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "d7DuF",
+                      "name": "FlagState",
+                      "fill": "$accent-red",
+                      "content": "⏳",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "qaNKB",
+          "name": "ActionWrap",
+          "width": "fill_container",
+          "gap": 10,
+          "padding": [
+            0,
+            20
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "emQAb",
+              "name": "CancelBtn",
+              "fill": "$bg-card-light",
+              "cornerRadius": 12,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "vN3Aw",
+                  "name": "CancelText",
+                  "fill": "$text-secondary",
+                  "content": "取消",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "aOF4M",
+              "name": "ConfirmBtn",
+              "fill": "$accent-red-bg",
+              "cornerRadius": 12,
+              "stroke": "$accent-red",
+              "strokeWidth": 1,
+              "gap": 6,
+              "padding": [
+                12,
+                20
+              ],
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "ObgMc",
+                  "name": "ConfirmText",
+                  "fill": "$accent-red",
+                  "content": "⚠️ 确认拨打 191",
+                  "fontFamily": "Inter",
+                  "fontSize": 12,
+                  "fontWeight": "700"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "sCPUD",
+          "name": "SpB",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "KIr8J",
+          "name": "SwipeWrap",
+          "width": "fill_container",
+          "padding": [
+            0,
+            20,
+            8,
+            20
+          ],
+          "justifyContent": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "lR2ng",
+              "name": "SwipeHint",
+              "fill": "$text-muted",
+              "content": "紧急求助卡：高对比警示 + 二次确认，防止误拨",
+              "fontFamily": "Inter",
+              "fontSize": 11,
+              "fontWeight": "normal"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "text",
+      "id": "OuZWn",
+      "x": 1800,
+      "y": 2732,
+      "name": "标注V4",
+      "fill": "#52525b",
+      "content": "V4 三步流程引导 · 沟通分层设计",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "aevfi",
+      "x": 2535,
+      "y": 2732,
+      "name": "标注V4",
+      "fill": "#52525b",
+      "content": "V4 三步流程引导 · 沟通分层设计",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "iLBz9",
+      "x": 3475,
+      "y": 2732,
+      "name": "标注V4",
+      "fill": "#52525b",
+      "content": "V4 三步流程引导 · 沟通分层设计",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "adSDJ",
+      "x": 3945,
+      "y": 2732,
+      "name": "标注V4",
+      "fill": "#52525b",
+      "content": "23 · 纯沟通卡（点餐）— 🔊播放 + 🎙️听对方说话 · 可反复出示",
+      "fontFamily": "Inter",
+      "fontSize": 11,
+      "fontWeight": "normal"
+    },
+    {
+      "type": "text",
+      "id": "hrtdS",
+      "x": 4415,
+      "y": 2732,
+      "name": "标注V4",
+      "fill": "#52525b",
+      "content": "24 · 紧急求助卡 — 警示 + ⚠️二次确认拨打 191，防误拨",
       "fontFamily": "Inter",
       "fontSize": 11,
       "fontWeight": "normal"
