@@ -19,6 +19,7 @@ import { SessionHistoryModal } from './src/components/SessionHistoryModal';
 import { UtilityDrawerModal, ToolKind } from './src/components/UtilityDrawerModal';
 import { ChatPage } from './src/components/ChatPage';
 import { ChatInputBar } from './src/components/ChatInputBar';
+import { ScenarioCapsuleBar } from './src/components/ScenarioCapsuleBar';
 import { TabBar, TabKey } from './src/components/TabBar';
 import { CardStackPage } from './src/components/CardStackPage';
 import { NotesPage } from './src/components/NotesPage';
@@ -29,6 +30,7 @@ import { PlaceContext } from './src/utils/locationContext';
 import { SavedCountry } from './src/utils/countryStore';
 import { UserProfile } from './src/utils/userProfile';
 import { getCountrySafety } from './src/data/countrySafety';
+import { getAirportCapsules, detectAirportDest, buildCapsuleCard } from './src/data/scenarioSops';
 import { getOpenRouterApiKey } from './src/utils/SecureConfig';
 import { modelManager } from './src/utils/ModelManager';
 import { initPack } from './src/packs/packManager';
@@ -389,7 +391,11 @@ export default function App() {
     }
     setProcessingLabel('正在生成表达卡...');
     try {
-      const card = await expressionEngine.generateCard(text);
+      const card = await expressionEngine.generateCard(
+        text,
+        undefined,
+        userProfile?.language ?? 'zh-CN',
+      );
       const id = chatSessionStore.getState().sessionId;
       if (card) {
         const withSession = { ...card, sessionId: id ?? undefined };
@@ -407,6 +413,26 @@ export default function App() {
     } finally {
       setProcessingLabel(null);
     }
+  };
+
+  /** 机场场景胶囊：一键生成打车/末班车/eSIM 表达卡（离线内容） */
+  const handleCapsuleSelect = (key: string) => {
+    const capsule = getAirportCapsules().find((c) => c.key === key);
+    if (!capsule) return;
+    const placeStr =
+      [detectedPlace?.city, detectedPlace?.region, detectedPlace?.country]
+        .filter(Boolean)
+        .join(' · ') || '';
+    const dest = detectAirportDest(placeStr);
+    const lang = userProfile?.language === 'en-US' ? 'en-US' : 'zh-CN';
+    const card = buildCapsuleCard(capsule, { dest }, currentCountry?.nameZh ?? '当前位置', lang);
+    const now = new Date();
+    const pad = (n: number) => n.toString().padStart(2, '0');
+    chatSessionStore
+      .getState()
+      .appendSystem(`📍 已根据你的位置与时间（${pad(now.getHours())}:${pad(now.getMinutes())}），为你推荐机场场景`);
+    chatSessionStore.getState().appendCard(card);
+    cardStackStore.getState().add(card);
   };
 
   /** V2 点表达卡消息 → 全屏大字卡覆盖层 */
@@ -639,6 +665,15 @@ export default function App() {
                 </Text>
                 <Text style={styles.locationChange}>切换 ›</Text>
               </TouchableOpacity>
+
+              {/* 场景胶囊（机场推荐，内容通用不绑定国家） */}
+              {getAirportCapsules().length > 0 ? (
+                <ScenarioCapsuleBar
+                  capsules={getAirportCapsules()}
+                  lang={userProfile?.language === 'en-US' ? 'en-US' : 'zh-CN'}
+                  onSelect={handleCapsuleSelect}
+                />
+              ) : null}
 
               {/* Processing Indicator */}
               {processingLabel && (
