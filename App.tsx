@@ -25,6 +25,7 @@ import { TabBar, TabKey } from './src/components/TabBar';
 import { CardStackPage } from './src/components/CardStackPage';
 import { NotesPage } from './src/components/NotesPage';
 import { MorePage } from './src/components/MorePage';
+import { V31MainPage } from './src/components/V31MainPage';
 import { ChatMessage, ReplyOption, MenuDish } from './src/core/types';
 import { NativeSpeech } from './src/utils/NativeSpeech';
 import { PlaceContext, getPlaceContext } from './src/utils/locationContext';
@@ -78,6 +79,7 @@ export default function App() {
     'JetBrainsMono-Regular': require('./assets/fonts/JetBrainsMono-Regular.ttf'),
     'JetBrainsMono-Bold': require('./assets/fonts/JetBrainsMono-Bold.ttf'),
   });
+  const [showV31, setShowV31] = useState<boolean>(false);
   const [isCameraActive, setIsCameraActive] = useState<boolean>(false);
   const [isCameraReady, setIsCameraReady] = useState<boolean>(false);
   const [isMicActive, setIsMicActive] = useState<boolean>(false);
@@ -946,6 +948,28 @@ export default function App() {
           onConfirm={handleConfirmDial}
         />
 
+        {/* V3.1 极简主页悬浮切换入口 */}
+        {showV31 ? (
+          <View style={{ ...StyleSheet.absoluteFillObject, zIndex: 99999 }}>
+            <V31MainPage />
+            <TouchableOpacity
+              activeOpacity={0.8}
+              style={styles.v31ToggleBtn}
+              onPress={() => setShowV31(false)}
+            >
+              <Text style={styles.v31ToggleBtnText}>切回 V2</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <TouchableOpacity
+            activeOpacity={0.8}
+            style={styles.v31ToggleBtn}
+            onPress={() => setShowV31(true)}
+          >
+            <Text style={styles.v31ToggleBtnText}>V3.1 极简版</Text>
+          </TouchableOpacity>
+        )}
+
         {/* 管线实时反馈悬浮入口（仅开发构建） */}
         {__DEV__ ? <PipelineTracePanel onRelocate={handleRelocate} /> : null}
       </SafeAreaView>
@@ -957,6 +981,21 @@ const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
     backgroundColor: COLORS.bgPrimary,
+  },
+  v31ToggleBtn: {
+    position: 'absolute',
+    top: Platform.OS === 'ios' ? 56 : 30,
+    left: 20,
+    backgroundColor: '#2563EB',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 12,
+    zIndex: 99999,
+  },
+  v31ToggleBtnText: {
+    fontFamily: FONT.monoBold,
+    fontSize: 11,
+    color: '#FFFFFF',
   },
   fontLoading: {
     flex: 1,

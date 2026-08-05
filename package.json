@@ -6,6 +6,10 @@
     "start": "expo start",
     "android": "expo run:android",
     "ios": "expo run:ios",
+    "ios:debug": "expo run:ios --configuration Debug",
+    "ios:release": "expo run:ios --configuration Release",
+    "ios:device:debug": "expo run:ios --device --configuration Debug",
+    "ios:device:release": "expo run:ios --device --configuration Release",
     "web": "expo start --web",
     "selftest": "bun run scripts/scenario-selftest.ts"
   },
