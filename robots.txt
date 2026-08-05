@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://dotsoy.github.io/scene-go-app/sitemap.xml

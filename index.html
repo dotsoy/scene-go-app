@@ -1,0 +1,610 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Primary SEO -->
+    <title>SceneGo — 出境游随身沟通工具 · 开源共建计划</title>
+    <meta
+      name="description"
+      content="SceneGo 是极致极简的出境游实时沟通与场景理解工具：按住说话、打字或拍照，把卡片递给对方。价值在各国场景词库与翻译质量，开源共建中——加入我们，一起完善每一种可能。"
+    />
+    <meta
+      name="keywords"
+      content="SceneGo, 出境游, 翻译工具, 旅行沟通, 开源, 共建, 词库, 场景翻译, travel translation, open source"
+    />
+    <meta name="author" content="SceneGo Contributors" />
+    <link rel="canonical" href="https://dotsoy.github.io/scene-go-app/" />
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="SceneGo" />
+    <meta property="og:title" content="SceneGo — 出境游随身沟通工具 · 开源共建计划" />
+    <meta
+      property="og:description"
+      content="把手机变成与世界的沟通遥控器。极致极简的出境游沟通工具，场景词库与翻译质量需要社区共建。"
+    />
+    <meta property="og:url" content="https://dotsoy.github.io/scene-go-app/" />
+    <meta property="og:image" content="https://opengraph.githubassets.com/1/dotsoy/scene-go-app" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="SceneGo — 出境游随身沟通工具 · 开源共建计划" />
+    <meta
+      name="twitter:description"
+      content="把手机变成与世界的沟通遥控器。极致极简的出境游沟通工具，开源共建中。"
+    />
+    <meta name="twitter:image" content="https://opengraph.githubassets.com/1/dotsoy/scene-go-app" />
+
+    <!-- Favicon -->
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23000'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='14' font-weight='bold' fill='%234FC3F7' text-anchor='middle'%3ES%3C/text%3E%3C/svg%3E"
+    />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "SceneGo",
+      "applicationCategory": "TravelApplication",
+      "operatingSystem": "iOS",
+      "description": "极致极简的出境游实时沟通与场景理解工具：按住说话、打字或拍照，把卡片递给对方看、听、读。",
+      "url": "https://dotsoy.github.io/scene-go-app/",
+      "codeRepository": "https://github.com/dotsoy/scene-go-app",
+      "license": "https://opensource.org/licenses/MIT",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "SceneGo 是什么？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SceneGo 是面向出境游场景的实时双向沟通与场景理解工具：按住说话、打字或拍照，把生成的双语卡片递给对方看或听，全程无需在手机里进行多余操作。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "为什么需要共建？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "SceneGo 的产品形态刻意保持极简，真正的价值在内容——各国场景词库、翻译质量与沟通模板。195 个国家的语言与沟通习惯，需要到过当地的社区成员共同完善。"
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "如何参与共建？",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "提出 Issue 告诉我们你熟悉的场景，认领内容任务，然后提交 PR。可以贡献场景词库、翻译校对、设计体验、真机测试或代码引擎。"
+          }
+        }
+      ]
+    }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <style>
+      :root {
+        --bg: #000000;
+        --bg-card: #121214;
+        --bg-card-light: #18181b;
+        --text-primary: #f4f4f5;
+        --text-secondary: #a1a1aa;
+        --text-tertiary: #71717a;
+        --accent-blue: #4fc3f7;
+        --accent-yellow: #facc15;
+        --accent-green: #81c784;
+        --border-subtle: rgba(255, 255, 255, 0.08);
+      }
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      html {
+        scroll-behavior: smooth;
+      }
+      body {
+        font-family: Inter, system-ui, -apple-system, sans-serif;
+        background: var(--bg);
+        color: var(--text-primary);
+        -webkit-font-smoothing: antialiased;
+        line-height: 1.6;
+      }
+      .container {
+        max-width: 1440px;
+        margin: 0 auto;
+        padding: 0 48px;
+      }
+
+      /* Nav */
+      .nav {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        height: 64px;
+        background: rgba(0, 0, 0, 0.85);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border-subtle);
+      }
+      .nav-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .logo {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 2px;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+      .tagline {
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 28px;
+      }
+      .nav-link {
+        font-size: 13px;
+        color: var(--text-secondary);
+        text-decoration: none;
+        cursor: pointer;
+        background: none;
+        border: none;
+        transition: color 0.2s;
+      }
+      .nav-link:hover {
+        color: var(--text-primary);
+      }
+      .btn-gh {
+        background: var(--text-primary);
+        color: #000;
+        font-weight: 700;
+        font-size: 13px;
+        border: none;
+        border-radius: 8px;
+        padding: 8px 16px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: opacity 0.2s;
+      }
+      .btn-gh:hover {
+        opacity: 0.85;
+      }
+
+      /* Hero */
+      .hero {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        min-height: 380px;
+        gap: 20px;
+        padding: 80px 40px;
+      }
+      .hero-eyebrow {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: var(--accent-blue);
+      }
+      .hero h1 {
+        font-size: clamp(32px, 5vw, 52px);
+        font-weight: 800;
+        line-height: 1.25;
+        max-width: 800px;
+      }
+      .hero-sub {
+        font-size: 17px;
+        color: var(--text-secondary);
+        max-width: 720px;
+      }
+      .cta-row {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        justify-content: center;
+        margin-top: 12px;
+      }
+      .btn-primary {
+        background: var(--accent-blue);
+        color: #000;
+        font-weight: 700;
+        font-size: 15px;
+        border: none;
+        border-radius: 12px;
+        padding: 14px 32px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: transform 0.15s, opacity 0.2s;
+      }
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        opacity: 0.92;
+      }
+      .btn-secondary {
+        background: transparent;
+        color: var(--text-primary);
+        font-weight: 600;
+        font-size: 15px;
+        border: 1px solid var(--border-subtle);
+        border-radius: 12px;
+        padding: 14px 32px;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: border-color 0.2s;
+      }
+      .btn-secondary:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+      }
+
+      /* Sections */
+      section {
+        padding: 60px 0;
+      }
+      .eyebrow {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 3px;
+        color: var(--accent-yellow);
+        margin-bottom: 12px;
+      }
+      section h2 {
+        font-size: clamp(24px, 3vw, 34px);
+        font-weight: 800;
+        margin-bottom: 20px;
+      }
+      .card-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 16px;
+        margin-top: 20px;
+      }
+      .card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-subtle);
+        border-radius: 16px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .card.clickable {
+        cursor: pointer;
+        text-decoration: none;
+        color: inherit;
+        transition: border-color 0.2s, transform 0.15s;
+      }
+      .card.clickable:hover {
+        border-color: rgba(255, 255, 255, 0.25);
+        transform: translateY(-2px);
+      }
+      .card .num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: 2px;
+        color: var(--accent-blue);
+      }
+      .card h3 {
+        font-size: 17px;
+        font-weight: 700;
+      }
+      .card p {
+        font-size: 13px;
+        color: var(--text-secondary);
+      }
+      .card .num.green {
+        color: var(--accent-green);
+      }
+      .card .num.yellow {
+        color: var(--accent-yellow);
+      }
+      .flow-num {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: 2px;
+      }
+
+      /* Footer */
+      footer {
+        background: var(--bg-card-light);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 24px;
+        text-align: center;
+      }
+      footer .logo {
+        font-size: 16px;
+      }
+      footer p {
+        font-size: 12px;
+        color: var(--text-tertiary);
+      }
+      footer a {
+        color: var(--accent-blue);
+        text-decoration: none;
+      }
+      footer a:hover {
+        text-decoration: underline;
+      }
+
+      @media (max-width: 768px) {
+        .container {
+          padding: 0 20px;
+        }
+        .tagline {
+          display: none;
+        }
+        .nav-right {
+          gap: 16px;
+        }
+        .hero {
+          padding: 60px 20px;
+          min-height: 320px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Nav -->
+    <nav class="nav container">
+      <div class="nav-left">
+        <a class="logo" href="#top">SCENEGO</a>
+        <span class="tagline">出境游随身沟通工具 · 开源共建</span>
+      </div>
+      <div class="nav-right">
+        <button class="nav-link" data-scroll="#product">产品理念</button>
+        <button class="nav-link" data-scroll="#contribute">共建计划</button>
+        <button class="nav-link" data-scroll="#roadmap">路线图</button>
+        <a class="btn-gh" href="https://github.com/dotsoy/scene-go-app" target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </nav>
+
+    <main id="top">
+      <!-- Hero -->
+      <header class="hero container">
+        <span class="hero-eyebrow">OPEN SOURCE · COMMUNITY BUILT</span>
+        <h1>把手机变成与世界的沟通遥控器</h1>
+        <p class="hero-sub">
+          SceneGo 是极致极简的出境游沟通工具。它不需要你学会任何国家的语言——只需要按住说话、打字或拍照，
+          把卡片递给对方。但我们无法独自完成这一切。
+        </p>
+        <div class="cta-row">
+          <a
+            class="btn-primary"
+            href="https://github.com/dotsoy/scene-go-app/issues/new/choose"
+            target="_blank"
+            rel="noopener"
+          >加入共建计划</a>
+          <button class="btn-secondary" data-scroll="#product">了解产品形态</button>
+        </div>
+      </header>
+
+      <!-- Product Philosophy -->
+      <section id="product" class="container">
+        <span class="eyebrow">PRODUCT PHILOSOPHY</span>
+        <h2>产品形态：极致极简</h2>
+        <div class="card-row">
+          <div class="card">
+            <span class="num">01</span>
+            <h3>唯一入口</h3>
+            <p>不分类、不导航。一个屏承载按住说话、打字、拍照全部输入，没有底部 Tab，没有预设场景标签。</p>
+          </div>
+          <div class="card">
+            <span class="num">02</span>
+            <h3>Action Card 流</h3>
+            <p>每一轮沟通是一张独立卡片：外语在上、母语在下。点卡全屏递给对方，多轮对话像聊天一样自然。</p>
+          </div>
+          <div class="card">
+            <span class="num">03</span>
+            <h3>图像理解</h3>
+            <p>拍菜单、标识或实物，原地解读——原文、含义与实用表达，一并呈现。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Why Build Together -->
+      <section id="contribute" class="container">
+        <span class="eyebrow">WHY WE BUILD TOGETHER</span>
+        <h2>为什么需要共建</h2>
+        <div class="card-row">
+          <div class="card">
+            <span class="num">01</span>
+            <h3>产品刻意保持极简</h3>
+            <p>没有底部导航、没有分类标签、没有完成按钮。任务发生在现实世界，不在手机里。</p>
+          </div>
+          <div class="card">
+            <span class="num">02</span>
+            <h3>价值在内容，不在功能</h3>
+            <p>极简的壳之下，真正的价值是各国场景词库、翻译质量与沟通模板——这是内容工程。</p>
+          </div>
+          <div class="card">
+            <span class="num">03</span>
+            <h3>一个人做不完全世界</h3>
+            <p>195 个国家的语言、场景与沟通习惯，需要真正到过那些地方的人来共同完善。</p>
+          </div>
+        </div>
+
+        <span class="eyebrow" style="margin-top: 48px">WAYS TO CONTRIBUTE</span>
+        <h2>五种方式参与共建</h2>
+        <div class="card-row">
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/labels/content"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="num" style="color: var(--accent-blue)">CONTENT</span>
+            <h3>场景内容</h3>
+            <p>整理你熟悉的场景（打车、点餐、问路、就医），补充当地真实说法与沟通习惯。</p>
+          </a>
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/labels/translation"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="num" style="color: var(--accent-yellow)">TRANSLATION</span>
+            <h3>翻译校对</h3>
+            <p>校对我方生成的外语表达，确保语法自然、口吻得体、贴近当地实际。</p>
+          </a>
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/labels/design"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="num" style="color: var(--accent-green)">DESIGN</span>
+            <h3>设计与体验</h3>
+            <p>让卡片更清晰、更克制，让每一步交互都更快到达现实世界。</p>
+          </a>
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/labels/testing"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="num" style="color: var(--accent-blue)">TESTING</span>
+            <h3>真机测试</h3>
+            <p>在真实旅途中使用并反馈：哪些话当地人不明白，哪些场景缺失。</p>
+          </a>
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/labels/code"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="num" style="color: var(--accent-yellow)">CODE</span>
+            <h3>代码与引擎</h3>
+            <p>打磨语音识别、图像理解与离线词库，让它在无网环境也可靠。</p>
+          </a>
+        </div>
+
+        <span class="eyebrow" style="margin-top: 48px">HOW TO START</span>
+        <h2>三步加入共建</h2>
+        <div class="card-row">
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/issues/new/choose"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="flow-num" style="color: var(--accent-blue)">01</span>
+            <h3>提出 Issue</h3>
+            <p>告诉我们你熟悉的场景或发现的问题，例如「在日本便利店怎么买烟」。</p>
+          </a>
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/issues?q=is%3Aissue+is%3Aopen+label%3A%22good+first+issue%22"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="flow-num" style="color: var(--accent-yellow)">02</span>
+            <h3>认领任务</h3>
+            <p>在项目看板中选择你感兴趣的内容条目，标注开始工作。</p>
+          </a>
+          <a
+            class="card clickable"
+            href="https://github.com/dotsoy/scene-go-app/pulls"
+            target="_blank"
+            rel="noopener"
+          >
+            <span class="flow-num" style="color: var(--accent-green)">03</span>
+            <h3>提交 PR</h3>
+            <p>补充词库、校对翻译或改进代码，通过评审后合入。</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- Roadmap -->
+      <section id="roadmap" class="container">
+        <span class="eyebrow">ROADMAP</span>
+        <h2>路线图</h2>
+        <div class="card-row">
+          <div class="card">
+            <span class="num">正在做</span>
+            <h3>V3.1 极简交互定稿</h3>
+            <p>零独立切页的双向沟通流与图像场景理解，画布与规格已就绪。</p>
+          </div>
+          <div class="card">
+            <span class="num">规划中</span>
+            <h3>场景内容共建</h3>
+            <p>各国打车、点餐、问路、就医等场景词库，按国家分册持续扩充。</p>
+          </div>
+          <div class="card">
+            <span class="num">暂不规划</span>
+            <h3>支付与账号</h3>
+            <p>SceneGo 是纯沟通工具：零支付、零交易、零账号依赖。</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+      <span class="logo">SCENEGO</span>
+      <p>开源项目 · 共建每一种可能</p>
+      <p>
+        <a href="https://github.com/dotsoy/scene-go-app" target="_blank" rel="noopener"
+          >github.com/dotsoy/scene-go-app</a
+        >
+        · MIT License
+      </p>
+    </footer>
+
+    <script>
+      // 闭环交互：导航与按钮滚动到对应区块
+      document.querySelectorAll("[data-scroll]").forEach((el) => {
+        el.addEventListener("click", (e) => {
+          e.preventDefault();
+          const target = document.querySelector(el.dataset.scroll);
+          if (target) target.scrollIntoView({ behavior: "smooth", block: "start" });
+        });
+      });
+
+      // 滚动阴影增强导航可读性
+      const nav = document.querySelector(".nav");
+      window.addEventListener("scroll", () => {
+        nav.style.borderBottomColor =
+          window.scrollY > 8 ? "rgba(255,255,255,0.16)" : "rgba(255,255,255,0.08)";
+      });
+    </script>
+  </body>
+</html>
