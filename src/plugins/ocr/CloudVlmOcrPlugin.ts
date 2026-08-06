@@ -28,18 +28,18 @@ const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异
 {"signature":[{"zh":"中文菜名","en":"英文名","th":"当地语言菜名","price":"价格(如 150 铢)","spice":"辣度(如 🌶️🌶️ 或 无辣)","allergens":["花生","海鲜"]}],"allergenWarn":"中文避坑预警（含过敏原提示，无则空串）","dishes":[与 signature 相同字段结构]}；signature 最多 3 项，dishes 最多 6 项`;
 
 const CARD_SYSTEM_PROMPT = `你是 SceneGo 出行助手。用户正在异国旅行，会用一句话描述当下的表达需求（可能来自语音转写）。
-根据需求生成一张"递给当地人看"的高对比度表达卡，语言必须用当地语言（按需求语境推断语种，如泰语/日语/英语）。
+根据需求生成一张"递给当地人看"的高对比度表达卡。语言必须严格使用下方设定的目标语言，禁止使用其他语言。
 
 你必须严格以如下 JSON 格式回复（不要输出任何其他内容）：
 {
   "title": "卡片的中文标题（如：出租车按表计费）",
   "category": "场景分类（RESTAURANT / AIRPORT / HOTEL / TRANSPORT / SHOPPING / ATTRACTION / SIGN / OTHER）",
-  "targetText": "当地语言大字表达（递给当地人看的核心句）",
-  "phonetic": "当地语言发音的拉丁转写",
-  "subText": "补充说明（当地语言或英文）",
+  "targetText": "目标语言大字表达（递给当地人看的核心句）",
+  "phonetic": "目标语言发音的拉丁转写",
+  "subText": "补充说明（目标语言或英文）",
   "localTip": "中文当地惯例提示（小费/计费/注意事项）",
-  "languageCode": "当地语言 BCP-47 代码（如 th-TH / ja-JP / en-US）",
-  "phrases": ["备用表达1（当地语言，括号内中文翻译）", "备用表达2（当地语言，括号内中文翻译）", "备用表达3（当地语言，括号内中文翻译）"]
+  "languageCode": "必须等于下方设定的目标语言代码",
+  "phrases": ["备用表达1（目标语言，括号内中文翻译）", "备用表达2（目标语言，括号内中文翻译）", "备用表达3（目标语言，括号内中文翻译）"]
 }`;
 
 /** 安全转换图片为 Base64 字符串（具备 FileSystem 原生模块 + Fetch Blob 双层降级） */
@@ -256,7 +256,10 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       });
 
       if (!result.ok || result.status === 0) return null;
-      return parseVlmScenarioResult(result.content ?? '');
+      const parsed = parseVlmScenarioResult(result.content ?? '');
+      if (!parsed) return null;
+      // 语言防御：模型输出语言与设置不符时自动重译为目标语言（openrouter/free 等小模型可能不遵守语言约束）
+      return this.enforceTargetLanguage(parsed, s.targetLang, s.targetLangCode, text);
     } catch (err: unknown) {
       // 网络/解析异常上抛给 UI（展示「网络或服务暂时不可用 + 重试」）；无 Key 路径在上面已短路
       console.warn('[Card Generate Error]:', err);
@@ -295,7 +298,9 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
         logLabel: `[Reply Card]: ${text}`,
       });
       if (!result.ok || result.status === 0) return null;
-      return parseVlmScenarioResult(result.content ?? '');
+      const parsed = parseVlmScenarioResult(result.content ?? '');
+      if (!parsed) return null;
+      return this.enforceTargetLanguage(parsed, s.targetLang, s.targetLangCode, text);
     } catch (err: unknown) {
       console.warn('[Reply Card Error]:', err);
       throw err;
@@ -327,5 +332,44 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       console.warn('[Listen Translate Error]:', err);
       return null;
     }
+  }
+
+  /** 把句子重译为目标语言（语言防御：free 模型可能不遵守语言约束，校验不符时用此兜底） */
+  async translateToTarget(text: string, langName: string, langCode: string): Promise<string | null> {
+    const apiKey = await getOpenRouterApiKey();
+    if (!apiKey) return null;
+    try {
+      const result = await chatCompletions({
+        messages: [
+          {
+            role: 'system',
+            content: `你是出行翻译助手。把下面的句子翻译成${langName}（语言代码 ${langCode}）。只输出一行${langName}译文，不要任何其他内容。`,
+          },
+          { role: 'user', content: text },
+        ],
+        maxTokens: 256,
+        model: getCachedSettings().model,
+        logLabel: '[Language Fix]',
+      });
+      if (!result.ok || result.status === 0) return null;
+      const content = (result.content ?? '').trim();
+      return content || null;
+    } catch (err: unknown) {
+      console.warn('[Language Fix Error]:', err);
+      return null;
+    }
+  }
+
+  /** 语言防御：模型输出的 languageCode 与设置不符时，重译 targetText 为目标语言（保证卡片第一行是目标语言） */
+  private async enforceTargetLanguage(parsed: ScenarioResult, langName: string, langCode: string, fallbackSource: string): Promise<ScenarioResult> {
+    if (parsed.languageCode && parsed.languageCode === langCode) return parsed;
+    const source = parsed.targetText || parsed.translatedText || fallbackSource;
+    const fixed = await this.translateToTarget(source, langName, langCode);
+    if (fixed) {
+      console.warn(`[Language Fix] 模型输出语言 ${parsed.languageCode ?? '未知'} ≠ 目标 ${langCode}，已重译`);
+      parsed.targetText = fixed;
+      parsed.languageCode = langCode;
+    }
+    return parsed;
   }
 }

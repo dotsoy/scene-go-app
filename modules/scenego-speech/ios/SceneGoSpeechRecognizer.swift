@@ -158,8 +158,15 @@ public class SceneGoSpeechRecognizer: Module {
       audioEngine.stop()
       recognitionRequest?.endAudio()
     }
-    recognitionTask?.cancel()
-    recognitionTask = nil
+    // 不立即 cancel：endAudio 后 recognitionTask 会自然结束并回调 final 结果
+    // （JS 侧依赖该 final 事件取最终转录；立即 cancel 会中断回调导致「松开无反馈」）。
+    // 兜底：1.5s 内任务未自然结束则强制取消，防止悬挂。
+    let task = recognitionTask
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+      guard let self, self.recognitionTask === task else { return }
+      task?.cancel()
+      self.recognitionTask = nil
+    }
     // 释放录音会话，避免持续占用麦克风
     try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
   }
