@@ -15,15 +15,22 @@ export interface InsightData {
 interface InsightViewProps {
   insight: InsightData;
   onPressCard?: (card: ActionCardData) => void;
+  onPlayAudio?: (card: ActionCardData) => void;
+  playing?: boolean;
   onResnap?: () => void;
   onManualInput?: () => void;
+  /** 识别失败（AI 异常）时显示「重新识别」按钮 */
+  onRetry?: () => void;
 }
 
 export const InsightView: React.FC<InsightViewProps> = ({
   insight,
   onPressCard,
+  onPlayAudio,
+  playing = false,
   onResnap,
   onManualInput,
+  onRetry,
 }) => {
   return (
     <View style={styles.container}>
@@ -49,6 +56,11 @@ export const InsightView: React.FC<InsightViewProps> = ({
             <TouchableOpacity style={styles.manualBtn} onPress={onManualInput}>
               <Text style={styles.manualBtnText}>手动打字输入</Text>
             </TouchableOpacity>
+            {onRetry && (
+              <TouchableOpacity style={styles.manualBtn} onPress={onRetry}>
+                <Text style={styles.manualBtnText}>重新识别</Text>
+              </TouchableOpacity>
+            )}
           </View>
         </View>
       ) : (
@@ -62,7 +74,12 @@ export const InsightView: React.FC<InsightViewProps> = ({
           </View>
 
           {/* Main Card */}
-          <ActionCard card={insight.mainCard} onPressCard={onPressCard} />
+          <ActionCard
+            card={insight.mainCard}
+            onPressCard={onPressCard}
+            onPlayAudio={onPlayAudio}
+            playing={playing}
+          />
 
           {/* Horizontal Scrolling Phrase Cards Row */}
           {insight.phraseCards && insight.phraseCards.length > 0 && (

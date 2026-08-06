@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import {
   View,
   Text,
@@ -9,6 +9,7 @@ import {
   SafeAreaView,
   StatusBar,
   ActivityIndicator,
+  PanResponder,
 } from 'react-native';
 import * as Speech from 'expo-speech';
 import { CameraView, useCameraPermissions } from 'expo-camera';
@@ -17,40 +18,14 @@ import { COLORS, FONT } from '../theme/tokens';
 import { ActionCard, ActionCardData } from './ActionCard';
 import { PresentationModal } from './PresentationModal';
 import { InsightView, InsightData } from './InsightView';
+import { SettingsSheet } from './SettingsSheet';
 import { expressionEngine } from '../core/expressionEngine';
 import { speechController } from '../core/speechController';
-import { countryController } from '../core/countryController';
 import { NativeSpeech } from '../utils/NativeSpeech';
-import { getLocationContext } from '../utils/locationContext';
-import { getCountrySafety } from '../data/countrySafety';
+import { getOpenRouterApiKey, setOpenRouterApiKey, clearOpenRouterApiKey } from '../utils/SecureConfig';
+import { loadAppSettings, saveAppSettings, AppSettings, DEFAULT_APP_SETTINGS } from '../utils/appSettings';
+import { toPhraseCards } from '../utils/cardPhrases';
 import type { CardData } from '../core/types';
-import type { SavedCountry } from '../utils/countryStore';
-import type { UserProfile } from '../utils/userProfile';
-import type { PlaceContext } from '../utils/locationContext';
-import { CountrySelectModal } from './CountrySelectModal';
-import { CountrySwitchPromptModal } from './CountrySwitchPromptModal';
-
-/** Idle 快捷表达 chips（对齐 Open Design 原型）：点击走真实 generateCard */
-const QUICK_EXPRESSIONS = ['我要去大皇宫，打表', '太贵了，便宜点'];
-
-/** 推荐回复 3 组轮换（对齐原型 RECS_SETS，随对话推进切换） */
-const RECS_SETS: ActionCardData[][] = [
-  [
-    { id: 'reply-3a', foreignText: 'กดมิเตอร์ได้ไหม', nativeText: '打表可以吗？' },
-    { id: 'reply-3b', foreignText: 'แพงไป ลดหน่อยได้ไหม', nativeText: '太贵了，能便宜点吗？' },
-    { id: 'reply-3c', foreignText: 'ฉันจะลงที่นี่', nativeText: '我在这里下车' },
-  ],
-  [
-    { id: 'reply-3d', foreignText: 'รับแบงค์พันไหมครับ', nativeText: '收一千泰铢纸币吗？' },
-    { id: 'reply-3e', foreignText: 'จอดข้างหน้าด้วยครับ', nativeText: '请在前面停车' },
-    { id: 'reply-3f', foreignText: 'ช่วยขับช้าๆ หน่อยครับ', nativeText: '请开慢一点' },
-  ],
-  [
-    { id: 'reply-3g', foreignText: 'มีใบเสร็จไหมครับ', nativeText: '能给收据吗？' },
-    { id: 'reply-3h', foreignText: 'ขอบคุณมากครับ', nativeText: '非常感谢' },
-    { id: 'reply-3i', foreignText: 'พรุ่งนี้มารับกี่โมงดีครับ', nativeText: '明天几点来接合适？' },
-  ],
-];
 
 /** CardData → 卡片模型（上下结构 + 可播放） */
 function toActionCard(card: CardData): ActionCardData {
@@ -63,25 +38,16 @@ function toActionCard(card: CardData): ActionCardData {
   };
 }
 
-/**
- * recommendedPhrases 约定格式「当地语言短语 (中文翻译)」→ 上下结构横滑卡。
- * 无中文翻译的短语无法构成上下结构，不展示（避免误导）。
- */
-function toPhraseCards(phrases: string[] | undefined): ActionCardData[] | undefined {
-  if (!phrases || phrases.length === 0) return undefined;
-  const cards: ActionCardData[] = [];
-  for (const phrase of phrases.slice(0, 3)) {
-    const m = phrase.match(/^(.*?)\s*\(([^)]+)\)\s*$/);
-    if (!m) continue;
-    cards.push({
-      id: `phrase-${cards.length + 1}`,
-      foreignText: m[1].trim(),
-      nativeText: m[2].trim(),
-      hasAudio: true,
-    });
-  }
-  return cards.length > 0 ? cards : undefined;
+interface StreamErrorItem {
+  id: number;
+  type: 'error';
+  text: string;
+  retry: () => void;
+  /** AI 失败时用户可「直接输出」：输入原文原样成卡 */
+  directOutput?: () => void;
 }
+
+type StreamItem = { id: number; type: 'sys'; text: string } | StreamErrorItem;
 
 export const MainPage: React.FC = () => {
   const [isCameraExpanded, setIsCameraExpanded] = useState(false);
@@ -90,85 +56,64 @@ export const MainPage: React.FC = () => {
   const [isSnapProcessing, setIsSnapProcessing] = useState(false);
 
   const [actionCards, setActionCards] = useState<ActionCardData[]>([]);
-  const [recsSetIdx, setRecsSetIdx] = useState(0);
+  const [streamItems, setStreamItems] = useState<StreamItem[]>([]);
   const [presentationCard, setPresentationCard] = useState<ActionCardData | null>(null);
-
-  // 国家/位置（右上角「切换」与首次启动选择，业务在 countryController）
-  const [currentCountry, setCurrentCountry] = useState<SavedCountry | null>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [detectedPlace, setDetectedPlace] = useState<PlaceContext | null>(null);
-  const [isCountrySelectOpen, setIsCountrySelectOpen] = useState(false);
-  const [switchPrompt, setSwitchPrompt] = useState<{ detectedName: string } | null>(null);
+  const [playingId, setPlayingId] = useState<string | null>(null);
 
   const [inputText, setInputText] = useState('');
   const [isMicOn, setIsMicOn] = useState(false);
   const [liveTranscript, setLiveTranscript] = useState('');
   const [isThinking, setIsThinking] = useState(false);
 
+  // 设置（目的地国家/地区 + 目标语言 + 模型 + Key 状态）
+  const [settings, setSettings] = useState<AppSettings>(DEFAULT_APP_SETTINGS);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [hasKey, setHasKey] = useState(false);
+
+  // Orb 按住说话：上滑取消 + 麦克风错误提示
+  const [orbCancel, setOrbCancel] = useState(false);
+  const [holdError, setHoldError] = useState<string | null>(null);
+
   const scrollRef = useRef<ScrollView>(null);
   const cameraRef = useRef<CameraView | null>(null);
   const [permission, requestPermission] = useCameraPermissions();
 
-  // 相机权限：未授权且可再次询问时自动请求（对齐仓库既有相机权限模式；拒绝后不再空转重试）
+  const seqRef = useRef(0);
+  const micOnRef = useRef(false);
+  const thinkingRef = useRef(false);
+  const liveTranscriptRef = useRef('');
+  const lastPhotoRef = useRef<string | null>(null);
+  const holdErrorTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // 相机权限：未授权且可再次询问时自动请求（拒绝后由权限层提供重试）
   useEffect(() => {
     if (permission && !permission.granted && permission.canAskAgain) {
       requestPermission();
     }
   }, [permission, requestPermission]);
 
-  // 启动：加载缓存国家/档案 + GPS 检测；未设置国家则打开选择，位置变化则提示切换（业务在 countryController）
+  // 启动：加载设置（目的地/语言/模型）+ API Key 状态
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      const result = await countryController.init();
+      const s = await loadAppSettings();
+      const key = await getOpenRouterApiKey().catch(() => '');
       if (cancelled) return;
-      setUserProfile(result.profile);
-      setDetectedPlace(result.place);
-      if (!result.cached) {
-        setIsCountrySelectOpen(true);
-        return;
-      }
-      setCurrentCountry(result.cached);
-      setSwitchPrompt(result.switchPrompt);
+      setSettings(s);
+      setHasKey(!!key);
     })();
     return () => {
       cancelled = true;
     };
   }, []);
 
-  /** 确认国家（弹窗手动选择 = 目的地）：保存档案 + 缓存国家（业务在 countryController），目的地为权威 */
-  const handleCountryConfirm = async (code: string, profile: UserProfile) => {
-    setUserProfile(profile);
-    const ok = await countryController.confirm(code, profile, detectedPlace?.city, true);
-    setSwitchPrompt(null);
-    setIsCountrySelectOpen(false);
-    if (ok) {
-      const s = getCountrySafety(code);
-      if (s) setCurrentCountry({ code, nameZh: s.nameZh, savedAt: Date.now(), manual: true });
-    }
-  };
+  useEffect(() => {
+    micOnRef.current = isMicOn;
+  }, [isMicOn]);
 
-  /** GPS 检测到位置变化：跟随定位切换（保留自动检测能力，下次位置再变仍会提示） */
-  const handleSwitchCountry = async () => {
-    if (!switchPrompt || !detectedPlace?.countryCode) return;
-    setSwitchPrompt(null);
-    const ok = await countryController.switchTo(
-      detectedPlace.countryCode,
-      userProfile ?? { nationality: 'CN', language: 'zh-CN' },
-      detectedPlace.city,
-    );
-    if (ok) {
-      const s = getCountrySafety(detectedPlace.countryCode);
-      if (s) setCurrentCountry({ code: s.code, nameZh: s.nameZh, savedAt: Date.now() });
-    }
-  };
-
-  /** 保持当前国家（重放安全卡） */
-  const handleKeepCountry = () => {
-    if (!currentCountry) return;
-    setSwitchPrompt(null);
-    countryController.keep(currentCountry, detectedPlace?.city);
-  };
+  useEffect(() => {
+    thinkingRef.current = isThinking;
+  }, [isThinking]);
 
   const appendCard = (card: ActionCardData) => {
     setActionCards((prev) => [...prev, card]);
@@ -176,90 +121,201 @@ export const MainPage: React.FC = () => {
     setActiveInsight(null);
   };
 
-  /** 打字/快捷表达 → 真实引擎生成表达卡（离线 SOP 优先，云端 VLM 兜底） */
-  const handleSendText = async (preset?: string) => {
-    const text = (preset ?? inputText).trim();
-    if (!text || isThinking) return;
+  const appendSys = (text: string) => {
+    setStreamItems((prev) => [...prev, { id: ++seqRef.current, type: 'sys', text }]);
+  };
+
+  const appendError = (text: string, retry: () => void, directOutput?: () => void) => {
+    setStreamItems((prev) => [...prev, { id: ++seqRef.current, type: 'error', text, retry, directOutput }]);
+  };
+
+  /** 用户直接输出：输入原文原样成卡（AI 不可用时的最后手段） */
+  const directOutputCard = (text: string) => {
+    appendCard({
+      id: `manual-${Date.now()}`,
+      foreignText: text,
+      nativeText: text,
+      hasAudio: true,
+    });
+  };
+
+  /** 文本成卡核心：打字/语音转录 → AI 翻译成目标语言；失败 → 错误行（重试 / 直接输出） */
+  const submitText = async (text: string) => {
+    const v = text.trim();
+    if (!v || thinkingRef.current) return;
     setIsThinking(true);
     try {
-      const locationCtx = await getLocationContext();
-      const card = await expressionEngine.generateCard(text, locationCtx ?? undefined, 'zh-CN');
+      const card = await expressionEngine.generateCard(v, settings.countryZh);
       if (card) {
         appendCard(toActionCard(card));
       } else {
-        appendCard({
-          id: `fallback-${Date.now()}`,
-          foreignText: 'ไม่เข้าใจ ครับ/ค่ะ',
-          nativeText: `未识别到明确表达需求：${text}`,
-          hasAudio: true,
-        });
+        appendError('AI 暂时无法生成卡片，请重试或直接输出', () => submitText(v), () => directOutputCard(v));
       }
+    } catch (err) {
+      console.warn('[Card Error]:', err);
+      appendError('网络或服务暂时不可用', () => submitText(v), () => directOutputCard(v));
     } finally {
       setIsThinking(false);
-      if (preset === undefined) setInputText('');
     }
   };
 
-  /** PLAY → TTS 真实发声 */
+  const handleSendText = () => {
+    const text = inputText.trim();
+    setInputText('');
+    submitText(text);
+  };
+
+  /** PLAY/STOP 切换：播放中点击停止，播放结束自动复位 */
   const handlePlayAudio = (card: ActionCardData) => {
+    if (playingId === card.id) {
+      Speech.stop();
+      setPlayingId(null);
+      return;
+    }
+    Speech.stop();
+    setPlayingId(card.id);
     Speech.speak(card.foreignText, {
       language: card.languageCode ?? 'th-TH',
       pitch: 1.0,
       rate: 0.85,
+      onDone: () => setPlayingId(null),
+      onStopped: () => setPlayingId(null),
+      onError: () => setPlayingId(null),
     });
   };
 
-  /** 语音：按住开始听写 */
+  const showHoldError = (msg: string) => {
+    setHoldError(msg);
+    if (holdErrorTimerRef.current) clearTimeout(holdErrorTimerRef.current);
+    holdErrorTimerRef.current = setTimeout(() => setHoldError(null), 2600);
+  };
+
+  /** Orb 按住说话：自己说话（中文听写）→ 松开发送 → AI 翻译成卡 */
   const startListening = async () => {
-    if (!speechController.isSupported()) return;
     const res = await speechController.start('zh-CN');
     if (res.ok) {
       setIsMicOn(true);
+      micOnRef.current = true;
       setLiveTranscript('');
+      liveTranscriptRef.current = '';
+    } else {
+      showHoldError('无法使用麦克风 · 请在系统设置中允许');
     }
   };
 
-  /** 语音：松开停止 → 真实转写 → 生成卡片 */
-  const stopListening = async () => {
-    if (!isMicOn) return;
-    await NativeSpeech.stop();
+  const cancelListening = async () => {
+    if (!micOnRef.current) return;
+    await NativeSpeech.stop().catch(() => {});
+    micOnRef.current = false;
     setIsMicOn(false);
-    const text = liveTranscript.trim();
     setLiveTranscript('');
-    if (!text) return;
-    setIsThinking(true);
-    try {
-      const locationCtx = await getLocationContext();
-      const card = await expressionEngine.generateCard(text, locationCtx ?? undefined, 'zh-CN');
-      if (card) appendCard(toActionCard(card));
-    } finally {
-      setIsThinking(false);
-    }
+    liveTranscriptRef.current = '';
+  };
+
+  const stopListening = async () => {
+    if (!micOnRef.current) return;
+    await NativeSpeech.stop().catch(() => {});
+    micOnRef.current = false;
+    setIsMicOn(false);
+    const text = liveTranscriptRef.current.trim();
+    setLiveTranscript('');
+    liveTranscriptRef.current = '';
+    if (text) submitText(text);
   };
 
   useEffect(() => {
     const sub = NativeSpeech.onSpeechResult((e) => {
+      liveTranscriptRef.current = e.transcript;
       setLiveTranscript(e.transcript);
     });
     return () => sub.remove();
   }, []);
 
-  /** 拍照 SNAP → 真实相机捕获 → expressionEngine.processImage 真实识别（模拟器走仓库既有测试图降级） */
-  const handleSnap = async () => {
-    if (isSnapProcessing) return;
+  /** 按住说话 Orb：PanResponder 实现「上滑取消 / 松开发送」 */
+  const orbPanResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => true,
+        onMoveShouldSetPanResponder: () => true,
+        onPanResponderGrant: () => {
+          if (micOnRef.current || thinkingRef.current) return;
+          startListening();
+        },
+        onPanResponderMove: (_evt, g) => {
+          const cancel = g.dy < -70;
+          setOrbCancel((prev) => (prev === cancel ? prev : cancel));
+        },
+        onPanResponderRelease: (_evt, g) => {
+          setOrbCancel(false);
+          if (g.dy < -70) cancelListening();
+          else stopListening();
+        },
+        onPanResponderTerminate: () => {
+          setOrbCancel(false);
+          cancelListening();
+        },
+      }),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  );
+
+  /** 聆听对方：转录文本 → 一张合并回复卡（外语回复上 / 母语译文下） */
+  const replyFromUtterance = async (text: string) => {
+    setIsThinking(true);
+    try {
+      const card = await expressionEngine.replyToUtterance(text, settings.countryZh);
+      if (card) {
+        appendCard(toActionCard(card));
+      } else {
+        appendError('AI 暂时无法生成回复卡，请重试或直接输出', () => replyFromUtterance(text), () => directOutputCard(text));
+      }
+    } catch (err) {
+      console.warn('[Reply Card Error]:', err);
+      appendError('网络或服务暂时不可用', () => replyFromUtterance(text), () => directOutputCard(text));
+    } finally {
+      setIsThinking(false);
+    }
+  };
+
+  /** mic ON/OFF：ON = 以目标语言持续聆听对方；OFF = 转录 → 合并回复卡 */
+  const onMicToggle = async () => {
+    if (micOnRef.current) {
+      await NativeSpeech.stop().catch(() => {});
+      micOnRef.current = false;
+      setIsMicOn(false);
+      const text = liveTranscriptRef.current.trim();
+      setLiveTranscript('');
+      liveTranscriptRef.current = '';
+      if (text) replyFromUtterance(text);
+      return;
+    }
+    const res = await speechController.start(settings.targetLangCode);
+    if (res.ok) {
+      setIsMicOn(true);
+      micOnRef.current = true;
+      setLiveTranscript('');
+      liveTranscriptRef.current = '';
+    } else {
+      showHoldError('无法使用麦克风 · 请在系统设置中允许');
+    }
+  };
+
+  /** 拍照 SNAP → 真实相机捕获 → processImage（模拟器走测试图降级；目的地作为位置上下文） */
+  const processInsight = async (photoUri: string) => {
     setIsSnapProcessing(true);
     try {
-      let photoUri: string | null = null;
-      if (Device.isDevice) {
-        const photo = await cameraRef.current?.takePictureAsync({ quality: 0.8 });
-        photoUri = photo?.uri ?? null;
-      } else {
-        // 模拟器无物理摄像头：走仓库既有测试图降级（真机绝不顶替用户照片）
-        photoUri = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800';
+      const result = await expressionEngine.processImage(photoUri, settings.countryZh);
+      // 已配置 Key 但云端识别失败（网络/鉴权）：按「识别失败，请重试」展示；未配置 Key 走本地词库兜底
+      if (result.ocrIssue && hasKey) {
+        setActiveInsight({
+          id: `insight-${Date.now()}`,
+          isError: true,
+          errorMessage: '识别失败，请重试',
+          mainCard: { id: 'insight-error', foreignText: '', nativeText: '', hasAudio: false },
+        });
+        setHasSubmittedInput(true);
+        return;
       }
-      if (!photoUri) throw new Error('camera-capture-failed');
-      setIsCameraExpanded(false);
-      const result = await expressionEngine.processImage(photoUri);
       setActiveInsight({
         id: `insight-${Date.now()}`,
         imageUri: photoUri,
@@ -275,57 +331,99 @@ export const MainPage: React.FC = () => {
         errorMessage: '照片识别失败，请重新拍摄或手动输入',
         mainCard: { id: 'insight-error', foreignText: '', nativeText: '', hasAudio: false },
       });
-      setIsCameraExpanded(false);
       setHasSubmittedInput(true);
     } finally {
       setIsSnapProcessing(false);
     }
   };
 
-  const handleSelectSuggestedReply = (reply: ActionCardData) => {
-    appendCard({ ...reply, id: `reply-${Date.now()}`, hasAudio: true });
-    setRecsSetIdx((i) => (i + 1) % RECS_SETS.length);
+  const handleSnap = async () => {
+    if (isSnapProcessing) return;
+    try {
+      let photoUri: string | null = null;
+      if (Device.isDevice) {
+        const photo = await cameraRef.current?.takePictureAsync({ quality: 0.8 });
+        photoUri = photo?.uri ?? null;
+      } else {
+        // 模拟器无物理摄像头：仓库既有测试图降级（开发用，非产品内容）
+        photoUri = 'https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=800';
+      }
+      if (!photoUri) throw new Error('camera-capture-failed');
+      lastPhotoRef.current = photoUri;
+      setIsCameraExpanded(false);
+      await processInsight(photoUri);
+    } catch (err) {
+      console.warn('[Snap] 拍照失败:', err);
+      setActiveInsight({
+        id: `insight-${Date.now()}`,
+        isError: true,
+        errorMessage: '照片识别失败，请重新拍摄或手动输入',
+        mainCard: { id: 'insight-error', foreignText: '', nativeText: '', hasAudio: false },
+      });
+      setIsCameraExpanded(false);
+      setHasSubmittedInput(true);
+    }
   };
 
-  /** 回到首页：清空卡片流/Insight，复位 mic/输入/推荐轮换，返回 Idle（对齐原型 resetToHome） */
+  /** 回到首页：清空卡片流/Insight，复位 mic/输入，返回 Idle */
   const handleResetToHome = () => {
-    if (isMicOn) {
+    if (micOnRef.current) {
       NativeSpeech.stop().catch(() => {});
     }
+    micOnRef.current = false;
     setIsMicOn(false);
     setLiveTranscript('');
+    setHoldError(null);
+    if (holdErrorTimerRef.current) clearTimeout(holdErrorTimerRef.current);
     setActionCards([]);
+    setStreamItems([]);
     setActiveInsight(null);
     setHasSubmittedInput(false);
     setInputText('');
-    setRecsSetIdx(0);
     setIsCameraExpanded(false);
     setPresentationCard(null);
+    Speech.stop();
+    setPlayingId(null);
     scrollRef.current?.scrollTo({ y: 0, animated: false });
+  };
+
+  /** 设置保存：Key 入 Keychain，目的地/语言/模型持久化 */
+  const handleSaveSettings = async (key: string, s: AppSettings) => {
+    if (key) await setOpenRouterApiKey(key);
+    else await clearOpenRouterApiKey();
+    await saveAppSettings(s);
+    setSettings(s);
+    setHasKey(!!key);
   };
 
   return (
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
 
-      {/* Header */}
+      {/* Header：目的地胶囊 + 设置入口 */}
       <View style={styles.headerRow}>
         <Text style={styles.brandText}>SCENEGO</Text>
-        <TouchableOpacity style={styles.locationPill} onPress={() => setIsCountrySelectOpen(true)}>
-          <Text style={styles.locationText}>
-            {currentCountry
-              ? (() => {
-                  // 目的地（手动选择）为权威；城市仅在与目的地国家一致时展示，避免与定位混拼
-                  const countryMatches =
-                    !detectedPlace?.countryCode || detectedPlace.countryCode === currentCountry.code;
-                  return countryMatches && detectedPlace?.city
-                    ? `${currentCountry.nameZh} · ${detectedPlace.city}`
-                    : currentCountry.nameZh;
-                })()
-              : '当前位置'}
-          </Text>
-          <Text style={styles.switchText}>切换 &gt;</Text>
-        </TouchableOpacity>
+        <View style={styles.headerRight}>
+          <TouchableOpacity
+            style={styles.locationPill}
+            onPress={() => setSettingsOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="打开设置"
+          >
+            <Text style={styles.locationText}>
+              {settings.countryZh} · {settings.targetLang}
+            </Text>
+            <Text style={styles.switchText}>设置</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.gearBtn}
+            onPress={() => setSettingsOpen(true)}
+            accessibilityRole="button"
+            accessibilityLabel="打开设置"
+          >
+            <Text style={styles.gearBtnText}>设置</Text>
+          </TouchableOpacity>
+        </View>
       </View>
 
       {/* Main Content Area (flex:1) */}
@@ -350,7 +448,23 @@ export const MainPage: React.FC = () => {
                 </View>
               </CameraView>
             ) : (
-              <Text style={styles.viewfinderSub}>相机权限未就绪，将使用模拟图识别</Text>
+              <View style={styles.camPerm}>
+                <Text style={styles.camPermTitle}>无法访问相机</Text>
+                <Text style={styles.camPermDesc}>
+                  {permission?.canAskAgain
+                    ? '请在系统设置中允许 SceneGo 使用相机后重试。'
+                    : '相机权限已被拒绝，请在系统设置中开启后重试。'}
+                </Text>
+                <View style={styles.camPermActions}>
+                  <TouchableOpacity
+                    style={styles.camPermPrimary}
+                    onPress={() => requestPermission()}
+                    accessibilityRole="button"
+                  >
+                    <Text style={styles.camPermPrimaryText}>重试</Text>
+                  </TouchableOpacity>
+                </View>
+              </View>
             )}
           </View>
           <View style={styles.snapRow}>
@@ -372,28 +486,38 @@ export const MainPage: React.FC = () => {
         >
           {!hasSubmittedInput && !activeInsight && (
             <View style={styles.heroCenter}>
-              <TouchableOpacity
-                activeOpacity={0.8}
-                style={[styles.heroOrb, isMicOn && styles.heroOrbActive]}
-                onPressIn={startListening}
-                onPressOut={stopListening}
+              {(isMicOn || holdError) && (
+                <View style={styles.recBubbleWrap}>
+                  <View style={styles.recBubble}>
+                    <Text style={[styles.recBadge, holdError && styles.recBadgeErr]}>
+                      {holdError ? '!' : 'REC'}
+                    </Text>
+                    <Text style={[styles.recText, holdError && styles.recTextErr]} numberOfLines={2}>
+                      {holdError ?? liveTranscript}
+                    </Text>
+                  </View>
+                </View>
+              )}
+              <View
+                style={[
+                  styles.heroOrb,
+                  isMicOn && styles.heroOrbActive,
+                  orbCancel && styles.heroOrbCancel,
+                ]}
+                {...orbPanResponder.panHandlers}
+                accessible
+                accessibilityRole="button"
+                accessibilityLabel="按住说话"
               >
-                <Text style={styles.orbText}>{isMicOn ? '松开发送' : '按住说话'}</Text>
-              </TouchableOpacity>
-              <Text style={styles.orbHint}>
-                {isMicOn ? liveTranscript || '正在聆听...' : '松开理解内容并生成卡片'}
-              </Text>
-              <View style={styles.chipRow}>
-                {QUICK_EXPRESSIONS.map((label) => (
-                  <TouchableOpacity
-                    key={label}
-                    style={styles.chip}
-                    onPress={() => handleSendText(label)}
-                  >
-                    <Text style={styles.chipText}>{label}</Text>
-                  </TouchableOpacity>
-                ))}
+                <Text style={styles.orbText}>
+                  {isMicOn ? (orbCancel ? '松开取消' : '松开发送') : '按住说话'}
+                </Text>
               </View>
+              <Text style={styles.orbHint}>
+                {isMicOn
+                  ? liveTranscript || '正在聆听...'
+                  : '按住说出需求 · 上滑取消，松开发送'}
+              </Text>
             </View>
           )}
 
@@ -403,11 +527,18 @@ export const MainPage: React.FC = () => {
                 <InsightView
                   insight={activeInsight}
                   onPressCard={(c) => setPresentationCard(c)}
+                  onPlayAudio={handlePlayAudio}
+                  playing={playingId === 'insight-main'}
                   onResnap={() => setIsCameraExpanded(true)}
                   onManualInput={() => {
                     setActiveInsight(null);
                     setHasSubmittedInput(true);
                   }}
+                  onRetry={
+                    activeInsight.isError && lastPhotoRef.current
+                      ? () => processInsight(lastPhotoRef.current!)
+                      : undefined
+                  }
                 />
               )}
 
@@ -417,8 +548,42 @@ export const MainPage: React.FC = () => {
                   card={card}
                   onPressCard={(c) => setPresentationCard(c)}
                   onPlayAudio={handlePlayAudio}
+                  playing={playingId === card.id}
                 />
               ))}
+
+              {streamItems.map((item) => {
+                if (item.type === 'sys') {
+                  return (
+                    <Text key={item.id} style={styles.sysLine}>
+                      {item.text}
+                    </Text>
+                  );
+                }
+                return (
+                  <View key={item.id} style={styles.errLine}>
+                    <Text style={styles.errLineText}>{item.text}</Text>
+                    <View style={styles.errActions}>
+                      <TouchableOpacity
+                        style={styles.retryBtn}
+                        onPress={item.retry}
+                        accessibilityRole="button"
+                      >
+                        <Text style={styles.retryBtnText}>重试</Text>
+                      </TouchableOpacity>
+                      {item.directOutput && (
+                        <TouchableOpacity
+                          style={styles.retryBtn}
+                          onPress={item.directOutput}
+                          accessibilityRole="button"
+                        >
+                          <Text style={styles.retryBtnText}>直接输出</Text>
+                        </TouchableOpacity>
+                      )}
+                    </View>
+                  </View>
+                );
+              })}
 
               {isThinking && (
                 <View style={styles.thinkingRow}>
@@ -427,23 +592,15 @@ export const MainPage: React.FC = () => {
                 </View>
               )}
 
-              {/* Horizontal Suggested Replies */}
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.suggestedScrollContent}
-                style={styles.suggestedScroll}
-              >
-                {RECS_SETS[recsSetIdx].map((reply) => (
-                  <ActionCard
-                    key={reply.id}
-                    card={reply}
-                    width={220}
-                    isOptionCard
-                    onPressCard={handleSelectSuggestedReply}
-                  />
-                ))}
-              </ScrollView>
+              {/* 聆听对方：mic ON 时实时转写展示 */}
+              {isMicOn && (
+                <View style={styles.thinkingRow}>
+                  <ActivityIndicator size="small" color={COLORS.accentGreen} />
+                  <Text style={styles.thinkingText} numberOfLines={3}>
+                    正在听对方说话… {liveTranscript}
+                  </Text>
+                </View>
+              )}
 
               {/* Mic & Text Bar */}
               <View style={styles.micBar}>
@@ -455,7 +612,7 @@ export const MainPage: React.FC = () => {
                 >
                   <Text style={styles.homeBtnText}>首页</Text>
                 </TouchableOpacity>
-                <TouchableOpacity onPress={() => setIsMicOn(!isMicOn)}>
+                <TouchableOpacity onPress={onMicToggle}>
                   <Text style={styles.micText}>{isMicOn ? 'mic ON' : 'mic OFF'}</Text>
                 </TouchableOpacity>
                 <View style={styles.micInputSubGroup}>
@@ -465,9 +622,9 @@ export const MainPage: React.FC = () => {
                     onChangeText={setInputText}
                     placeholder="打字补充说明..."
                     placeholderTextColor={COLORS.textTertiary}
-                    onSubmitEditing={() => handleSendText()}
+                    onSubmitEditing={handleSendText}
                   />
-                  <TouchableOpacity style={styles.micSendBtn} onPress={() => handleSendText()}>
+                  <TouchableOpacity style={styles.micSendBtn} onPress={handleSendText}>
                     <Text style={styles.micSendArrow}>&gt;</Text>
                   </TouchableOpacity>
                 </View>
@@ -477,21 +634,11 @@ export const MainPage: React.FC = () => {
         </ScrollView>
       )}
 
-      <CountrySelectModal
-        visible={isCountrySelectOpen}
-        detected={detectedPlace}
-        currentCode={currentCountry?.code ?? null}
-        profile={userProfile}
-        onClose={() => setIsCountrySelectOpen(false)}
-        onConfirm={handleCountryConfirm}
-      />
-
-      <CountrySwitchPromptModal
-        visible={!!switchPrompt}
-        detectedName={switchPrompt?.detectedName ?? ''}
-        currentName={currentCountry?.nameZh ?? ''}
-        onSwitch={handleSwitchCountry}
-        onKeep={handleKeepCountry}
+      <SettingsSheet
+        visible={settingsOpen}
+        settings={settings}
+        onClose={() => setSettingsOpen(false)}
+        onSave={handleSaveSettings}
       />
 
       <PresentationModal
@@ -523,11 +670,18 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     letterSpacing: 2,
   },
+  headerRight: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
   locationPill: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
     backgroundColor: '#161618',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
     borderRadius: 12,
     paddingHorizontal: 12,
     paddingVertical: 6,
@@ -540,6 +694,19 @@ const styles = StyleSheet.create({
   switchText: {
     fontFamily: FONT.regular,
     fontSize: 11,
+    color: COLORS.textTertiary,
+  },
+  gearBtn: {
+    width: 30,
+    height: 30,
+    borderRadius: 9,
+    backgroundColor: 'rgba(255,255,255,0.04)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  gearBtnText: {
+    fontFamily: FONT.regular,
+    fontSize: 10,
     color: COLORS.textTertiary,
   },
   scroll: {
@@ -557,6 +724,39 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 20,
   },
+  recBubbleWrap: {
+    alignSelf: 'center',
+    maxWidth: 300,
+  },
+  recBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 9,
+    backgroundColor: 'rgba(24,24,27,0.95)',
+    borderWidth: 1,
+    borderColor: 'rgba(79,195,247,0.4)',
+    borderRadius: 12,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+  },
+  recBadge: {
+    fontFamily: FONT.monoBold,
+    fontSize: 11,
+    letterSpacing: 0.8,
+    color: COLORS.accentRed,
+  },
+  recBadgeErr: {
+    color: '#f4706c',
+  },
+  recText: {
+    flex: 1,
+    fontSize: 14,
+    color: COLORS.textPrimary,
+    lineHeight: 20,
+  },
+  recTextErr: {
+    color: '#f4706c',
+  },
   heroOrb: {
     width: 160,
     height: 160,
@@ -564,9 +764,20 @@ const styles = StyleSheet.create({
     backgroundColor: '#2563EB',
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: 'rgba(37,99,235,0.5)',
+    shadowOpacity: 0.5,
+    shadowRadius: 22,
+    shadowOffset: { width: 0, height: 12 },
+    elevation: 8,
   },
   heroOrbActive: {
     backgroundColor: '#EF5350',
+    shadowColor: 'rgba(239,83,80,0.5)',
+  },
+  heroOrbCancel: {
+    backgroundColor: '#EF5350',
+    opacity: 0.75,
+    shadowColor: 'rgba(239,83,80,0.7)',
   },
   orbText: {
     fontFamily: FONT.bold,
@@ -580,27 +791,44 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     lineHeight: 20,
   },
-  chipRow: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    justifyContent: 'center',
-    gap: 8,
-  },
-  chip: {
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.03)',
-    borderRadius: 999,
-    paddingHorizontal: 13,
-    paddingVertical: 8,
-  },
-  chipText: {
-    fontFamily: FONT.regular,
-    fontSize: 12,
-    color: COLORS.textSecondary,
-  },
   streamContainer: {
     gap: 12,
+  },
+  sysLine: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: COLORS.textSecondary,
+    paddingHorizontal: 14,
+    lineHeight: 18,
+  },
+  errLine: {
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 2,
+  },
+  errLineText: {
+    textAlign: 'center',
+    fontSize: 11,
+    color: '#f4706c',
+    paddingHorizontal: 14,
+    lineHeight: 18,
+  },
+  errActions: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  retryBtn: {
+    backgroundColor: '#252528',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.06)',
+    borderRadius: 10,
+    paddingHorizontal: 20,
+    paddingVertical: 8,
+  },
+  retryBtnText: {
+    fontFamily: FONT.semibold,
+    fontSize: 12,
+    color: COLORS.textPrimary,
   },
   thinkingRow: {
     flexDirection: 'row',
@@ -610,15 +838,12 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
   },
   thinkingText: {
+    flex: 1,
     fontFamily: FONT.regular,
     fontSize: 12,
     color: COLORS.textSecondary,
-  },
-  suggestedScroll: {
-    marginTop: 2,
-  },
-  suggestedScrollContent: {
-    gap: 10,
+    textAlign: 'center',
+    lineHeight: 18,
   },
   micBar: {
     backgroundColor: '#161618',
@@ -725,10 +950,43 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     overflow: 'hidden',
   },
-  viewfinderSub: {
+  camPerm: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 6,
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 10,
+    padding: 30,
+    backgroundColor: 'rgba(5,5,7,0.92)',
+  },
+  camPermTitle: {
+    fontFamily: FONT.bold,
+    fontSize: 14,
+    color: '#FFFFFF',
+    lineHeight: 20,
+  },
+  camPermDesc: {
     fontFamily: FONT.regular,
     fontSize: 12,
     color: COLORS.textTertiary,
+    textAlign: 'center',
+    lineHeight: 19,
+  },
+  camPermActions: {
+    flexDirection: 'row',
+    gap: 10,
+    marginTop: 8,
+  },
+  camPermPrimary: {
+    backgroundColor: '#2563EB',
+    borderRadius: 10,
+    paddingHorizontal: 15,
+    paddingVertical: 9,
+  },
+  camPermPrimaryText: {
+    fontFamily: FONT.semibold,
+    fontSize: 12,
+    color: '#FFFFFF',
   },
   snapRow: {
     alignItems: 'center',

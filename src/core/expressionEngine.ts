@@ -8,7 +8,6 @@ import { ChatTurn, ScenarioResult } from '../plugins/types';
 import { getLocationContext } from '../utils/locationContext';
 import { compressImage } from '../utils/imageCompress';
 import { scenarioToCard } from '../utils/cardBuilder';
-import { sopEngine } from './sopEngine';
 import { pipelineTraceStore } from './pipelineTrace';
 import { CardData } from './types';
 
@@ -42,28 +41,8 @@ export const expressionEngine = {
     };
   },
 
-  /** 文本驱动的动态表达卡：一句话需求（语音转写/手打）→ 表达卡；lang 为用户侧文案语言 */
-  async generateCard(text: string, location?: string, lang?: string): Promise<CardData | null> {
-    // 离线 SOP 优先：打车/药店确定性模板（无 Key 也能成卡）
-    const local = sopEngine.matchLocalSop(text, {
-      location: location ?? undefined,
-      lang: (lang as 'zh-CN' | 'en-US') ?? undefined,
-    });
-    if (local) {
-      console.log(
-        `[Card trace] 离线SOP → card=${local.id} category=${local.categoryTag} steps=${local.steps?.length ?? 0} title=${local.title}`,
-      );
-      pipelineTraceStore.getState().pushTrace({
-        at: Date.now(),
-        input: text,
-        path: 'sop',
-        category: local.categoryTag,
-        targetText: local.targetText,
-        steps: local.steps?.length ?? 0,
-      });
-      return local;
-    }
-
+  /** 文本驱动的动态表达卡：一句话需求（打字/语音）→ AI 翻译成目标语言表达卡 */
+  async generateCard(text: string, location?: string): Promise<CardData | null> {
     const result = await pluginManager.generateCardFromText(text, location);
     if (!result) {
       pipelineTraceStore.getState().pushTrace({
@@ -90,6 +69,16 @@ export const expressionEngine = {
       menu: result.menu ? `signature=${result.menu.signature.length}/dishes=${result.menu.dishes.length}` : undefined,
     });
     return card;
+  },
+
+  /**
+   * 聆听对方（mic ambient）：对方用当地语言说了一段话 → 一张合并回复卡
+   * （外语回复在上递给人看，母语译文在下供用户理解）。一次输入 = 一张卡。
+   */
+  async replyToUtterance(text: string, location?: string): Promise<CardData | null> {
+    const result = await pluginManager.generateReplyCard(text, location);
+    if (!result) return null;
+    return scenarioToCard(result, location ?? '当前位置');
   },
 
   /**

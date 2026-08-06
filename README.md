@@ -92,8 +92,8 @@ scenego/
 │       ├── ios/SceneGoSpeech.podspec
 │       └── ios/SceneGoSpeechRecognizer.swift
 ├── src/
-│   ├── components/             # MainPage, ActionCard,
-│   │                           # InsightView, PresentationModal
+│   ├── components/             # MainPage, ActionCard, InsightView,
+│   │                           # PresentationModal, SettingsSheet
 │   ├── plugins/                # OCR / matcher / speech plugins
 │   │   ├── PluginManager.ts    # pipeline: recognize → match
 │   │   └── ocr/ matchers/ speech/

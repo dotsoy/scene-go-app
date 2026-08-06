@@ -16,6 +16,8 @@ interface ActionCardProps {
   onPlayAudio?: (card: ActionCardData) => void;
   width?: DimensionValue;
   isOptionCard?: boolean;
+  /** 正在播放（按钮显示 STOP，点击由上层停止） */
+  playing?: boolean;
 }
 
 export const ActionCard: React.FC<ActionCardProps> = ({
@@ -24,6 +26,7 @@ export const ActionCard: React.FC<ActionCardProps> = ({
   onPlayAudio,
   width = '100%',
   isOptionCard = false,
+  playing = false,
 }) => {
   return (
     <TouchableOpacity
@@ -50,13 +53,15 @@ export const ActionCard: React.FC<ActionCardProps> = ({
         <View style={styles.actionRow}>
           <TouchableOpacity
             activeOpacity={0.7}
-            style={styles.playBtn}
+            style={[styles.playBtn, playing && styles.playBtnActive]}
             onPress={(e) => {
               e.stopPropagation();
               onPlayAudio && onPlayAudio(card);
             }}
           >
-            <Text style={styles.playBtnText}>PLAY</Text>
+            <Text style={[styles.playBtnText, playing && styles.playBtnTextActive]}>
+              {playing ? 'STOP' : 'PLAY'}
+            </Text>
           </TouchableOpacity>
         </View>
       )}
@@ -116,9 +121,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
+  playBtnActive: {
+    borderColor: 'rgba(79,195,247,0.4)',
+  },
   playBtnText: {
     fontFamily: FONT.monoBold,
     fontSize: 11,
     color: COLORS.textSecondary,
+  },
+  playBtnTextActive: {
+    color: COLORS.accentBlue,
   },
 });
