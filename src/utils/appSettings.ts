@@ -28,9 +28,9 @@ export const TARGET_LANGS = [
 ];
 
 export const MODEL_OPTIONS = [
-  { id: 'openai/gpt-4o', label: 'openai/gpt-4o（推荐 · 支持识图）' },
+  { id: 'openrouter/free', label: 'openrouter/free（免费 · 仅文本翻译）' },
+  { id: 'openai/gpt-4o', label: 'openai/gpt-4o（支持识图）' },
   { id: 'openai/gpt-4o-mini', label: 'openai/gpt-4o-mini（轻量）' },
-  { id: 'anthropic/claude-3.5-sonnet', label: 'anthropic/claude-3.5-sonnet' },
   { id: 'google/gemini-1.5-flash', label: 'google/gemini-1.5-flash' },
 ];
 
@@ -39,7 +39,8 @@ export const DEFAULT_APP_SETTINGS: AppSettings = {
   countryZh: '泰国',
   targetLang: '泰语',
   targetLangCode: 'th-TH',
-  model: 'openai/gpt-4o',
+  // 默认免费模型防超预算；注意 free 池为文本模型，不支持拍照识图（拍照会走本地词库兜底）
+  model: 'openrouter/free',
 };
 
 let cached: AppSettings | null = null;
