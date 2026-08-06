@@ -11,7 +11,9 @@
     "ios:device:debug": "expo run:ios --device --configuration Debug",
     "ios:device:release": "expo run:ios --device --configuration Release",
     "web": "expo start --web",
-    "selftest": "bun run scripts/scenario-selftest.ts"
+    "selftest": "bun run scripts/scenario-selftest.ts",
+    "logictest": "bun run scripts/logic-selftest.ts",
+    "check": "bunx tsc --noEmit && bun run scripts/scenario-selftest.ts && bun run scripts/logic-selftest.ts"
   },
   "dependencies": {
     "@expo/metro-runtime": "~3.2.3",

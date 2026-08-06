@@ -1,8 +1,11 @@
 import { OcrPlugin, OcrResult, ScenarioResult, ChatTurn } from '../types';
-import { MenuData, MenuDish } from '../../core/types';
 import { getOpenRouterApiKey } from '../../utils/SecureConfig';
+import { getCachedSettings } from '../../utils/appSettings';
 import { chatCompletions, AiChatMessage } from '../../utils/aiGateway';
 import * as FileSystem from 'expo-file-system';
+import { parseVlmScenarioResult } from './parseVlmScenario';
+
+export { parseVlmScenarioResult } from './parseVlmScenario';
 
 const SCENE_SYSTEM_PROMPT = `你是 SceneGo 出行智能助手。用户正在异国旅行，会通过手机摄像头拍摄眼前的场景（菜单、路牌、车站、商店、景点、告示牌等）。
 你的任务是分析这张照片，给出对旅行者最有价值的即时解读。
@@ -66,14 +69,18 @@ async function convertImageToBase64(imageUri: string): Promise<string> {
   });
 }
 
-/** 构造场景识别消息（图片 + 位置提示） */
+/** 构造场景识别消息（图片 + 位置提示；目标语言来自设置面板） */
 function buildSceneMessages(base64: string, location?: string) {
+  const s = getCachedSettings();
   const userText = location
     ? `请分析这张照片中的场景，给出出行解读。\n（用户当前所在位置：${location}，可结合位置判断场景地点与当地语言）`
     : '请分析这张照片中的场景，给出出行解读。';
   return {
     messages: [
-      { role: 'system', content: SCENE_SYSTEM_PROMPT },
+      {
+        role: 'system',
+        content: `${SCENE_SYSTEM_PROMPT}\n当前设定目标语言：${s.targetLang}（languageCode 必须为 ${s.targetLangCode}，recommendedPhrases / targetText 用该语言输出）。`,
+      },
       {
         role: 'user',
         content: [
@@ -157,6 +164,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       const result = await chatCompletions({
         messages: req.messages,
         maxTokens: req.maxTokens,
+        model: getCachedSettings().model,
         logLabel: '[Scene OCR]',
       });
 
@@ -211,6 +219,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       const result = await chatCompletions({
         messages: req.messages,
         maxTokens: req.maxTokens,
+        model: getCachedSettings().model,
         logLabel: `[Follow-Up]: ${question}\n[History]: ${history.length} turns`,
       });
 
@@ -227,6 +236,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
     const apiKey = await getOpenRouterApiKey();
     if (!apiKey) return null;
 
+    const s = getCachedSettings();
     try {
       const userContent = location
         ? `${text}\n\n（用户当前所在位置：${location}，生成卡片请使用当地语言）`
@@ -234,18 +244,61 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
 
       const result = await chatCompletions({
         messages: [
-          { role: 'system', content: CARD_SYSTEM_PROMPT },
+          {
+            role: 'system',
+            content: `${CARD_SYSTEM_PROMPT}\n当前设定目标语言：${s.targetLang}（languageCode 必须为 ${s.targetLangCode}）。`,
+          },
           { role: 'user', content: userContent },
         ],
         maxTokens: 512,
+        model: s.model,
         logLabel: `[Card From Text]: ${text}`,
       });
 
       if (!result.ok || result.status === 0) return null;
       return parseVlmScenarioResult(result.content ?? '');
     } catch (err: unknown) {
+      // 网络/解析异常上抛给 UI（展示「网络或服务暂时不可用 + 重试」）；无 Key 路径在上面已短路
       console.warn('[Card Generate Error]:', err);
-      return null;
+      throw err;
+    }
+  }
+
+  /** 聆听对方（mic ambient）：对方当地语言发言 → 一张合并回复卡（外语回复 + 母语译文） */
+  async generateReplyCard(text: string, location?: string): Promise<ScenarioResult | null> {
+    const apiKey = await getOpenRouterApiKey();
+    if (!apiKey) return null;
+    const s = getCachedSettings();
+    try {
+      const userContent = location
+        ? `对方用当地语言对我说了这句话：\n「${text}」\n（用户当前所在位置：${location}）\n\n请生成一张递给对方看的回复卡。`
+        : `对方用当地语言对我说了这句话：\n「${text}」\n\n请生成一张递给对方看的回复卡。`;
+      const result = await chatCompletions({
+        messages: [
+          {
+            role: 'system',
+            content: `你是 SceneGo 出行助手。对方用当地语言对你说了一段话，你需要回话。
+严格以如下 JSON 格式回复（不要输出任何其他内容）：
+{
+  "title": "中文标题（如：回应对方）",
+  "category": "场景分类（RESTAURANT / TRANSPORT / SHOPPING / HOTEL / OTHER）",
+  "targetText": "递给对方看的当地语言回复（目标语言：${s.targetLang}）",
+  "subText": "这句回复的中文译文，并简要说明对方说了什么（供用户理解）",
+  "localTip": "中文惯例提示（可选，如小费/礼貌用语）",
+  "languageCode": "${s.targetLangCode}"
+}`,
+          },
+          { role: 'user', content: userContent },
+        ],
+        maxTokens: 512,
+        model: s.model,
+        logLabel: `[Reply Card]: ${text}`,
+      });
+      if (!result.ok || result.status === 0) return null;
+      return parseVlmScenarioResult(result.content ?? '');
+    } catch (err: unknown) {
+      console.warn('[Reply Card Error]:', err);
+      throw err;
     }
   }
 
@@ -264,6 +317,7 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
           { role: 'user', content: text },
         ],
         maxTokens: 256,
+        model: getCachedSettings().model,
         logLabel: '[Listen Translate]',
       });
       if (!result.ok || result.status === 0) return null;
@@ -274,81 +328,4 @@ export class CloudVlmOcrPlugin implements OcrPlugin {
       return null;
     }
   }
-}
-
-/** 尝试从云端 VLM 原始返回文本中解析出 ScenarioResult JSON */
-export function parseVlmScenarioResult(rawText: string): ScenarioResult | null {
-  if (!rawText || rawText.trim().length === 0) return null;
-
-  /** VLM 菜单字段 → MenuData；结构不合法返回 undefined（不影响整卡解读） */
-  const parseMenu = (obj: Record<string, unknown> | null | undefined): MenuData | undefined => {
-    if (!obj || typeof obj !== 'object') return undefined;
-    const dishList = (arr: unknown): MenuDish[] => {
-      if (!Array.isArray(arr)) return [];
-      const out: MenuDish[] = [];
-      for (const d of arr) {
-        if (!d || typeof d !== 'object') continue;
-        const item = d as Record<string, unknown>;
-        if (typeof item.zh !== 'string' || typeof item.en !== 'string' || typeof item.th !== 'string') continue;
-        out.push({
-          zh: item.zh,
-          en: item.en,
-          th: item.th,
-          price: typeof item.price === 'string' ? item.price : '',
-          spice: typeof item.spice === 'string' ? item.spice : '无辣',
-          signature: item.signature === true,
-          allergens: Array.isArray(item.allergens)
-            ? (item.allergens.filter((a): a is string => typeof a === 'string') as string[])
-            : undefined,
-        });
-      }
-      return out;
-    };
-    const signature = dishList(obj.signature).slice(0, 3);
-    const dishes = dishList(obj.dishes).slice(0, 6);
-    if (signature.length === 0 && dishes.length === 0) return undefined;
-    const warn = typeof obj.allergenWarn === 'string' && obj.allergenWarn.trim()
-      ? obj.allergenWarn.trim()
-      : undefined;
-    return { signature, dishes, allergenWarn: warn };
-  };
-
-  try {
-    let jsonStr = rawText;
-    const match = rawText.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (match) jsonStr = match[1];
-
-    const obj = JSON.parse(jsonStr.trim());
-    if (obj.title || obj.translatedText) {
-      return {
-        title: obj.title || '场景解读',
-        category: obj.category || 'SCENE',
-        originalText: rawText,
-        translatedText: obj.translatedText || rawText,
-        tips: Array.isArray(obj.tips) ? obj.tips : ['来自场景图像分析'],
-        recommendedPhrases: Array.isArray(obj.recommendedPhrases)
-          ? obj.recommendedPhrases
-          : [],
-        // 表达卡字段（动态卡路径）：模型可能省略，此处可选透传
-        targetText: obj.targetText,
-        phonetic: obj.phonetic,
-        subText: obj.subText,
-        localTip: obj.localTip,
-        languageCode: obj.languageCode,
-        // 菜单解读：结构不合法时 undefined（走普通解读）
-        menu: parseMenu(obj.menu),
-      };
-    }
-  } catch {
-    // 非严格 JSON 文本，包裹为完整解读返回
-  }
-
-  return {
-    title: '场景解读',
-    category: 'SCENE',
-    originalText: rawText,
-    translatedText: rawText,
-    tips: ['来自场景图像分析'],
-    recommendedPhrases: ['Excuse me, could you explain this? (请问能解释一下这个吗？)'],
-  };
 }

@@ -66,6 +66,11 @@ class PluginManager {
     return this.cloudVlmPlugin.generateCardFromText(text, location);
   }
 
+  /** 聆听对方（mic ambient）：对方当地语言发言 → 合并回复卡（外语回复 + 母语译文） */
+  async generateReplyCard(text: string, location?: string): Promise<ScenarioResult | null> {
+    return this.cloudVlmPlugin.generateReplyCard(text, location);
+  }
+
   /**
    * 核心管线：拍摄 → 识别 → 语义匹配
    *

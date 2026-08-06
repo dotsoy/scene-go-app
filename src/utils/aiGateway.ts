@@ -30,6 +30,8 @@ export interface AiChatMessage {
 export interface AiChatRequest {
   messages: AiChatMessage[];
   maxTokens?: number;
+  /** 模型 id（缺省用 DEFAULT_MODEL）；设置面板可覆盖 */
+  model?: string;
   /** ApiLogger 请求标签（脱敏描述，不落完整请求体） */
   logLabel?: string;
 }
@@ -93,7 +95,7 @@ export async function chatCompletions(req: AiChatRequest): Promise<AiChatResult>
   }
 
   const url = AI_GATEWAY_URL;
-  const model = DEFAULT_MODEL;
+  const model = req.model || DEFAULT_MODEL;
   const body = JSON.stringify({
     model,
     messages: req.messages,
