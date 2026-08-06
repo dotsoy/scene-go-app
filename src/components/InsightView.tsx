@@ -1,25 +1,25 @@
 import React from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity, StyleSheet } from 'react-native';
 import { COLORS, FONT } from '../theme/tokens';
-import { V31ActionCard, V31ActionCardData } from './V31ActionCard';
+import { ActionCard, ActionCardData } from './ActionCard';
 
-export interface V31InsightData {
+export interface InsightData {
   id: string;
   imageUri?: string;
-  mainCard: V31ActionCardData;
-  phraseCards?: V31ActionCardData[];
+  mainCard: ActionCardData;
+  phraseCards?: ActionCardData[];
   isError?: boolean;
   errorMessage?: string;
 }
 
-interface V31InsightViewProps {
-  insight: V31InsightData;
-  onPressCard?: (card: V31ActionCardData) => void;
+interface InsightViewProps {
+  insight: InsightData;
+  onPressCard?: (card: ActionCardData) => void;
   onResnap?: () => void;
   onManualInput?: () => void;
 }
 
-export const V31InsightView: React.FC<V31InsightViewProps> = ({
+export const InsightView: React.FC<InsightViewProps> = ({
   insight,
   onPressCard,
   onResnap,
@@ -62,7 +62,7 @@ export const V31InsightView: React.FC<V31InsightViewProps> = ({
           </View>
 
           {/* Main Card */}
-          <V31ActionCard card={insight.mainCard} onPressCard={onPressCard} />
+          <ActionCard card={insight.mainCard} onPressCard={onPressCard} />
 
           {/* Horizontal Scrolling Phrase Cards Row */}
           {insight.phraseCards && insight.phraseCards.length > 0 && (
@@ -73,7 +73,7 @@ export const V31InsightView: React.FC<V31InsightViewProps> = ({
               style={styles.phraseScroll}
             >
               {insight.phraseCards.map((card) => (
-                <V31ActionCard
+                <ActionCard
                   key={card.id}
                   card={card}
                   width={220}

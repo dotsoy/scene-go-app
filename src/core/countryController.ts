@@ -46,7 +46,7 @@ export const countryController = {
     cardStackStore.getState().add(this.buildSafetyCard(country, city));
   },
 
-  /** 启动流程：加载缓存国家/档案 + GPS 检测；不一致则生成切换提示 */
+  /** 启动流程：加载缓存国家/档案 + GPS 检测；不一致且非手动目的地时生成切换提示 */
   async init(): Promise<CountryInitResult> {
     const cached = await loadCountry();
     const profile = await loadUserProfile();
@@ -54,11 +54,16 @@ export const countryController = {
     let switchPrompt: { detectedName: string } | null = null;
     if (cached) {
       if (place?.countryCode && place.countryCode !== cached.code) {
-        const detected = getCountrySafety(place.countryCode);
-        if (detected) {
-          switchPrompt = { detectedName: detected.nameZh };
-        } else {
+        // 手动设定的目的地是权威：位置不同仅重放安全卡，不打扰用户
+        if (cached.manual) {
           this.ensureSafetyCard(cached, place?.city);
+        } else {
+          const detected = getCountrySafety(place.countryCode);
+          if (detected) {
+            switchPrompt = { detectedName: detected.nameZh };
+          } else {
+            this.ensureSafetyCard(cached, place?.city);
+          }
         }
       } else {
         this.ensureSafetyCard(cached, place?.city);
@@ -69,21 +74,22 @@ export const countryController = {
 
   /**
    * 确认国家（首次启动/手动切换/检测切换）：保存档案 + 缓存国家 + 生成安全卡。
+   * manual=true 表示弹窗内手动选择的目的地（后续 GPS 差异不自动提示）；false 为 GPS 跟随确认。
    * 返回是否有效（国家不在支持清单时返回 false，由 UI 处理）。
    */
-  async confirm(code: string, profile: UserProfile, city?: string): Promise<boolean> {
+  async confirm(code: string, profile: UserProfile, city?: string, manual = false): Promise<boolean> {
     const s = getCountrySafety(code);
     await saveUserProfile(profile);
     if (!s) return false;
-    const saved: SavedCountry = { code, nameZh: s.nameZh, savedAt: Date.now() };
+    const saved: SavedCountry = { code, nameZh: s.nameZh, savedAt: Date.now(), manual };
     await saveCountry(saved);
     this.ensureSafetyCard(saved, city);
     return true;
   },
 
-  /** 切换国家（GPS 检测到不同国家，用户确认切换） */
+  /** 切换国家（GPS 检测到不同国家，用户确认切换）——跟随定位，保留自动检测能力 */
   async switchTo(detectedCode: string, profile: UserProfile, city?: string): Promise<boolean> {
-    return this.confirm(detectedCode, profile, city);
+    return this.confirm(detectedCode, profile, city, false);
   },
 
   /** 保持当前国家（重放安全卡） */

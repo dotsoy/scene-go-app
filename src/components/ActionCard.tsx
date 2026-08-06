@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, DimensionValue } from 'react-native';
 import { COLORS, FONT } from '../theme/tokens';
 
-export interface V31ActionCardData {
+export interface ActionCardData {
   id: string;
   foreignText: string;
   nativeText: string;
@@ -10,15 +10,15 @@ export interface V31ActionCardData {
   languageCode?: string;
 }
 
-interface V31ActionCardProps {
-  card: V31ActionCardData;
-  onPressCard?: (card: V31ActionCardData) => void;
-  onPlayAudio?: (card: V31ActionCardData) => void;
+interface ActionCardProps {
+  card: ActionCardData;
+  onPressCard?: (card: ActionCardData) => void;
+  onPlayAudio?: (card: ActionCardData) => void;
   width?: DimensionValue;
   isOptionCard?: boolean;
 }
 
-export const V31ActionCard: React.FC<V31ActionCardProps> = ({
+export const ActionCard: React.FC<ActionCardProps> = ({
   card,
   onPressCard,
   onPlayAudio,

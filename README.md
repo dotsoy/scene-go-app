@@ -37,23 +37,22 @@ Built with Expo / React Native. Client-only: no backend required.
 ```
 ┌────────────────────────────────────────────┐
 │ App (Expo / React Native)                  │
-│  App.tsx                                   │
-│  ├── CameraBackground ── snapshot          │
-│  ├── plugins/                              │
-│  │   ├── CloudVlmOcrPlugin  (OpenRouter)   │
-│  │   ├── LocalDictMatcherPlugin (offline)  │
-│  │   ├── QwenLocalPlugin / WhisperSpeech   │
-│  │   └── PluginManager (pipeline)          │
-│  ├── modules/scenego-speech (Swift,        │
-│  │   SFSpeechRecognizer Local Module)      │
-│  ├── utils/ SessionStore / NoteStore       │
-│  │         (AsyncStorage + Keychain)       │
-│  └── components/ FlashCard, Snapshot,      │
-│              Notes, Logs, SessionHistory   │
+│  App.tsx (启动壳: 字体 + 引擎初始化)        │
+│  └── MainPage (单一随身工具)              │
+│      ├── ActionCard (外语上/母语下+PLAY)   │
+│      ├── InsightView (照片+横滑表达卡)     │
+│      ├── PresentationModal (全屏展示)      │
+│      └── expressionEngine ── plugins/       │
+│          ├── CloudVlmOcrPlugin (OpenRouter) │
+│          ├── LocalDictMatcherPlugin(offline)│
+│          ├── QwenLocalPlugin / WhisperSpeech│
+│          └── PluginManager (pipeline)       │
+│  modules/scenego-speech (Swift,             │
+│      SFSpeechRecognizer Local Module)       │
 └────────────────────────────────────────────┘
 ```
 
-Recognition pipeline: snapshot → plugin pipeline (`recognizeText` → `match`) → structured `ScenarioResult` → flash card + follow-up chat.
+Recognition pipeline: snapshot → plugin pipeline (`recognizeText` → `match`) → structured `ScenarioResult` → expression card (+ insight phrase row).
 
 ## Quick Start
 
@@ -85,7 +84,7 @@ The API key is also configurable in-app (Settings → 识别引擎设置), store
 
 ```text
 scenego/
-├── App.tsx                     # Entry: app state, modals
+├── App.tsx                     # Entry: fonts + engine init, renders MainPage
 ├── app.json                    # Expo config, permissions, plugins
 ├── modules/
 │   └── scenego-speech/         # Expo Local Module (Swift)
@@ -93,9 +92,8 @@ scenego/
 │       ├── ios/SceneGoSpeech.podspec
 │       └── ios/SceneGoSpeechRecognizer.swift
 ├── src/
-│   ├── components/             # FlashCardView, ChatPage, SnapshotDialog,
-│   │                           # CardStackPage, NotesPage, MorePage, ApiLog,
-│   │                           # SessionHistory, PluginSelector, CameraBackground
+│   ├── components/             # MainPage, ActionCard,
+│   │                           # InsightView, PresentationModal
 │   ├── plugins/                # OCR / matcher / speech plugins
 │   │   ├── PluginManager.ts    # pipeline: recognize → match
 │   │   └── ocr/ matchers/ speech/

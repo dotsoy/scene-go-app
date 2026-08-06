@@ -41,8 +41,10 @@ export const CountrySelectModal: React.FC<CountrySelectModalProps> = ({
   useEffect(() => {
     if (!visible) return;
     const detectedCode = detected?.countryCode ?? null;
-    const valid = COUNTRY_SAFETY.some((c) => c.code === detectedCode);
-    setSelected(valid ? detectedCode! : (currentCode ?? COUNTRY_SAFETY[0].code));
+    const detectedValid = COUNTRY_SAFETY.some((c) => c.code === detectedCode);
+    const currentValid = currentCode ? COUNTRY_SAFETY.some((c) => c.code === currentCode) : false;
+    // 手动切换优先保留当前目的地；仅首次启动（无当前选择）时预选 GPS 检测国家
+    setSelected(currentValid ? currentCode! : detectedValid ? detectedCode! : COUNTRY_SAFETY[0].code);
     setShowAll(false);
     setExpandedCell(null);
     if (profile) {

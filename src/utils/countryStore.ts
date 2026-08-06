@@ -9,6 +9,8 @@ export interface SavedCountry {
   code: string;
   nameZh: string;
   savedAt: number;
+  /** 是否用户在弹窗中手动选择的目的地（true 时 GPS 检测不自动覆盖/提示，destination 为权威） */
+  manual?: boolean;
 }
 
 export async function loadCountry(): Promise<SavedCountry | null> {

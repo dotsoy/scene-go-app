@@ -1,15 +1,15 @@
 import React from 'react';
 import { Modal, View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
 import { FONT, COLORS } from '../theme/tokens';
-import { V31ActionCardData } from './V31ActionCard';
+import { ActionCardData } from './ActionCard';
 
-interface V31PresentationModalProps {
+interface PresentationModalProps {
   visible: boolean;
-  card: V31ActionCardData | null;
+  card: ActionCardData | null;
   onClose: () => void;
 }
 
-export const V31PresentationModal: React.FC<V31PresentationModalProps> = ({
+export const PresentationModal: React.FC<PresentationModalProps> = ({
   visible,
   card,
   onClose,
