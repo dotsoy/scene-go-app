@@ -63,6 +63,7 @@
 - **SCN-23**: 逐屏打磨应用批(三 agent 规范)——04 相机精简至取景器+快门、06 去 GPS 术语、10 更名安全信息+删检查更新、02 加换一句+BackBtn。打磨规范见 polish-claude/cmd/pool-2026-08-08.md。
 - **SCN-24**: 打磨第二批——06 触控 44+Profile 降级、03 大字下中文参照、07 ✕→返回、01 顶位置切换横幅(→09)。详见 changelog。
 - **SCN-25**: 03 屏精简为**居中弹窗**(仅 BigText+Phonetic,删其余),点击表达卡变此大卡。
+- **SCN-26**: 05 屏间距(PhotoCard 缩小+PhotoWrap/NameCard 间隙)+ **场景无关通用识别**(识别项=原文/释义/音标/播放,去菜单标签与价格,物体示例)。详见 changelog。
 - 10 屏无 Stats 工程细节,仅留「安全信息已就绪」标题卡;Head 含 BackBtn 返回 13。
 **组件**: StatusBar / ExprCard / InputBar / TabBar / **SafetyFAB**(全局安全悬浮)。
 
