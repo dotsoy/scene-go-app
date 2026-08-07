@@ -602,392 +602,51 @@
       "clip": true,
       "width": 390,
       "height": 844,
-      "fill": "$bg-primary",
+      "fill": "$mask",
       "layout": "vertical",
+      "justifyContent": "center",
+      "alignItems": "center",
       "children": [
         {
-          "id": "Hx7Va",
-          "type": "ref",
-          "ref": "v7L7Gu",
-          "name": "StatusBar",
-          "width": "fill_container"
-        },
-        {
           "type": "frame",
-          "id": "oqdRI",
-          "name": "TopRow",
-          "width": "fill_container",
-          "gap": 8,
-          "padding": [
-            10,
-            20
-          ],
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "frame",
-              "id": "MBKPT",
-              "name": "CloseBtn",
-              "width": 32,
-              "height": 32,
-              "fill": "$bg-card-light",
-              "cornerRadius": 16,
-              "justifyContent": "center",
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "N4Rbw",
-                  "name": "CloseIcon",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "x",
-                  "library": "lucide",
-                  "fill": "$text-secondary"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "l2LFQO",
-              "name": "CatPill",
-              "fill": "$bg-card-light",
-              "cornerRadius": 6,
-              "padding": [
-                4,
-                8
-              ],
-              "children": [
-                {
-                  "type": "text",
-                  "id": "AsAij",
-                  "name": "CatText",
-                  "fill": "$text-secondary",
-                  "content": "TAXI",
-                  "fontFamily": "Inter",
-                  "fontSize": 11,
-                  "fontWeight": "700",
-                  "letterSpacing": 1
-                }
-              ]
-            },
-            {
-              "type": "text",
-              "id": "YBde0",
-              "name": "Loc",
-              "fill": "$text-tertiary",
-              "content": "泰国 · 曼谷",
-              "fontFamily": "Inter",
-              "fontSize": 12,
-              "fontWeight": "normal"
-            },
-            {
-              "type": "frame",
-              "id": "kmSwP",
-              "name": "Sp2",
-              "width": "fill_container",
-              "height": 8
-            },
-            {
-              "type": "frame",
-              "id": "e712me",
-              "name": "ProgressPill",
-              "fill": "$bg-card-light",
-              "cornerRadius": 12,
-              "padding": [
-                6,
-                10
-              ],
-              "children": [
-                {
-                  "type": "text",
-                  "id": "D2dSX",
-                  "name": "ProgText",
-                  "fill": "$accent-yellow",
-                  "content": "01 / 01",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "700",
-                  "letterSpacing": 1
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "SlwMD",
-          "name": "BigWrap",
-          "width": "fill_container",
+          "id": "qVAir",
+          "name": "BigCard",
+          "width": 360,
+          "fill": "$bg-primary",
+          "cornerRadius": 20,
           "layout": "vertical",
-          "gap": 12,
-          "padding": 20,
-          "children": [
-            {
-              "type": "frame",
-              "id": "w9zNFZ",
-              "name": "BigArea",
-              "width": "fill_container",
-              "fill": "#000000",
-              "cornerRadius": 12,
-              "stroke": "#ffffff33",
-              "strokeWidth": 1,
-              "layout": "vertical",
-              "gap": 10,
-              "padding": 20,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "lblAZ",
-                  "name": "BigText",
-                  "fill": "#ffffff",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "กรุณาคิดค่าโดยสารตามมิเตอร์",
-                  "lineHeight": 1.3,
-                  "fontFamily": "Inter",
-                  "fontSize": 44,
-                  "fontWeight": "800"
-                },
-                {
-                  "type": "text",
-                  "id": "AWVWd",
-                  "name": "Phonetic",
-                  "fill": "$text-secondary",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "kà-rú-naa kít kâa dooi-sǎan taam mí-dtəə",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "SYOmG",
-                  "name": "Supplement",
-                  "fill": "$text-muted",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "แท็กซี่ในกรุงเทพฯ คิดค่าโดยสารตามมิเตอร์ · 曼谷出租车按打表计费",
-                  "fontFamily": "Inter",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "omHFX",
-                  "name": "ZhRef",
-                  "fill": "$text-muted",
-                  "content": "出租车按表计费",
-                  "fontFamily": "$font-body",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "F0IqXK",
-          "name": "ActionWrap",
-          "width": "fill_container",
-          "gap": 10,
+          "gap": 16,
           "padding": [
-            0,
-            20
-          ],
-          "alignItems": "center",
-          "children": [
-            {
-              "type": "frame",
-              "id": "tc9wp",
-              "name": "PlayBtn",
-              "fill": "$accent-blue",
-              "cornerRadius": 12,
-              "gap": 6,
-              "padding": [
-                12,
-                20
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "e33DmH",
-                  "name": "PlayIcon",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "volume-2",
-                  "library": "lucide",
-                  "fill": "#0a0a1e"
-                },
-                {
-                  "type": "text",
-                  "id": "X4Avs",
-                  "name": "PlayText",
-                  "fill": "#0a0a1e",
-                  "content": "播放",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "700",
-                  "letterSpacing": 1
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "n7YHR",
-              "name": "AiBtn",
-              "fill": "$bg-card-light",
-              "cornerRadius": 12,
-              "gap": 6,
-              "padding": [
-                12,
-                16
-              ],
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon",
-                  "id": "ncZ5Z",
-                  "name": "AiIcon",
-                  "width": 16,
-                  "height": 16,
-                  "icon": "sparkles",
-                  "library": "lucide",
-                  "fill": "$accent-blue"
-                },
-                {
-                  "type": "text",
-                  "id": "lnzW8",
-                  "name": "AiText",
-                  "fill": "$text-primary",
-                  "content": "AI 解读",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "600"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "iMHCl",
-              "name": "Sp3",
-              "width": "fill_container",
-              "height": 8
-            },
-            {
-              "type": "frame",
-              "id": "pbAqj",
-              "name": "NextBtn",
-              "gap": 4,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "wKsbG",
-                  "name": "NextText",
-                  "fill": "$accent-blue",
-                  "content": "NEXT CARD",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "700",
-                  "letterSpacing": 1
-                },
-                {
-                  "type": "icon",
-                  "id": "u8lDQ",
-                  "name": "NextIcon",
-                  "width": 14,
-                  "height": 14,
-                  "icon": "arrow-right",
-                  "library": "lucide",
-                  "fill": "$accent-blue"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "ZWDA1",
-          "name": "ProtoWrap",
-          "width": "fill_container",
-          "layout": "vertical",
-          "gap": 4,
-          "padding": [
-            16,
-            20
-          ],
-          "children": [
-            {
-              "type": "text",
-              "id": "SFgDD",
-              "name": "ProtoHead",
-              "fill": "$text-tertiary",
-              "content": "当地提示",
-              "fontFamily": "$font-mono",
-              "fontSize": 10,
-              "fontWeight": "normal",
-              "letterSpacing": 1
-            },
-            {
-              "type": "frame",
-              "id": "DZkCh",
-              "name": "ProtoBox",
-              "width": "fill_container",
-              "fill": "$bg-card-light",
-              "cornerRadius": 10,
-              "layout": "vertical",
-              "gap": 4,
-              "padding": 12,
-              "children": [
-                {
-                  "type": "text",
-                  "id": "G0jHF",
-                  "name": "ProtoBody",
-                  "fill": "$text-secondary",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "泰国出租车按打表计费。上车后司机通常直接打表，如遇拒载或漫天要价，可出示本卡。",
-                  "lineHeight": 1.5,
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "normal"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "frame",
-          "id": "P4eJDz",
-          "name": "SpBottom",
-          "width": "fill_container",
-          "height": "fill_container"
-        },
-        {
-          "type": "frame",
-          "id": "fri99",
-          "name": "SwipeWrap",
-          "width": "fill_container",
-          "padding": [
-            0,
-            20,
-            8,
-            20
+            40,
+            32
           ],
           "justifyContent": "center",
+          "alignItems": "center",
           "children": [
             {
               "type": "text",
-              "id": "f8M60k",
-              "name": "SwipeHint",
-              "fill": "$text-muted",
-              "content": "点击 ✕ 返回 · 点按关闭",
-              "fontFamily": "Inter",
-              "fontSize": 11,
+              "id": "eaWaO",
+              "name": "BigText",
+              "fill": "#ffffff",
+              "textGrowth": "fixed-width",
+              "width": 326,
+              "content": "กรุณาคิดค่าโดยสารตามมิเตอร์",
+              "textAlign": "center",
+              "fontFamily": "$font-body",
+              "fontSize": 40,
+              "fontWeight": "600"
+            },
+            {
+              "type": "text",
+              "id": "JiK4t",
+              "name": "Phonetic",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": 326,
+              "content": "kà-rú-naa kít kâa dooi-sǎan taam mí-dtəə",
+              "textAlign": "center",
+              "fontFamily": "$font-body",
+              "fontSize": 18,
               "fontWeight": "normal"
             }
           ]
@@ -3744,6 +3403,7 @@
           "id": "OWwRS",
           "name": "PhotoWrap",
           "width": "fill_container",
+          "height": 120,
           "padding": [
             0,
             20
@@ -3755,7 +3415,7 @@
               "id": "LRxRP",
               "name": "PhotoCard",
               "width": "fill_container",
-              "height": 180,
+              "height": 120,
               "fill": "$bg-card",
               "cornerRadius": 16,
               "stroke": "$border-subtle",
@@ -3791,6 +3451,14 @@
         },
         {
           "type": "frame",
+          "id": "PYrIj",
+          "name": "GapPW-NC",
+          "width": 390,
+          "height": 16,
+          "layout": "vertical"
+        },
+        {
+          "type": "frame",
           "id": "OUXG5",
           "name": "NameCard",
           "width": "fill_container",
@@ -3799,117 +3467,31 @@
           "stroke": "$border-subtle",
           "strokeWidth": 1,
           "layout": "vertical",
-          "gap": 6,
-          "padding": 16,
+          "gap": 10,
           "children": [
             {
               "type": "frame",
-              "id": "EyjHN",
-              "name": "NameRow",
+              "id": "rl8Ae",
+              "name": "RecItem0",
               "width": "fill_container",
-              "justifyContent": "space_between",
+              "height": 44,
+              "fill": "$bg-card",
+              "cornerRadius": 12,
+              "padding": [
+                0,
+                16
+              ],
               "alignItems": "center",
               "children": [
                 {
                   "type": "text",
-                  "id": "f3DRP",
-                  "name": "NameLabel",
-                  "fill": "$text-tertiary",
-                  "content": "识别结果",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 10,
-                  "fontWeight": "700",
-                  "letterSpacing": 0.06
-                },
-                {
-                  "type": "text",
-                  "id": "A59ty",
-                  "name": "NameState",
-                  "fill": "$accent-green",
-                  "content": "已识别 3 项",
-                  "fontFamily": "Inter",
-                  "fontSize": 11,
-                  "fontWeight": "normal"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "NL5G6",
-              "name": "ItemRow",
-              "width": "fill_container",
-              "gap": 10,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "yTLgP",
-                  "name": "ItemZh",
+                  "id": "hhBlE",
+                  "name": "RecZh0",
                   "fill": "$text-primary",
-                  "content": "冬阴功汤",
-                  "fontFamily": "Inter",
+                  "content": "便利商店",
+                  "fontFamily": "$font-body",
                   "fontSize": 15,
-                  "fontWeight": "700"
-                },
-                {
-                  "type": "text",
-                  "id": "IAtjU",
-                  "name": "ItemPh",
-                  "fill": "$accent-yellow",
-                  "content": "tôm yam kûng",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
                   "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "yCbqB",
-                  "name": "ItemPrice",
-                  "fill": "$text-secondary",
-                  "content": "฿180",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "700"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "aFVI9",
-              "name": "ItemRow2",
-              "width": "fill_container",
-              "gap": 10,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "MP29Y",
-                  "name": "ItemZh2",
-                  "fill": "$text-primary",
-                  "content": "泰式炒河粉",
-                  "fontFamily": "Inter",
-                  "fontSize": 15,
-                  "fontWeight": "700"
-                },
-                {
-                  "type": "text",
-                  "id": "X2d9C",
-                  "name": "ItemPh2",
-                  "fill": "$accent-yellow",
-                  "content": "pàt thai",
-                  "fontFamily": "Inter",
-                  "fontSize": 12,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "text",
-                  "id": "C3KGF",
-                  "name": "ItemPrice2",
-                  "fill": "$text-secondary",
-                  "content": "฿120",
-                  "fontFamily": "$font-mono",
-                  "fontSize": 12,
-                  "fontWeight": "700"
                 }
               ]
             }
