@@ -2,17 +2,17 @@
 
 > 用途: 下次会话快速恢复本设计协作的完整上下文。读此文件即可知道「在做什么、做到哪、文件在哪、怎么继续」。
 > 更新: 每次协作会话结束/中断时更新此文件。
-> 关联: 画布 `DESIGN-v2.1.pen`、改动日志 `design-changelog.md`、本目录各审阅/产品/审计文件。
+> 关联: 画布 `DESIGN-v2.1.pen`、改动日志 `design-changelog.md`、本目录各审阅/产品/审计/规范文件。
 
 ---
 
 ## 1. 会话身份与目标
 
 - **项目**: SceneGo — 出境用户语言沟通 App(拍照/语音/文字 → 当地语言表达卡)。
-- **画布**: `docs/reference/DESIGN-v2.1.pen`(Pencil,13 屏 + 组件)。
-- **本轮目标**: 完善产品的交互设计,并让 claude + cmd 协作产出审阅/产品/审计意见,已按优先级实施到画布。
-- **协作方**: 主 agent(omp)+ claude(herdr pane `wA:p3`)+ cmd/Command Code(herdr pane `wA:p2`,npm 包 `command-code`)。
-- **交互通道**: 因 cmd 不在 herdr agent 白名单(`agent_status: unknown`),只能用 `herdr pane send-text <id> "..."` + `send-keys enter`(先文本后回车两步法,`pane run` 对 cmd 不可靠)。见 skill `herdr-cmd-messaging`。
+- **画布**: `docs/reference/DESIGN-v2.1.pen`(Pencil,**11 屏**: 01-10 + 13 + 组件)。
+- **设计基调**: 纯黑极简、无 emoji、禁技术术语、操作必反馈、紧急防误触、不造假数据。
+- **协作方**: 主 agent(omp,能改画布)+ **claude**(w1:p5)+ **cmd/Command Code**(w1:p2)+ **pool**(w1:p4,Poolside)。⚠️ 仅主 agent 有 Pencil MCP 能改画布,其余 agent 只能产出文档规范,由主 agent 应用到画布。
+- **交互通道**: `herdr pane send-text <id> "..."` + `sleep 1` + `send-keys enter`。cmd 不在 herdr agent 白名单,`pane run` 不可靠,只能 send-text。任务须自包含(agent 无会话上下文)。
 
 ---
 
@@ -20,14 +20,18 @@
 
 | 文件 | 内容 | 来源 |
 |---|---|---|
-| **design-changelog.md** | 所有画布改动 SCN-01~13 的日志(改了什么/为什么/状态) | 主 agent |
+| **design-changelog.md** | 所有画布改动 SCN-01~26 的日志(改了什么/为什么/状态) | 主 agent |
 | **design-session-handoff.md** | 本文件(热启动手册) | 主 agent |
+| **transition-spec.md** | 转场语义规范(推入/模态/抽屉逐屏映射) | claude |
+| **safety-drawer-spec.md** | SafetyDrawer 分层规范 ⚠️ 其中 L0 已弃用(SCN-19 保 08) | cmd |
+| **pool-review-2026-08-08.md** | 全量审阅(一致性/无障碍/IA) | pool |
+| **audit-claude-2026-08-08.md** / **audit-cmd-2026-08-08.md** | 文档 vs 画布漂移审计 | claude/cmd |
+| **polish-claude/cmd/pool-2026-08-08.md** | 逐屏打磨规范(01-04 / 05-08 / 09·10·13) | 三 agent |
 | review-claude.md | 主流程屏(01-05)单屏交互审阅 | claude |
 | review-cmd.md | 工具屏(06-10)+ 全局组件单屏审阅 | cmd |
 | product-claude.md | 产品层思考(主流程/语音/紧急/首体验) | claude |
 | product-cmd.md | 产品层思考(安全/目的地/离线/导航) | cmd |
-| audit-claude.md | 按钮流程闭环审计(主流程屏) | claude |
-| audit-cmd.md | 按钮流程闭环审计(工具屏) | cmd |
+| audit-claude.md / audit-cmd.md | 按钮流程闭环审计(旧) | claude/cmd |
 | state-a11y-claude.md | 状态与异常矩阵 + 无障碍 | claude |
 | nav-consistency-cmd.md | 转场与导航流 + 一致性 | cmd |
 
@@ -35,72 +39,72 @@
 
 ## 3. 已完成改动(详见 changelog,摘要)
 
-- **SCN-01~09**: 红线修复(emoji→国家码、技术文案→人话、拨号防误触标注、选中态、01 屏去 MicBtn/TriggerRow)。
-- **SCN-10/11**: P0 产品决策(TabBar 3 tab、安全号码按意图重排、SafetyFAB 组件、定位切换预览、离线模式取消)。
-- **SCN-12**: 苛刻检查 P0 修复(05 返回、06 关闭、08 收起、术语统一、长按拨打、SafetyFAB 实例化)。
-- **SCN-13**: P1 一致性与无障碍(术语、按钮圆角、触控目标、字号提升)。
-- **SCN-14**: P2 一致性批次(圆角体系、06 模态关闭、SafetyFAB 落地、提示颜色图例、TabBar 组件归 3tab)。⚠️ 本批修正多处 SCN 声称未落地(SCN-13b/12b/11c+12f/10+11a)。
-- **SCN-15**: TabBar 三页面落地——对话(触发+活动流, 屏11)、笔记(收藏, 屏12)、更多(设置聚合, 屏13),三屏实例化 TabBar + SafetyFAB。按 cmd/claude IA 建议 + 用户拍板。
-- **SCN-16**: 全面审计修复批——SCN-01~13 约 19 项声称未落地,一次性修复(06 国家码/01 触发区与离线元素/07-08 长按拨打与意图/09 预览卡/10 日期与术语/05 BackBtn/02 WhoTag/ExprCard 换一句)。详见 changelog。
-- **SCN-17**: 审阅收尾批——10 屏删 Stats 三格工程细节、06 屏加「更多国家 · 26 国」入口、泰国选中卡补勾选图标。详见 changelog。
-- **SCN-18**: 转场/安全规范应用批——三 agent 并行产出规范(claude 转场/ cmd SafetyDrawer / pool 全量审阅)并应用到画布:三 TabBar 页布局修正(底部锚定)、11 时间线卡导航箭头、10 BackBtn、**新屏 14 安全 L0 快速层**、ExprCard 收藏星标。详见 changelog。
-- **SCN-19**: 简化批(用户拍板)——去 11 对话/12 笔记/14 安全L0,保 08;01 恢复唯一触发首页,13 改独立设置页(01 齿轮入口),撤 ExprCard 星标。画布现 11 屏(01-10+13)。
-- **SCN-20**: 02 屏重分区(用户拍板"去主卡,重新分区"+ review-claude 建议)——6 张等宽同级卡,来源区分(我=$bg-card+「我」徽标 / AI=$bg-card-light+右下边框),建议回复带选中态。ExprCard 组件保留为预留组件(02 不再使用实例)。
+- **SCN-01~09**: 红线修复(emoji→国家码、技术文案→人话、拨号防误触、选中态、01 去 MicBtn/TriggerRow)。
+- **SCN-10/11**: P0 决策(TabBar 3tab、安全号码按意图重排、SafetyFAB 组件、定位切换预览、离线取消)。
+- **SCN-12/13**: 苛刻检查 P0 修复(05 返回/06 关闭/08 收起/术语/长按拨打)+ P1 一致性与无障碍。
+- **SCN-14**: P2 一致性批(圆角体系 6/10/12/16/20、06 模态关闭、SafetyFAB 落地、提示色图例、TabBar 归 3tab)。⚠️ 修正多处 SCN 声称未落地。
+- **SCN-15**: TabBar 三页面(11 对话/12 笔记/13 更多)落地 + 实例化 TabBar/SafetyFAB。
+- **SCN-16**: 全面审计修复批(SCN-01~13 约 19 项声称未落地一次性修复)。
+- **SCN-17**: 审阅收尾(10 删 Stats、06 更多国家入口、泰国勾选图标)。
+- **SCN-18**: 转场/安全规范应用(三 agent 并行产出规范)+ 布局修正 + 新屏 14 安全 L0。
+- **SCN-19**: **简化批(用户拍板)**——去 11/12/14,保 08;01 唯一触发首页;13 独立设置页(01 齿轮入口);撤 ExprCard 星标。画布 11 屏。
+- **SCN-20/21**: 02 屏重分区(去主卡)→ 3 等宽卡 → 母语上/外语下。
+- **SCN-22**: 02 屏按用户目标结构重建——**双等宽气泡 + 建议回复区**,聊天式错位(我右/对方左)。
+- **SCN-23**: 逐屏打磨批(04 相机精简至取景器+快门、06 去 GPS 术语、10 更名安全信息+删检查更新、02 加换一句+BackBtn)。
+- **SCN-24**: 打磨第二批(06 触控 44+Profile 降级、03 中文参照、07 ✕→返回、01 顶位置切换横幅→09)。
+- **SCN-25**: 03 屏精简为**居中弹窗**(仅 BigText+Phonetic),点击表达卡变此大卡。
+- **SCN-26**: 05 屏间距 + **识别结果定稿——仅母语单行、单个全宽 44px 行**(去外语/音标/播放/表头,用户手动改定稿)。
 
 ---
 
-## 4. 画布现状(13 屏 + 组件)
+## 4. 画布现状(11 屏 + 组件)
 
-**屏**: 01 IDLE(触发,唯一首页)/ 02 表达卡 / 03 全屏大字 / 04 相机 / 05 图片解读 / 06 国家选择 / 07 安全卡 / 08 安全详情 / 09 位置切换 / 10 离线状态 / 13 更多(设置聚合,独立页,01 右上齿轮进入)。
-
-**关键结构事实**:
-- 画布是「内容流」式,**无 TabBar 实例化**(TabBar 组件保留未用;SCN-15 的三 tab 页 11/12 与 14 已删,SCN-19)。01 为唯一触发首页。
-- SafetyFAB 已实例化到 01/02/05/13 屏右下角,点按直接开 08 安全详情抽屉(无 L0 分层,SCN-19)。
-- 07/08 安全页保留,08 是底部抽屉(mask 右上角 ✕ 关闭)。
-- 01 屏已无 MicBtn(语音归中央 HoldMic)、无 TriggerRow(拍照/打字归 InputBar)、无离线徽章(离线模式取消)。
-- 06 屏旗标为国家码 + 「途」头像;选中卡 2px 深色描边 + 勾选图标;含「更多国家 · 26 国」入口(画布示例 8 国)。
-- 02 屏按目标结构(SCN-22): **双等宽气泡 + 建议回复区**——我方表达(「我的表达」+播放+换一句 / 泰语+音标+中文)与对方回话(「对方」+再听一遍 / 泰语+中文)均 284/$bg-card-light/r16 对等;建议回复(好的，谢谢✓ / 太贵了，能便宜点吗)。Head 含 BackBtn。ExprCard 组件保留未用。
-- **SCN-23**: 逐屏打磨应用批(三 agent 规范)——04 相机精简至取景器+快门、06 去 GPS 术语、10 更名安全信息+删检查更新、02 加换一句+BackBtn。打磨规范见 polish-claude/cmd/pool-2026-08-08.md。
-- **SCN-24**: 打磨第二批——06 触控 44+Profile 降级、03 大字下中文参照、07 ✕→返回、01 顶位置切换横幅(→09)。详见 changelog。
-- **SCN-25**: 03 屏精简为**居中弹窗**(仅 BigText+Phonetic,删其余),点击表达卡变此大卡。
-- **SCN-26**: 05 屏间距(PhotoCard 缩小+PhotoWrap/NameCard 间隙)+ **场景无关通用识别**(识别项=原文/释义/音标/播放,去菜单标签与价格,物体示例)。详见 changelog。
-- 10 屏无 Stats 工程细节,仅留「安全信息已就绪」标题卡;Head 含 BackBtn 返回 13。
-**组件**: StatusBar / ExprCard / InputBar / TabBar / **SafetyFAB**(全局安全悬浮)。
+**屏**: 01 IDLE(触发,唯一首页)/ 02 表达卡 / 03 全屏大字(居中弹窗) / 04 相机(极简取景器+快门) / 05 图片解读(母语单行识别) / 06 国家选择(模态) / 07 安全卡 / 08 安全详情(底部抽屉) / 09 位置切换(模态) / 10 安全信息·26 国 / 13 更多(设置聚合,独立页)。
 
 **关键结构事实**:
-- 画布是「内容流」式,TabBar 组件已实例化到 11/12/13(对话/笔记/更多)三页;02/03/04/05/07/08 全屏任务态/沉浸态不加。
-- SafetyFAB 已实例化到 01/02/05/11/12/13 屏右下角(全局安全入口)。
-- 07/08 安全页保留,08 是底部抽屉(点按弹出,mask 右上角 ✕ 关闭,SCN-16c)。
-- 01 屏已无 MicBtn(语音归中央 HoldMic)、无 TriggerRow(拍照/打字归 InputBar)、无离线徽章(离线模式取消)。
-- 06 屏旗标为国家码 + 「途」头像;选中卡 2px 深色描边 + 勾选图标(SCN-16a/17c);含「更多国家 · 26 国」入口(SCN-17b,画布示例 8 国)。
-- 10 屏无 Stats 工程细节(场景包版本/已下载/占用已删,SCN-17a),仅留「安全信息已就绪」标题卡。
+- **无 TabBar 实例化**(组件保留未用;11/12/14 已删)。
+- **SafetyFAB** 实例化于 01/02/05/13 右下角,点按**直接开 08 安全抽屉**(无 L0)。
+- **01**: 中央 HoldMic 触发;InputBar(拍照/文字);顶部位置切换横幅(→09);右上齿轮(→13)。无 MicBtn/TriggerRow/离线徽章。
+- **02**: 双等宽气泡(284/$bg-card-light/r16)聊天式错位——我方(「我的表达」+播放+换一句 / 泰语+音标+中文)、对方(「对方」+再听一遍 / 泰语+中文);建议回复区(好的，谢谢✓ / 太贵了，能便宜点吗, r18);Head 含 BackBtn。ExprCard 组件保留未用。
+- **03**: 居中弹窗(mask + 360 圆角卡),仅 BigText(40px)+ Phonetic(18px)。
+- **04**: StatusBar + Header(Brand/Cancel)+ 全屏取景器 + 快门。无任何引导/取景框/提示。
+- **05**: PhotoCard(120)+ 识别结果(单个全宽 44px 行,仅母语,如「便利商店」)+ 短语区 + 输入/重拍。PhotoWrap/NameCard 间 16px 间隙。
+- **06**: 模态;8 国卡(44px 触控,选中 2px 描边+勾选);旗标为国家码 +「途」头像;「更多国家 · 26 国」入口;Profile 弱化;GpsRow「定位成功 · 泰国 · 曼谷」。
+- **07**: 安全卡;3 拨号块(191 遇到危险/1669 身体不适/1155 旅游纠纷,长按拨打);Head ✕ 已改返回(chevron-left)。
+- **08**: 底部抽屉(紧急电话·长按拨打 + 求助句 + 使馆 + 本地提示);mask 右上 ✕ 关闭。
+- **10**: 更名「安全信息 · 26 国」;无 Stats 工程细节;无检查更新按钮;Head 含 BackBtn(→13)。
+- **13**: 设置聚合(目的地与语言→06、安全信息→10、关于与帮助、隐私)+ 版本号;SafetyFAB 常驻。
+
+**组件**: StatusBar / ExprCard(未用) / InputBar / TabBar(未用) / **SafetyFAB**。
 
 ---
 
 ## 5. 待办(未做)
 
-**P2(✅ SCN-14 已落地)**: 圆角体系细调、06 模态定位、SAFETY 徽章(FAB)、提示颜色图例、TabBar 组件归 3tab。
+**画布侧可直接做的**:
+- **AA-05**: 个别低对比组合(#999/#333)需调色(pool 审阅)——纯字号提升不够。
+- 其余屏若需再打磨,参照 polish-claude/cmd/pool-2026-08-08.md。
 
-**结构性缺口(待决/跟进)**:
-- 转场语义规范(transition-spec.md)基于旧屏集(含 11/12/14),需按简化后屏集(01-10+13)更新映射表。
-- **AA-05 待处理**: 个别 #999/#333 低对比组合,纯字号提升不够,需调色(pool 审阅)。
-- **13 更多页入口**: 已加 01 右上齿轮(SGN-19c)进入;其余设置项(目的地/安全信息→06/10)行为待后续贯通。
-- 09 位置切换触发入口画布未定义(cmd 建议顶部横幅触发 + 预览卡)。
+**需产品拍板/运行时**:
+- **转场规范(transition-spec.md)基于旧屏集**,含已删的 11/12/14,需按当前 11 屏更新映射表。
+- 09 触发入口横幅已加(SCN-24),但「切换」异步反馈/失败回滚未定义(运行时)。
+- 01 语音/识别**错误态**未定义(加载/失败 Toast,运行时)。
+- 02 建议回复点按反馈(选中→发送,运行时)。
+- 10 国家行点击行为(当前国→07,其他→下载详情)未定义。
 
-**产品级未决**:
-- 安全入口最终形态: SafetyFAB 已落地(SCN-14c),08 抽屉保留;claude 建议 SafetyDrawer L0/L1 分层。
-- 离线模式已取消;cmd 建议 10 屏更名「安全信息」+ 删工程细节(占用MB/检查更新),入口归「更多」。
-- cmd 提示:「对话」tab 命名偏双向聊天,实际承载"表达流",可再议「表达/首页」。
+**协作注意事项**:
+- safety-drawer-spec.md 的 L0 分层已弃用(SCN-19 保 08),引用时注意。
+- cmd 曾建议「对话」tab 命名再议——TabBar 已不用,此点作废。
 
 ---
 
 ## 6. 协作流程(热启动复用)
 
-1. **定位 agent**: `herdr pane list` → claude=`w1:p5`,cmd=`w1:p2`(⚠️ 2026-08-08 实测,旧文档 `wA:p3`/`wA:p2` 已失效;id 以查询为准)。
-2. **下发任务**: `herdr pane send-text <id> '<任务>'` + `sleep 1` + `send-keys enter`。任务需自包含(agent 无会话上下文)。
-3. **收集结果**: `herdr pane read <id>` 读输出;长结果让 agent 写入文件(它们在 /private/tmp,写 scenego 路径需批准权限)。
-4. **记录改动**: 每改一个画布项 → changelog 加 SCN-N。
-5. **画布操作**: 用 Pencil MCP `execute`(写)/`get_app_state`(读)。注意:Update 会重建节点 id,用 name 定位比硬编码 id 稳。
+1. **定位 agent**: `herdr pane list` → claude=`w1:p5`,cmd=`w1:p2`,pool=`w1:p4`(id 以查询为准)。
+2. **下发任务**: `herdr pane send-text <id> '<任务>'` + `sleep 1` + `send-keys enter`。任务自包含;长结果让 agent 写入文件(写 scenego 路径可能弹权限需批准)。
+3. **画布操作**: 仅主 agent 用 Pencil MCP `execute`(写)/`get_app_state`(读)。⚠️ **画布改动需用户在 Pen.app Cmd+S 保存才落盘**,提交 git 前确认 .pen mtime 更新。
+4. **记录改动**: 每改一画布项 → changelog 加 SCN-N + 同步本文件 §3/§4。
+5. **分工经验**: 画布只能主 agent 改;claude/cmd/pool 并行产出规范文档(转场/安全/审阅/打磨),主 agent 应用。
 
 ---
 
@@ -108,7 +112,7 @@
 
 - 纯黑极简、无 emoji(图标用 lucide/文字)。
 - 界面文案禁技术术语(SOP/VLM/Listen&Reply/Done-Flag/zh-CN/GPS 等)。
-- 禁止上滑手势触发(iOS 系统冲突),用长按/点击/横滑。
+- 禁止上滑手势触发(iOS 冲突),用长按/点击/横滑。
 - 操作必有反馈(按压态/loading/成功/失败)。
 - 不造假数据,全真实管线。
 - 紧急动作防误触(长按 0.6s + 进度环 + 震动)。
@@ -117,9 +121,13 @@
 
 ## 8. 关键经验(踩坑记录)
 
-- **Pencil Update 重建 id**: 更新节点后 id 会变,后续引用要用 Get 按 name 重新定位。
-- **组件实例 descendants 是整体替换**: Update 实例时若只传部分覆盖,会丢其他覆盖(placeholder 曾丢失)。
-- **cmd 的 pane run 不可靠**: 必须 send-text 再单独 send-keys enter。
-- **herdr agent 白名单**: command-code/cmd 不在其中,不能用 `agent prompt`,走 `pane` 通道。
-- **对比度/字号**: $text-muted 是主题变量,全局改风险高,靠提字号改善。
-- **绝对定位裁剪**: 组件内 absolute 定位超出父容器会 partially clipped,需移到正确的父层。
+- **Pencil Update 重建 id**: 更新节点后 id 会变,用 Get 按 name 重新定位,勿硬编码 id。
+- **全局 Get 会误匹配**: `Get(n=>...)` 无 path 匹配全文档(含组件),如 `BackBtn`/`Country`/`PlayPill` 同名会误插入/误改——务必用实例 path 或限定 name 精确匹配。
+- **Icon 无 stroke**: 图标不支持 stroke/strokeWidth(仅 fill/effect)。
+- **margin 非法**: pencil 无 margin 属性,用 padding/gap。
+- **多行 execute 破坏 JSON**: execute input 需单行(新行破坏 JSON string)。
+- **frame 默认 horizontal flex**: layout undefined 即水平 flex,x/y 被忽略;需显式 layout:'none' 或用 spacer 制造间距。
+- **画布不自动落盘**: MCP 编辑在应用内存,需用户 Cmd+S 才写 .pen;提交前查 mtime。
+- **herdr/Pen 拉起的 claude 不 source .zshrc**: 环境变量需写进 ~/.claude/settings.json(model/env),claude 默认回落 claude-opus-5 会烧 OpenRouter 额度。
+- **cmd 的 pane run 不可靠**: 必须 send-text + send-keys enter。
+- **对比度**: $text-muted 是主题变量,全局改风险高,靠提字号/局部调色。
