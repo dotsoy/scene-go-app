@@ -45,13 +45,12 @@ export interface CardStep {
   phonetic?: string;
   /** 中文补充（含翻译） */
   supplement?: string;
-  /** 协商筹码 chips（如 🚕 打表计费 / 🛣 不走高速） */
-  chips?: { emoji: string; label: string }[];
+  /** 协商筹码 chips（如「打表计费」/「不走高速」） */
+  chips?: { label: string }[];
 }
 
-/** 全览卡回应选项（选中后生成回卡，成卡时已构建） */
+/** 全览卡回应选项（选中后直出回卡，成卡时已预生成 replyCard） */
 export interface ReplyOption {
-  emoji: string;
   label: string;
   replyCard: CardData;
 }
