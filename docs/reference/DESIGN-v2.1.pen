@@ -3141,7 +3141,7 @@
                       "name": "Reply1",
                       "height": 40,
                       "fill": "$bg-card-light",
-                      "cornerRadius": 18,
+                      "cornerRadius": 10,
                       "gap": 6,
                       "padding": [
                         0,
@@ -3149,16 +3149,6 @@
                       ],
                       "alignItems": "center",
                       "children": [
-                        {
-                          "type": "icon",
-                          "id": "L6FFC",
-                          "name": "OkIcon",
-                          "width": 15,
-                          "height": 15,
-                          "icon": "circle-check",
-                          "library": "lucide",
-                          "fill": "$accent-green"
-                        },
                         {
                           "type": "text",
                           "id": "Q0bXQf",
@@ -3177,7 +3167,7 @@
                       "name": "Reply2",
                       "height": 40,
                       "fill": "$bg-card-light",
-                      "cornerRadius": 18,
+                      "cornerRadius": 10,
                       "gap": 6,
                       "padding": [
                         0,
@@ -3185,16 +3175,6 @@
                       ],
                       "alignItems": "center",
                       "children": [
-                        {
-                          "type": "icon",
-                          "id": "CCTLB",
-                          "name": "NoIcon",
-                          "width": 15,
-                          "height": 15,
-                          "icon": "circle-x",
-                          "library": "lucide",
-                          "fill": "$accent-red"
-                        },
                         {
                           "type": "text",
                           "id": "T7gTR",
