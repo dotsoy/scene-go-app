@@ -79,6 +79,9 @@ const noTarget = scenarioToCard({ ...sc, targetText: undefined, phonetic: undefi
 check('缺 targetText → 用短语拆分降级', noTarget.targetText === 'By meter, please');
 const empty = scenarioToCard({ ...sc, targetText: undefined, recommendedPhrases: [], translatedText: '' }, 'X');
 check('全缺 → 兜底「请帮我」', empty.targetText === '请帮我' && empty.categoryTag === 'TAXI');
+check('成卡预生成回复选项（label=中文/replyCard=外语）', card.reply?.options?.[0]?.label === '请打表' && card.reply?.options?.[0]?.replyCard?.targetText === 'By meter, please');
+check('回复选项最多 2 条', card.reply?.options?.length === 2);
+check('无短语 → 无回复选项', empty.reply === undefined);
 
 // ── toPhraseCards（推荐短语 → 横滑卡）──
 console.log('── toPhraseCards ──');

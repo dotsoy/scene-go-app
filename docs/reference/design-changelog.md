@@ -215,7 +215,7 @@
 - **改动**: 02 屏 ReplyRow 的 Reply1/Reply2 删除 OkIcon(`circle-check`)/NoIcon(`circle-x`) 图标,改纯文字;`cornerRadius` 18→10(非全圆胶囊)。
 - **原因**: ✓/✗ 图标无法表达场景回复的情绪表现(致谢、讨价还价),语义由文案本身承担;全圆胶囊视觉过重,改温和圆角。
 - **决策(用户拍板)**: 点回复选项「直出 replyCard」——主卡生成时一并生成回复选项的预翻译,点选秒级出卡零等待。技术含义:需在成卡时产出 `ReplyOption.replyCard`(当前为死字段),数据层不改 prompt(回复纯文字化是纯 UI 层改动)。
-- **状态**: ✅ 已实施(画布);Phase 1 代码落地(2026-08-08):`src/theme/tokens.ts`(colors/radii/fonts)、`src/components/ExpressionCard.tsx`(双气泡)、`src/components/ReplyRow.tsx`(纯文字回复块)、`src/screens/CardResultScreen.tsx`(02 屏)、App.tsx 接入;`ReplyOption.emoji`/`chips.emoji` 死代码删除。回复选项 Phase 1 用 .pen 定稿两文案占位,后续接成卡预生成。
+- **状态**: ✅ 已实施(画布);代码落地(2026-08-08):Phase 1 建 `src/theme/tokens.ts`、`ExpressionCard.tsx`(双气泡)、`ReplyRow.tsx`(纯文字块)、`CardResultScreen.tsx`(02 屏)、App.tsx 接入;删除 `ReplyOption.emoji`/`chips.emoji` 死代码。Phase 2 接成卡预生成:`cardBuilder.buildReplyOptions(ScenarioResult)` 从 recommendedPhrases 前 2 条推导回复选项(label=中文,replyCard=外语扁平卡),挂载进 scenarioToCard 的 card.reply;replyCard 用 `Omit<CardData,'reply'>` 扁平结构防递归。回复选项随场景变化,点选直出 replyCard。
 
 ---
 

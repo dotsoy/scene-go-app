@@ -51,8 +51,10 @@ export interface CardStep {
 
 /** 全览卡回应选项（选中后直出回卡，成卡时已预生成 replyCard） */
 export interface ReplyOption {
+  /** 点选显示的中文短句（如「好的，谢谢」） */
   label: string;
-  replyCard: CardData;
+  /** 预生成的回卡：扁平结构（无嵌套 reply），防递归 */
+  replyCard: Omit<CardData, 'reply'>;
 }
 
 /** 菜单解读：VLM 结构化菜单条目 */
